@@ -24,8 +24,8 @@ DB_URI = os.environ.get("DB_URI", "mongodb+srv://rezebot:bXtk6z31xLZlLxQW@cluste
 DB_NAME = os.environ.get("DB_NAME", "rezebot")
 
 # Glitch Fix: DB_CHANNEL ko link format se match karne ke liye -100 ke bina load kiya hai
-DB_CHANNEL = int(os.environ.get("DB_CHANNEL", "-3819023656"))
-FSUBS = [[int(os.environ.get("FSUB_CHANNEL", "-1003819023656")), True, 10]] 
+DB_CHANNEL = int(os.environ.get("DB_CHANNEL", "-1003819023656"))
+FSUBS = [[int(os.environ.get("FSUB_CHANNEL", "-1002479514026")), True, 10]] 
 
 # Admin IDs list split handler
 ADMINS = [int(x) for x in os.environ.get("ADMINS", "8247593853,6341576569").split(",")]
