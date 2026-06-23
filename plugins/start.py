@@ -47,42 +47,42 @@ async def start_command(client: Client, message: Message):
         # 4. Check if shortner is enabled
         shortner_enabled = getattr(client, 'shortner_enabled', True)
 
-        # FIX: Agar config me SHORT_API khali hai, to shortener system completely bypass ho jaye
-        if not is_user_pro and user_id != OWNER_ID and not is_short_link and shortner_enabled and SHORT_API != "":
+        # FIX: Strict check validation - agar config me shortener empty hai ya false hai, to block skip ho jaye
+        if (SHORT_URL and SHORT_API) and not is_user_pro and user_id != OWNER_ID and not is_short_link and shortner_enabled:
             try:
                 short_link = get_short(f"https://t.me/{client.username}?start=yu3elk{base64_string}7", client)
+                short_photo = client.messages.get("SHORT_PIC", "")
+                
+                short_caption_raw = client.messages.get("SHORT_MSG", "HEY {user_mention}")
+                short_caption = short_caption_raw.format(
+                    first=message.from_user.first_name,
+                    last=message.from_user.last_name or "",
+                    username=None if not message.from_user.username else '@' + message.from_user.username,
+                    user_mention=message.from_user.mention,
+                    id=message.from_user.id
+                )
+                
+                tutorial_link = SHORT_TUT if SHORT_TUT else "https://t.me/Premiium_Tube/6"
+
+                await client.send_photo(
+                    chat_id=message.chat.id,
+                    photo=short_photo,
+                    caption=short_caption,
+                    reply_markup=InlineKeyboardMarkup([
+                        [
+                            InlineKeyboardButton("• ᴏᴘᴇɴ ʟɪɴᴋ", url=short_link),
+                            InlineKeyboardButton("ᴛᴜᴛᴏʀɪᴀʟ •", url=tutorial_link)
+                        ],
+                        [
+                            InlineKeyboardButton(" • ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ •", url="https://t.me/Premiium_Tube/6")
+                        ]
+                    ])
+                )
+                return
             except Exception as e:
-                client.LOGGER(__name__, client.name).warning(f"Shortener failed: {e}")
-                return await message.reply("Couldn't generate short link.")
-
-            short_photo = client.messages.get("SHORT_PIC", "")
-            
-            short_caption_raw = client.messages.get("SHORT_MSG", "HEY {user_mention}")
-            short_caption = short_caption_raw.format(
-                first=message.from_user.first_name,
-                last=message.from_user.last_name or "",
-                username=None if not message.from_user.username else '@' + message.from_user.username,
-                user_mention=message.from_user.mention,
-                id=message.from_user.id
-            )
-            
-            tutorial_link = SHORT_TUT if SHORT_TUT else "https://t.me/Premiium_Tube/6"
-
-            await client.send_photo(
-                chat_id=message.chat.id,
-                photo=short_photo,
-                caption=short_caption,
-                reply_markup=InlineKeyboardMarkup([
-                    [
-                        InlineKeyboardButton("• ᴏᴘᴇɴ ʟɪɴᴋ", url=short_link),
-                        InlineKeyboardButton("ᴛᴜᴛᴏʀɪᴀʟ •", url=tutorial_link)
-                    ],
-                    [
-                        InlineKeyboardButton(" • ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ •", url="https://t.me/Premiium_Tube/6")
-                    ]
-                ])
-            )
-            return
+                client.LOGGER(__name__, client.name).warning(f"Shortener bypassed or failed: {e}")
+                # Crash hone ke bajay direct file send karne ke liye processing flow chalne dega
+                pass
 
         # 6. Decode and prepare file IDs
         try:
@@ -339,5 +339,5 @@ async def my_plan(client: Client, message: Message):
             "🔸 Request: Disabled\n\n"
             "🔓 Unlock Premium to get more benefits\n"
             "Contact: @NPCContactBot"
-                        )
-                            
+                                )
+        
