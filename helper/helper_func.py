@@ -305,7 +305,7 @@ def convert_time(duration_seconds: int) -> str:
 
 DEL_MSG = """<b>This File is deleting automatically in <a href="https://t.me/{username}">{time}</a>.. Forward in your Saved Messages..!</b>"""
 
-async def auto_del_notification(bot_username, msg, delay_time, transfer): 
+async def batch_auto_del_notification(bot_username, msg, delay_time, transfer): 
     temp = await msg.reply_text(DEL_MSG.format(username=bot_username, time=convert_time(delay_time)), disable_web_page_preview = True) 
     await asyncio.sleep(delay_time)
     try:
