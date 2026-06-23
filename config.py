@@ -8,7 +8,7 @@ OWNER_ID = 6497757690
 
 MSG_EFFECT = 5046509860389126442
 
-SHORT_URL = "linkshortify.com" # shortner url 
+SHORT_URL = "gplinks.com" # shortner url 
 SHORT_API = "" 
 SHORT_TUT = "https://t.me/How_To_Open_Shortners"
 
