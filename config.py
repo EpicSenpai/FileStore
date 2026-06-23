@@ -9,17 +9,17 @@ OWNER_ID = 6497757690
 MSG_EFFECT = 5046509860389126442
 
 SHORT_URL = "linkshortify.com" # shortner url 
-SHORT_API = "fec7b30d9561894979e5aa8999b16de8470315fb" 
+SHORT_API = "" 
 SHORT_TUT = "https://t.me/How_To_Open_Shortners"
 
 # Bot Configuration
 SESSION = "rezebot"
-TOKEN = "8743100938:AAGhqbQ4M9uKPKIwjNht9AZX4gp0GsiFrnw"
-API_ID = "34310221"
-API_HASH = "9e18f477424fa6252663d5d6c895253a"
+TOKEN = ""
+API_ID = ""
+API_HASH = ""
 WORKERS = 5
 
-DB_URI = "mongodb+srv://rezebot:bXtk6z31xLZlLxQW@cluster0.cw2xujb.mongodb.net/rezebot?appName=Cluster0"
+DB_URI = ""
 DB_NAME = "rezebot"
 
 FSUBS = [[-1002479514026, True, 10]] # Force Subscription Channels [channel_id, request_enabled, timer_in_minutes]
