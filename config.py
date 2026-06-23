@@ -10,8 +10,8 @@ PORT = os.environ.get("PORT", "5010")
 OWNER_ID = int(os.environ.get("OWNER_ID", "8247593853")) 
 MSG_EFFECT = int(os.environ.get("MSG_EFFECT", "5046509860389126442"))
 
-SHORT_URL = os.environ.get("SHORT_URL", "gplinks.com") # shortner url 
-SHORT_API = os.environ.get("SHORT_API", "540e6d65d2851a9c645d0eafb573535af3d33943") 
+SHORT_URL = os.environ.get("SHORT_URL", "") # shortner url 
+SHORT_API = os.environ.get("SHORT_API", "") 
 SHORT_TUT = os.environ.get("SHORT_TUT", "https://t.me/How_To_Open_Shortners")
 
 SESSION = os.environ.get("SESSION", "rezebot")
@@ -40,7 +40,7 @@ MESSAGES = {
     "START": "<b><blockquote>›› ʜᴇʏ {mention} ~ </blockquote>  <blockquote>ᴛʜᴇ ᴍᴏᴏɴ ᴛᴀᴜɢʜᴛ ᴍᴇ ᴏɴᴇ ᴛʜɪɴ — ɴᴏ ᴍᴀᴛᴛᴇ r ʜᴏᴡ ᴅᴀʀᴋ ɪᴛ ɢᴇᴛs, ʏᴏᴜ sᴛɪʟʟ sʜɪɴᴇ..</blockquote></b>",
     "FSUB": "<b><blockquote>›› ʜᴇʏ ×</blockquote>\n  ʏᴏᴜʀ ғɪʟᴇ ɪs ʀᴇᴀᴅʏ ‼️ ʟᴏᴏᴋs ʟɪᴋᴇ ʏᴏᴜ ʜᴀᴠᴇɴ'ᴛ sᴜʙsᴄʀɪʙᴇ ᴅ ᴛᴏ ᴏᴜʀ ᴄʜᴀɴɴᴇʟs ʏᴇᴛ, sᴜʙsᴄʀɪʙᴇ ɴᴏᴡ ᴛᴏ ɢᴇᴛ ʏᴏᴜʀ ғɪʟᴇs</b>",
     "ABOUT": "<b>›› ᴍʏ ɴᴀᴍᴇ: {bot_name} \n <blockquote expandable>›› ᴜᴘᴅᴀᴛᴇs ᴄʜᴀɴɴᴇʟ: <a href='https://t.me/AuraTube'>Cʟɪᴄᴋ ʜᴇ rᴇ</a> \n›› ᴏᴡɴᴇ r: @EpicSenpai\n›› ʟᴀɴɢᴜᴀɢᴇ: <a href='https://docs.python.org/3/'>Pʏᴛʜᴏɴ 3</a> \n›› ʟɪʙʀᴀʀʏ: <a href='https://docs.pyrogram.org/'>Pʏʀᴏɢʀᴀᴍ ᴠ2</a> \n›› ᴅᴀᴛᴀʙᴀsᴇ: <a href='https://www.mongodb.com/docs/'>Mᴏɴɢᴏ ᴅʙ</a> \n›› ᴅᴇᴠᴇʟᴏᴘᴇ r: @EpicSenpai</b></blockquote>",
-    "REPLY": "<b>For More Join - @SpicyVerse</b>",
+    "REPLY": "",
     "SHORT_MSG": "<b>📊 ʜᴇʏ {user_mention} \n\n‼️ ɢᴇᴛ ᴀʟʟ ꜰɪʟᴇꜱ ɪɴ ᴀ ꜱɪɴɢʟᴇ ʟɪɴᴋ ‼️\n\n ⌯ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴏᴘᴇɴ ʟɪɴᴋ ʙᴜᴛᴛᴏɴ..</b>",
     "START_PHOTO": "https://litter.catbox.moe/q9aqxh.jpg",
     "FSUB_PHOTO": "https://litter.catbox.moe/w9bw9z.jpg",
