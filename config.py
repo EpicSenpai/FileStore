@@ -2,7 +2,7 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 
-# LOGGER configuration properly defined to fix ImportError
+# Standard logging configuration setup
 logging.basicConfig(
     level=logging.INFO,
     format="[%(asctime)s - %(levelname)s] - %(name)s - %(message)s",
@@ -11,7 +11,21 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
-LOGGER = logging.getLogger(__name__)
+
+# Smart Logger wrapper wrapper to handle bot.py custom method formatting dynamically
+class SmartLogger:
+    def __init__(self, name=__name__):
+        self._logger = logging.getLogger(name)
+    
+    def __call__(self, *args, **kwargs):
+        # dynamic method callback wrapper for custom repo format support
+        return self._logger
+        
+    def __getattr__(self, name):
+        return getattr(self._logger, name)
+
+# This object will satisfy both config imports and bot.py function calling!
+LOGGER = SmartLogger()
 
 # Bot Configuration
 LOG_FILE_NAME = "bot.log"
