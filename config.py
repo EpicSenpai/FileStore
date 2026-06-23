@@ -2,6 +2,17 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 
+# LOGGER configuration properly defined to fix ImportError
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(asctime)s - %(levelname)s] - %(name)s - %(message)s",
+    handlers=[
+        RotatingFileHandler("bot.log", maxBytes=50000000, backupCount=10),
+        logging.StreamHandler()
+    ]
+)
+LOGGER = logging.getLogger(__name__)
+
 # Bot Configuration
 LOG_FILE_NAME = "bot.log"
 PORT = os.environ.get("PORT", "5010")
@@ -39,9 +50,9 @@ AUTO_DEL = 1800
 MESSAGES = {
     "START": "<b><blockquote>✦ ʜᴇʏ {mention} ~ </blockquote>\n\nᴛʜᴇ ᴍᴏᴏɴ ᴛᴀᴜɢʜᴛ ᴍᴇ ᴏɴᴇ ᴛʜɪɴɢ — ɴᴏ ᴍᴀᴛᴛᴇʀ ʜᴏᴡ ᴅᴀʀᴋ ɪᴛ ɢᴇᴛs, ʏᴏᴜ sᴛɪʟʟ sʜɪɴᴇ..</b>",
     "FSUB": "<b><blockquote>✦ ʜᴇʏ {mention} ~ </blockquote>\n\nʏᴏᴜʀ ꜰɪʟᴇ ɪs ʀᴇᴀᴅʏ! ᴋɪɴᴅʟʏ ᴊᴏɪɴ ᴏᴜʀ ᴄʜᴀɴɴᴇʟ ᴛᴏ ɢᴇᴛ ᴀᴄᴄᴇss.</b>",
-    "ABOUT": "<b><blockquote>✦ ᴍʏ ɴᴀᴍᴇ: {bot_name}\n✦ ᴜᴘᴅᴀᴛᴇs ᴄʜᴀɴɴᴇʟ: <a href='https://t.me/AuraTube'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>\n✦ ᴏᴡɴᴇʀ: @EpicSenpai\n✦ ʟᴀɴɢᴜᴀɢᴇ: ᴘʏᴛʜᴏɴ 3\n✦ ʟɪʙʀᴀʀʏ: ᴘʏʀᴏɢʀᴀᴍ ᴠ2\n✦ ᴅᴀᴛᴀʙᴀsᴇ: ᴍᴏɴɢᴏ ᴅʙ\n✦ ᴅᴇᴠᴇʟᴏᴘᴇʀ: @EpicSenpai</blockquote></b>",
+    "ABOUT": "<b><blockquote>✦ ᴍʏ ɴᴀᴍᴇ: {bot_name}\n✦ ᴜᴘᴅᴀᴛᴇs ᴄʜᴀɴɴᴇʟ: <a href='https://t.me/PRIME_SMP'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>\n✦ ᴏᴡɴᴇʀ: @EpicSenpai\n✦ ʟᴀɴɢᴜᴀɢᴇ: ᴘʏᴛʜᴏɴ 3\n✦ ʟɪʙʀᴀʀʏ: ᴘʏʀᴏɢʀᴀᴍ ᴠ2\n✦ ᴅᴀᴛᴀʙᴀsᴇ: ᴍᴏɴɢᴏ ᴅʙ\n✦ ᴅᴇᴠᴇʟᴏᴘᴇʀ: @EpicSenpai</blockquote></b>",
     "REPLY": "", # Ads completely blocked
-    "SHORT_MSG": "<b><blockquote>✦ ʜᴇʏ {user_mention} × </blockquote>\n\n‼️ ɢᴇᴛ ᴀʟʟ ꜰɪʟᴇs ɪɴ ᴀ sɪɴɢʟᴇ ʟɪɴᴋ ‼️\n\n⌂ ʏᴏᴜʀ ʟɪɴᴋ ɪs ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴏᴘᴇɴ ʟɪɴᴋ ʙᴜᴛᴛᴏɴ..</b>",
+    "SHORT_MSG": "<b><blockquote>✦ ʜᴇʏ {user_mention} ~ </blockquote>\n\n‼️ ɢᴇᴛ ᴀʟʟ ꜰɪʟᴇs ɪɴ ᴀ sɪɴɢʟᴇ ʟɪɴᴋ ‼️\n\n⌂ ʏᴏᴜʀ ʟɪɴᴋ ɪs ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴏᴘᴇɴ ʟɪɴᴋ ʙᴜᴛᴛᴏɴ..</b>",
     "START_PHOTO": "https://litter.catbox.moe/q9aqxh.jpg",
     "FSUB_PHOTO": "https://litter.catbox.moe/w9bw9z.jpg",
     "SHORT_PIC": "https://litter.catbox.moe/q9aqxh.jpg"
