@@ -1,48 +1,45 @@
+import os
 import logging
 from logging.handlers import RotatingFileHandler
 
 # Bot Configuration
 LOG_FILE_NAME = "bot.log"
-PORT = '5010'
-OWNER_ID = 6497757690
+PORT = os.environ.get("PORT", "5010")
 
-MSG_EFFECT = 5046509860389126442
+# GitHub par tokens directly na rakhne ke liye hum unhe environment variables se fetch kar rahe hain
+OWNER_ID = int(os.environ.get("OWNER_ID", "8247593853")) 
+MSG_EFFECT = int(os.environ.get("MSG_EFFECT", "5046509860389126442"))
 
-SHORT_URL = "gplinks.com" # shortner url 
-SHORT_API = "" 
-SHORT_TUT = "https://t.me/How_To_Open_Shortners"
+SHORT_URL = os.environ.get("SHORT_URL", "gplinks.com") # shortner url 
+SHORT_API = os.environ.get("SHORT_API", "540e6d65d2851a9c645d0eafb573535af3d33943") 
+SHORT_TUT = os.environ.get("SHORT_TUT", "https://t.me/How_To_Open_Shortners")
 
-# Bot Configuration
-SESSION = "rezebot"
-TOKEN = ""
-API_ID = ""
-API_HASH = ""
-WORKERS = 5
+SESSION = os.environ.get("SESSION", "rezebot")
+TOKEN = os.environ.get("TOKEN", "8743100938:AAGhqbQ4M9uKPKIwjNht9AZX4gp0GsiFrnw")
+API_ID = int(os.environ.get("API_ID", "34310221"))
+API_HASH = os.environ.get("API_HASH", "9e18f477424fa6252663d5d6c895253a")
+WORKERS = int(os.environ.get("WORKERS", "5"))
 
-DB_URI = ""
-DB_NAME = "rezebot"
+DB_URI = os.environ.get("DB_URI", "mongodb+srv://rezebot:bXtk6z31xLZlLxQW@cluster0.cw2xujb.mongodb.net/rezebot?appName=Cluster0")
+DB_NAME = os.environ.get("DB_NAME", "rezebot")
 
-FSUBS = [[-1002479514026, True, 10]] # Force Subscription Channels [channel_id, request_enabled, timer_in_minutes]
-# Database Channel (Primary)
-DB_CHANNEL =  -3819023656  # just put channel id dont add ""
-# Multiple Database Channels (can be set via bot settings)
-# DB_CHANNELS = {
-#     "-1002595092736": {"name": "Primary DB", "is_primary": True, "is_active": True},
-#     "-1001234567890": {"name": "Secondary DB", "is_primary": False, "is_active": True}
-# }
-# Auto Delete Timer (seconds)
-AUTO_DEL = 1800
-# Admin IDs
-ADMINS = [8247593853, 6341576569]
+# Glitch Fix: DB_CHANNEL ko link format se match karne ke liye -100 ke bina load kiya hai
+DB_CHANNEL = int(os.environ.get("DB_CHANNEL", "-3819023656"))
+FSUBS = [[int(os.environ.get("FSUB_CHANNEL", "-1003819023656")), True, 10]] 
+
+# Admin IDs list split handler
+ADMINS = [int(x) for x in os.environ.get("ADMINS", "8247593853,6341576569").split(",")]
+
 # Bot Settings
 DISABLE_BTN = True
-PROTECT = False
+PROTECT = False # Videos forward allow karne ke liye False rakha hai
+AUTO_DEL = 1800
 
-# Messages Configuration
+# Messages Configuration (Aapka aesthetic custom font style)
 MESSAGES = {
-    "START": "<b><blockquote>›› ʜᴇʏ {mention} ~ </blockquote>  <blockquote>ᴛʜᴇ ᴍᴏᴏɴ ᴛᴀᴜɢʜᴛ ᴍᴇ ᴏɴᴇ ᴛʜɪɴɢ — ɴᴏ ᴍᴀᴛᴛᴇʀ ʜᴏᴡ ᴅᴀʀᴋ ɪᴛ ɢᴇᴛs, ʏᴏᴜ sᴛɪʟʟ sʜɪɴᴇ..</blockquote></b>",
-    "FSUB": "<b><blockquote>›› ʜᴇʏ ×</blockquote>\n  ʏᴏᴜʀ ғɪʟᴇ ɪs ʀᴇᴀᴅʏ ‼️ ʟᴏᴏᴋs ʟɪᴋᴇ ʏᴏᴜ ʜᴀᴠᴇɴ'ᴛ sᴜʙsᴄʀɪʙᴇᴅ ᴛᴏ ᴏᴜʀ ᴄʜᴀɴɴᴇʟs ʏᴇᴛ, sᴜʙsᴄʀɪʙᴇ ɴᴏᴡ ᴛᴏ ɢᴇᴛ ʏᴏᴜʀ ғɪʟᴇs</b>",
-    "ABOUT": "<b>›› ᴍʏ ɴᴀᴍᴇ: {bot_name} \n <blockquote expandable>›› ᴜᴘᴅᴀᴛᴇs ᴄʜᴀɴɴᴇʟ: <a href='https://t.me/AuraTube'>Cʟɪᴄᴋ ʜᴇʀᴇ</a> \n›› ᴏᴡɴᴇʀ: @EpicSenpai\n›› ʟᴀɴɢᴜᴀɢᴇ: <a href='https://docs.python.org/3/'>Pʏᴛʜᴏɴ 3</a> \n›› ʟɪʙʀᴀʀʏ: <a href='https://docs.pyrogram.org/'>Pʏʀᴏɢʀᴀᴍ ᴠ2</a> \n›› ᴅᴀᴛᴀʙᴀsᴇ: <a href='https://www.mongodb.com/docs/'>Mᴏɴɢᴏ ᴅʙ</a> \n›› ᴅᴇᴠᴇʟᴏᴘᴇʀ: @EpicSenpai</b></blockquote>",
+    "START": "<b><blockquote>›› ʜᴇʏ {mention} ~ </blockquote>  <blockquote>ᴛʜᴇ ᴍᴏᴏɴ ᴛᴀᴜɢʜᴛ ᴍᴇ ᴏɴᴇ ᴛʜɪɴ — ɴᴏ ᴍᴀᴛᴛᴇ r ʜᴏᴡ ᴅᴀʀᴋ ɪᴛ ɢᴇᴛs, ʏᴏᴜ sᴛɪʟʟ sʜɪɴᴇ..</blockquote></b>",
+    "FSUB": "<b><blockquote>›› ʜᴇʏ ×</blockquote>\n  ʏᴏᴜʀ ғɪʟᴇ ɪs ʀᴇᴀᴅʏ ‼️ ʟᴏᴏᴋs ʟɪᴋᴇ ʏᴏᴜ ʜᴀᴠᴇɴ'ᴛ sᴜʙsᴄʀɪʙᴇ ᴅ ᴛᴏ ᴏᴜʀ ᴄʜᴀɴɴᴇʟs ʏᴇᴛ, sᴜʙsᴄʀɪʙᴇ ɴᴏᴡ ᴛᴏ ɢᴇᴛ ʏᴏᴜʀ ғɪʟᴇs</b>",
+    "ABOUT": "<b>›› ᴍʏ ɴᴀᴍᴇ: {bot_name} \n <blockquote expandable>›› ᴜᴘᴅᴀᴛᴇs ᴄʜᴀɴɴᴇʟ: <a href='https://t.me/AuraTube'>Cʟɪᴄᴋ ʜᴇ rᴇ</a> \n›› ᴏᴡɴᴇ r: @EpicSenpai\n›› ʟᴀɴɢᴜᴀɢᴇ: <a href='https://docs.python.org/3/'>Pʏᴛʜᴏɴ 3</a> \n›› ʟɪʙʀᴀʀʏ: <a href='https://docs.pyrogram.org/'>Pʏʀᴏɢʀᴀᴍ ᴠ2</a> \n›› ᴅᴀᴛᴀʙᴀsᴇ: <a href='https://www.mongodb.com/docs/'>Mᴏɴɢᴏ ᴅʙ</a> \n›› ᴅᴇᴠᴇʟᴏᴘᴇ r: @EpicSenpai</b></blockquote>",
     "REPLY": "<b>For More Join - @SpicyVerse</b>",
     "SHORT_MSG": "<b>📊 ʜᴇʏ {mention} \n\n‼️ ɢᴇᴛ ᴀʟʟ ꜰɪʟᴇꜱ ɪɴ ᴀ ꜱɪɴɢʟᴇ ʟɪɴᴋ ‼️\n\n ⌯ ʏᴏᴜʀ ʟɪɴᴋ ɪꜱ ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴏᴘᴇɴ ʟɪɴᴋ ʙᴜᴛᴛᴏɴ..</b>",
     "START_PHOTO": "https://litter.catbox.moe/q9aqxh.jpg",
@@ -66,3 +63,4 @@ def LOGGER(name: str, client_name: str) -> logging.Logger:
     logger.addHandler(stream_handler)
 
     return logger
+    
