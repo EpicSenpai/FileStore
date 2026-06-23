@@ -2,7 +2,7 @@ from helper.helper_func import *
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 import humanize
-from config import MSG_EFFECT, OWNER_ID
+from config import MSG_EFFECT, OWNER_ID, SHORT_API, SHORT_URL, SHORT_TUT
 from plugins.shortner import get_short
 from helper.helper_func import get_messages, force_sub, decode, batch_auto_del_notification
 import asyncio
@@ -47,8 +47,8 @@ async def start_command(client: Client, message: Message):
         # 4. Check if shortner is enabled
         shortner_enabled = getattr(client, 'shortner_enabled', True)
 
-        # 5. If user is not premium AND shortner is enabled, send short URL and return
-        if not is_user_pro and user_id != OWNER_ID and not is_short_link and shortner_enabled:
+        # FIX: Agar config me SHORT_API khali hai, to shortener system completely bypass ho jaye
+        if not is_user_pro and user_id != OWNER_ID and not is_short_link and shortner_enabled and SHORT_API != "":
             try:
                 short_link = get_short(f"https://t.me/{client.username}?start=yu3elk{base64_string}7", client)
             except Exception as e:
@@ -57,7 +57,6 @@ async def start_command(client: Client, message: Message):
 
             short_photo = client.messages.get("SHORT_PIC", "")
             
-            # FIX: Adding missing formatting for SHORT_MSG so it dynamic parses {user_mention}
             short_caption_raw = client.messages.get("SHORT_MSG", "HEY {user_mention}")
             short_caption = short_caption_raw.format(
                 first=message.from_user.first_name,
@@ -67,7 +66,7 @@ async def start_command(client: Client, message: Message):
                 id=message.from_user.id
             )
             
-            tutorial_link = getattr(client, 'tutorial_link', "https://t.me/Premiium_Tube/6")
+            tutorial_link = SHORT_TUT if SHORT_TUT else "https://t.me/Premiium_Tube/6"
 
             await client.send_photo(
                 chat_id=message.chat.id,
@@ -83,7 +82,7 @@ async def start_command(client: Client, message: Message):
                     ]
                 ])
             )
-            return  # prevent sending actual files
+            return
 
         # 6. Decode and prepare file IDs
         try:
@@ -340,5 +339,5 @@ async def my_plan(client: Client, message: Message):
             "🔸 Request: Disabled\n\n"
             "🔓 Unlock Premium to get more benefits\n"
             "Contact: @NPCContactBot"
-        )
-        
+                        )
+                            
