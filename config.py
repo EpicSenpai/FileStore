@@ -54,11 +54,11 @@ DISABLE_BTN = True
 PROTECT = False 
 AUTO_DEL = 1800
 
-# Fixed Messages Configuration without 'Copy Code' glitch and fully functional About button
+# Fixed Messages Configuration with your exact requested custom hyperlinks format
 MESSAGES = {
     "START": "<b><blockquote>✦ ʜᴇʏ {mention} ~ </blockquote> <blockquote>ᴛʜᴇ ᴍᴏᴏɴ ᴛᴀᴜɢʜᴛ ᴍᴇ ᴏɴᴇ ᴛʜɪɴɢ — ɴᴏ ᴍᴀᴛᴛᴇʀ ʜᴏᴡ ᴅᴀʀᴋ ɪᴛ ɢᴇᴛs, ʏᴏᴜ sᴛɪʟʟ sʜɪɴᴇ..</blockquote></b>",
     "FSUB": "<b><blockquote>✦ ʜᴇʏ {mention} ~</blockquote> ʏᴏᴜʀ ꜰɪʟᴇ ɪs ʀᴇᴀᴅʏ! ᴋɪɴᴅʟʏ ᴊᴏɪɴ ᴏᴜʀ ᴄʜᴀɴɴᴇʟ ᴛᴏ ɢᴇᴛ ᴀᴄᴄᴇss.</b>",
-    "ABOUT": "<b>✦ ᴍʏ ɴᴀᴍᴇ: {bot_name} <blockquote>✦ ᴜᴘᴅᴀᴛᴇs ᴄʜᴀɴɴᴇʟ: <a href='https://t.me/PRIME_SMP'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>\n✦ ᴏᴡɴᴇʀ: @EpicSenpai\n✦ ʟᴀɴɢᴜᴀɢᴇ: ᴘʏᴛʜᴏɴ 3\n✦ ʟɪʙʀᴀʀʏ: ᴘʏʀᴏɢʀᴀᴍ ᴠ2\n✦ ᴅᴀᴛᴀʙᴀsᴇ: ᴍᴏɴɢᴏ ᴅʙ\n✦ ᴅᴇᴠᴇʟᴏᴘᴇʀ: @EpicSenpai</blockquote></b>",
+    "ABOUT": "<b>✦ ᴍʏ ɴᴀᴍᴇ: {bot_name}\n<blockquote>›› ᴜᴘᴅᴀᴛᴇs ᴄʜᴀɴɴᴇʟ: <a href='https://t.me/AuraTube'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>\n›› ᴏᴡɴᴇʀ: @EpicSenpai\n›› ʟᴀɴɢᴜᴀɢᴇ: <a href='https://docs.python.org/'>ᴘʏᴛʜᴏɴ 3</a>\n›› ᴅᴀᴛᴀʙᴀsᴇ: <a href='https://www.mongodb.com/docs/'>ᴍᴏɴɢᴏ ᴅʙ</a>\n›› ᴅᴇᴠᴇʟᴏᴘᴇʀ: @EpicSenpai</blockquote></b>",
     "REPLY": "", 
     "SHORT_MSG": "<b><blockquote>✦ ʜᴇʏ {user_mention} ~</blockquote> ‼️ ɢᴇᴛ ᴀʟʟ ꜰɪʟᴇs ɪɴ ᴀ sɪɴɢʟᴇ ʟɪɴᴋ ‼️\n\n⌂ ʏᴏᴜʀ ʟɪɴᴋ ɪs ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴏᴘᴇɴ ʟɪɴᴋ ʙᴜᴛᴛᴏɴ..</b>",
     "START_PHOTO": "https://litter.catbox.moe/q9aqxh.jpg",
