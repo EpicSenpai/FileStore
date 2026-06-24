@@ -311,8 +311,7 @@ async def deliver_files_routing(client, message, base64_string, original_payload
     # Notice text banner container setup
     if media_messages:
         warning_banner_text = (
-            "<b><u>⚠️ ᴛʜɪs ꜰɪʟᴇ ᴡɪʟʟ ʙᴇ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴅᴇʟᴇᴛᴇᴅ ɪɴ 30 ᴍɪɴᴜᴛᴇs ᴅᴜᴇ ᴛᴏ ᴄᴏᴘʏʀɪɢʜᴛ ɪssᴜᴇs! "
-            "ᴋɪɴᴅʟʏ ꜰᴏʀᴡᴀʀᴅ ɪᴛ ᴛᴏ ʏᴏᴜʀ sᴀᴠᴇᴅ ᴍᴇssᴀɢᴇs ᴏʀ ᴀɴʏ ᴏᴛʜᴇʀ sᴘᴀᴄᴇ, ᴛʜᴇɴ ᴅᴏᴡɴʟᴏᴀᴅ ᴛᴏ ᴡᴀᴛᴄʜ ɪᴛ sᴀꜰᴇʟʏ!</u></b>"
+            "<b><u>⚠️ This File is deleting automatically in<a href="https://t.me/RezeFilesBot">30 Minutes...</a>Forward in your Saved Messages..!</u></b>"
         )
         try:
             banner_msg = await client.send_message(chat_id=chat_target, text=warning_banner_text)
