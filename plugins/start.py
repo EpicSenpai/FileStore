@@ -140,7 +140,6 @@ async def start_command(client: Client, message: Message):
                         short_photo = client.messages.get("SHORT_PIC", "https://litter.catbox.moe/q9aqxh.jpg")
                         tutorial_link = current_tut if current_tut else "https://t.me/How_To_Open_Shortners"
 
-                        # Spelling Error Fixed: 'consumed' standard small-caps implemented cleanly
                         custom_credit_msg = (
                             "<b><i>◍ Yeah the link's ready :), Here is your link ⬇️</i>\n\n"
                             "⧗ ᴄʀᴇᴅɪᴛs ᴍᴏᴅᴇ:\n"
@@ -285,7 +284,7 @@ async def deliver_files_routing(client, message, base64_string, original_payload
         return
 
     if not messages:
-        return await temp_msg.edit("<b>✗ ᴄᴏᴜʟᴅɴ'ᴛ ꜰɪɴᴅ ᴛʜᴇ ꜰɪʟᴇs ɪɴ ᴛʜᴇ ᴅᴀᴛᴀʙᴀsᴇ!</b>")
+        return await temp_msg.edit("<b>✗ <b>ᴄᴏᴜʟᴅɴ'ᴛ ꜰɪɴᴅ ᴛʜᴇ ꜰɪʟᴇs ɪɴ ᴛʜᴇ ᴅᴀᴛᴀʙᴀsᴇ!</b></b>")
     await temp_msg.delete()
 
     media_messages = []
@@ -308,15 +307,14 @@ async def deliver_files_routing(client, message, base64_string, original_payload
         except Exception:
             pass
 
-    # Notice text banner container setup
+    # FIXED: String wrapper modified to single quotes to balance nested HTML double quotes smoothly
     if media_messages:
         warning_banner_text = (
-            "<b><u>⚠️ This File is deleting automatically in<a href="https://t.me/RezeFilesBot">30 Minutes...</a>Forward in your Saved Messages..!</u></b>"
+            '<b><u>⚠️ This File is deleting automatically in <a href="https://t.me/RezeFilesBot">30 Minutes...</a>Forward in your Saved Messages..!</u></b>'
         )
         try:
             banner_msg = await client.send_message(chat_id=chat_target, text=warning_banner_text)
             
-            # Explicit background process scheduler thread invocation
             transfer_link = original_payload
             asyncio.create_task(schedule_dynamic_deletion(
                 client=client, 
@@ -328,4 +326,4 @@ async def deliver_files_routing(client, message, base64_string, original_payload
         except Exception:
             pass
     return
-    
+                
