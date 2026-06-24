@@ -13,29 +13,29 @@ from config import (
 from plugins.shortner import get_short
 from helper.helper_func import get_messages, force_sub, decode
 
-# Background scheduler task to handle file deletion and warning text update
+# Background clean scheduler loop task handler
 async def schedule_dynamic_deletion(client: Client, chat_id: int, media_messages: list, banner_msg: Message, transfer_link: str):
-    # 30 Minutes delay time = 1800 seconds (Aap test karne ke liye ise kam bhi kar sakte hain)
+    # 30 Minutes structural deletion latency = 1800 seconds
     await asyncio.sleep(1800)
     
-    # 1. Sirf media files (video/photos) ko delete karein
+    # 1. Purge all media nodes safely from chat history
     for msg in media_messages:
         try:
             await msg.delete()
         except Exception:
             pass
 
-    # 2. Warning message ko delete karne ke bajaye ussi ko EDIT karke chhota retrieval message banayein
+    # 2. Render the short and crisp structural recovery text block with aesthetic small caps
     retrieval_text = (
         "<b>›› ᴘʀᴇᴠɪᴏᴜs ᴍᴇssᴀɢᴇ ᴡᴀs ᴅᴇʟᴇᴛᴇᴅ\n\n"
-        "ɪꜰ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ɢᴇᴛ ᴛʜᴇ ꜰɪʟᴇs ᴀɢᴀɪɴ, ᴛʜᴇɴ ᴄʟɪᴄᴋ: • ɢᴇᴛ ꜰɪʟᴇꜱ • "
+        "ɪꜰ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ɢᴇᴛ ᴛʜᴇ ꜰɪʟᴇs ᴀɢᴀɪɴ, ᴛʜᴇɴ ᴄʟɪᴄᴋ: • ɢᴇᴛ ꜰɪʟᴇs • "
         "ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴇʟsᴇ ᴄʟᴏsᴇ ᴛʜɪs ᴍᴇssᴀɢᴇ.</b>"
     )
     
     retrieval_markup = InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("• ɢᴇᴛ ꜰɪʟᴇꜱ •", callback_data=f"getfiles_{transfer_link}"),
-            InlineKeyboardButton("ᴄʟᴏꜱᴇ •", callback_data="close")
+            InlineKeyboardButton("• ɢᴇᴛ ꜰɪʟᴇs •", callback_data=f"getfiles_{transfer_link}"),
+            InlineKeyboardButton("ᴄʟᴏsᴇ •", callback_data="close")
         ]
     ])
     
@@ -45,7 +45,6 @@ async def schedule_dynamic_deletion(client: Client, chat_id: int, media_messages
             reply_markup=retrieval_markup
         )
     except Exception:
-        # Agar user ne chat delete kar di ho ya koi error aaye toh backup backup message send ho jaye
         try:
             await client.send_message(chat_id=chat_id, text=retrieval_text, reply_markup=retrieval_markup)
         except Exception:
@@ -86,11 +85,16 @@ async def start_command(client: Client, message: Message):
         is_user_pro = await client.mongodb.is_pro(user_id)
         shortner_enabled = getattr(client, 'shortner_enabled', True)
 
+        #===============================================================#
+        # MONGO TOKEN TRACKING LOGIC
+        #===============================================================#
         if not is_user_pro and user_id != OWNER_ID and shortner_enabled:
+            
             user_data = await client.mongodb.db.users.find_one({"id": user_id}) or {}
             user_credits = user_data.get("credits", 0)
             rotation_index = user_data.get("rotation_index", 0)
 
+            # Case A: Shortener successfully bypassed -> Reward interface pipeline
             if is_short_link:
                 user_credits = 3  
                 next_rotation = (rotation_index + 1) % 3
@@ -100,14 +104,17 @@ async def start_command(client: Client, message: Message):
                     upsert=True
                 )
                 
+                # Image 2 Style Exact Verification parsing structure with exact custom photo
                 success_msg = (
-                    "<b>◍ ʏᴏᴜʀ ᴠᴇʀɪғɪᴄᴀᴛɪᴏɴ ɪꜱ ꜱᴜᴄᴄᴇssғᴜʟ!\n\n"
-                    "<blockquote>⧗ 3 ᴄʀᴇᴅɪᴛꜱ ᴀᴅᴅᴇᴅ ᴛᴏ ʏᴏᴜʀ ᴀᴄᴄᴏᴜɴᴛ.</blockquote></b>"
+                    "<b>◍ ʏᴏᴜʀ ᴠᴇʀɪғɪᴄᴀᴛɪᴏɴ ɪs sᴜᴄᴄᴇssғᴜʟ!\n\n"
+                    "<blockquote>⧗ 3 ᴄʀᴇᴅɪᴛs ᴀᴅᴅᴇᴅ ᴛᴏ ʏᴏᴜʀ ᴀᴄᴄᴏᴜɴᴛ.</blockquote></b>"
                 )
                 
-                await message.reply_text(
-                    text=success_msg,
-                    quote=True, 
+                # Dynamic Photo response injected via explicit reply formatting
+                await message.reply_photo(
+                    photo="https://litter.catbox.moe/2zd2uk.jpg",
+                    caption=success_msg,
+                    quote=True,
                     reply_markup=InlineKeyboardMarkup([
                         [InlineKeyboardButton("✨ ᴄʟɪᴄᴋ ʜᴇʀᴇ ✨", callback_data=f"getfiles_{base64_string}")],
                         [InlineKeyboardButton("• ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ •", url="https://t.me/Premiium_Tube/6")]
@@ -115,6 +122,7 @@ async def start_command(client: Client, message: Message):
                 )
                 return
             
+            # Case B: Free user token loop expired screen layout
             elif user_credits <= 0:
                 current_url, current_api, current_tut = SHORT_URL_1, SHORT_API_1, SHORT_TUT_1
                 
@@ -132,11 +140,12 @@ async def start_command(client: Client, message: Message):
                         short_photo = client.messages.get("SHORT_PIC", "https://litter.catbox.moe/q9aqxh.jpg")
                         tutorial_link = current_tut if current_tut else "https://t.me/How_To_Open_Shortners"
 
+                        # Spelling Error Fixed: 'consumed' standard small-caps implemented cleanly
                         custom_credit_msg = (
                             "<b><i>◍ Yeah the link's ready :), Here is your link ⬇️</i>\n\n"
                             "⧗ ᴄʀᴇᴅɪᴛs ᴍᴏᴅᴇ:\n"
-                            "<blockquote>◍ Eᴀᴄʜ ᴀᴅ ʙʏᴘᴀss ʀᴇᴡᴀʀᴅs ʏᴏᴜ ᴡɪᴛʜ 3 ᴄʀᴇᴅɪᴛs.</blockquote>\n"
-                            "<blockquote>◍ Oɴᴇ ᴄʀᴇᴅɪᴛ ɪs ᴄᴏɴsᴜᴍᴇḍ ᴘᴇʀ ғɪʟᴇ/ʟɪɴᴋ ᴀᴄᴄᴇss.</blockquote></b>"
+                            "<blockquote>◍ ᴇᴀᴄʜ ᴀᴅ ʙʏᴘᴀss ʀᴇᴡᴀʀᴅs ʏᴏᴜ ᴡɪᴛʜ 3 ᴄʀᴇᴅɪᴛs.</blockquote>\n"
+                            "<blockquote>◍ ᴏɴᴇ ᴄʀᴇᴅɪᴛ ɪs ᴄᴏɴsᴜᴍᴇᴅ ᴘᴇʀ ꜰɪʟᴇ/ʟɪɴᴋ ᴀᴄᴄᴇss.</blockquote></b>"
                         )
 
                         await client.send_photo(
@@ -166,7 +175,7 @@ async def start_command(client: Client, message: Message):
         return
 
     else:
-        buttons = [[InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data="ABOUT"), InlineKeyboardButton("ᴄʟᴏꜱᴇ •", callback_data='close')]]
+        buttons = [[InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data="ABOUT"), InlineKeyboardButton("ᴄʟᴏsᴇ •", callback_data='close')]]
         if user_id in client.admins:
             buttons.insert(0, [InlineKeyboardButton("• ꜱᴇᴛᴛɪɴɢꜱ •", callback_data="settings")])
 
@@ -299,16 +308,16 @@ async def deliver_files_routing(client, message, base64_string, original_payload
         except Exception:
             pass
 
-    # Notice card is dispatched inside an isolated text message container
+    # Notice text banner container setup
     if media_messages:
         warning_banner_text = (
-            "<b><u>⚠️ ᴛʜɪs ꜰɪʟᴇ ᴡɪʟʟ ʙᴇ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴅᴇʟᴇᴛᴇᴅ ɪɴ 30 ᴍɪɴᴜᴛᴇs ᴅᴜᴇ ᴛᴏ ᴄᴏᴘʏʀɪɢʜᴛ ɪssᴜes! "
+            "<b><u>⚠️ ᴛʜɪs ꜰɪʟᴇ ᴡɪʟʟ ʙᴇ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴅᴇʟᴇᴛᴇᴅ ɪɴ 30 ᴍɪɴᴜᴛᴇs ᴅᴜᴇ ᴛᴏ ᴄᴏᴘʏʀɪɢʜᴛ ɪssᴜᴇs! "
             "ᴋɪɴᴅʟʏ ꜰᴏʀᴡᴀʀᴅ ɪᴛ ᴛᴏ ʏᴏᴜʀ sᴀᴠᴇᴅ ᴍᴇssᴀɢᴇs ᴏʀ ᴀɴʏ ᴏᴛʜᴇʀ sᴘᴀᴄᴇ, ᴛʜᴇɴ ᴅᴏᴡɴʟᴏᴀᴅ ᴛᴏ ᴡᴀᴛᴄʜ ɪᴛ sᴀꜰᴇʟʏ!</u></b>"
         )
         try:
             banner_msg = await client.send_message(chat_id=chat_target, text=warning_banner_text)
             
-            # Yahaan se background task trigger hoga jo sahi se edit handle karega
+            # Explicit background process scheduler thread invocation
             transfer_link = original_payload
             asyncio.create_task(schedule_dynamic_deletion(
                 client=client, 
@@ -320,51 +329,4 @@ async def deliver_files_routing(client, message, base64_string, original_payload
         except Exception:
             pass
     return
-
-#===============================================================#
-
-@Client.on_message(filters.command('request') & filters.private)
-async def request_command(client: Client, message: Message):
-    user_id = message.from_user.id
-    is_admin = user_id in client.admins
-    is_user_premium = await client.mongodb.is_pro(user_id)
-
-    if is_admin or user_id == OWNER_ID:
-        await message.reply_text("<b>🔹 ʏᴏᴜ ᴀʀᴇ ᴍʏ sᴇɴsᴇɪ!\nᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ɪs ᴏɴʟʏ ꜰᴏʀ ᴜsᴇʀs.</b>")
-        return
-
-    if not is_user_premium: 
-        BUTTON_URL = "https://t.me/Premiium_Tube/6"
-        reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("💎 Upgrade to Premium", url=BUTTON_URL)]])
-        await message.reply("<b>✗ ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴀ ᴘʀᴇᴍɪᴜᴍ ᴜsᴇʀ.\nᴜᴘɢʀᴀᴅᴇ ᴛᴏ ᴘʀᴇᴍɪᴜᴍ ᴛᴏ ᴀᴄᴄᴇs sᴛʀᴜᴄᴛᴜʀᴀʟ ꜰᴇᴀᴛᴜʀᴇs.</b>", reply_markup=reply_markup)
-        return
-
-    if len(message.command) < 2:
-        await message.reply("<b>⚠️ sᴇɴᴅ ᴍᴇ ʏᴏᴜʀ ʀᴇǫᴜᴇsᴛ ɪɴ ᴛʜɪs ꜰᴏʀᴍᴀᴛ:\n<code>/request Your_Request_Here</code></b>")
-        return
-
-    requested = " ".join(message.command[1:])
-    owner_message = f"<b>📩 ɴᴇᴡ ʀᴇǫᴜᴇsᴛ ꜰʀᴏᴍ {message.from_user.mention}\n\n🆔 ᴜsᴇʀ ɪᴅ: <code>{user_id}</code>\n📝 ʀᴇǫᴜᴇsᴛ: <code>{requested}</code></b>"
-    await client.send_message(OWNER_ID, owner_message)
-    await message.reply("<b>✅ ᴛʜᴀɴᴋs ꜰᴏʀ ʏᴏᴜʀ ʀᴇǫᴜᴇsᴛ!\nʏᴏᴜʀ ʀᴇǫᴜᴇsᴛ ᴡɪʟʟ ʙᴇ ʀᴇᴠɪᴇᴡᴇᴅ sᴏᴏɴ.</b>")
-
-#===============================================================#
-
-@Client.on_message(filters.command('profile') & filters.private)
-async def my_plan(client: Client, message: Message):
-    user_id = message.from_user.id
-    is_admin = user_id in client.admins
-
-    if is_admin or user_id == OWNER_ID:
-        await message.reply_text("<b>🔹 ʏᴏᴜ'ʀᴇ ᴍʏ sᴇɴsᴇɪ! ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ɪs ᴏɴʟʏ ꜰᴏʀ ᴜsᴇʀs.</b>")
-        return
     
-    is_user_premium = await client.mongodb.is_pro(user_id)
-    user_data = await client.mongodb.db.users.find_one({"id": user_id}) or {}
-    user_credits = user_data.get("credits", 0)
-
-    if is_user_premium:
-        await message.reply_text("<b>👤 ᴘʀᴏꜰɪʟᴇ ɪɴꜰᴏʀᴍᴀᴛɪᴏɴ:\n\n🔸 ᴀᴅs: ᴅɪsᴀʙʟᴇᴅ\n🔸 ᴘʟᴀɴ: ᴘʀᴇᴍɪᴜᴍ\n🔸 ʀᴇǫᴜᴇsᴛ: ᴇɴᴀʙʟᴇᴅ\n\n🌟 ʏᴏᴜ'ʀᴇ ᴀ ᴘʀᴇᴍɪᴜᴍ ᴜsᴇʀ!</b>")
-    else:
-        await message.reply_text(f"<b>👤 ᴘʀᴏꜰɪʟᴇ ɪɴꜰᴏʀᴍᴀᴛɪᴏɴ:\n\n🔸 ᴀᴅs: ᴇɴᴀʙʟᴇᴅ\n🔸 ᴘʟᴀɴ: ꜰʀᴇᴇ\n🔸 ᴠᴀʟɪᴅ ᴄʀᴇᴅɪᴛs: <code>{user_credits}</code> ᴄʀᴇᴅɪᴛs\n🔸 ʀᴇǫᴜᴇsᴛ: ᴅɪsᴀʙʟᴇᴅ\n\n🔓 ᴜɴʟᴏᴄᴋ ᴘʀᴇᴍɪᴜᴍ ᴛᴏ ɢᴇᴛ ᴍᴏʀᴇ ʙᴇɴᴇꜰɪᴛs\nᴄᴏɴᴛᴀᴄᴛ: @EpicSenpai</b>")
-                
