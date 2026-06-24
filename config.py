@@ -33,25 +33,22 @@ OWNER_ID = int(os.environ.get("OWNER_ID", "824793853"))
 MSG_EFFECT = int(os.environ.get("MSG_EFFECT", "5046509860389126442"))
 
 #===============================================================#
-# LIVE MULTI-SHORTENER ROTATION CONFIGURATION (Line by Line)
+# MULTI-SHORTENER GLOBAL VARIABLES WITH LIVE MUTATION SUPPORT
 #===============================================================#
 
-# 1st Shortener Settings (GPLinks)
 SHORT_URL_1 = os.environ.get("SHORT_URL_1", "gplinks.com")
 SHORT_API_1 = os.environ.get("SHORT_API_1", "540e6d65d2851a9c645d0eafb573535af3d33943")
 SHORT_TUT_1 = os.environ.get("SHORT_TUT_1", "https://t.me/How_To_Open_Shortners")
 
-# 2nd Shortener Settings (LinkShortify)
 SHORT_URL_2 = os.environ.get("SHORT_URL_2", "linkshortify.com")
 SHORT_API_2 = os.environ.get("SHORT_API_2", "fec7b30d9561894979e5aa8999b16de8470315fb")
 SHORT_TUT_2 = os.environ.get("SHORT_TUT_2", "https://t.me/How_To_Open_Shortners")
 
-# 3rd Shortener Settings (VPLink)
 SHORT_URL_3 = os.environ.get("SHORT_URL_3", "vplink.in")
 SHORT_API_3 = os.environ.get("SHORT_API_3", "8b62a316f1b492d73f27d74aed48788c4b7a2bda")
 SHORT_TUT_3 = os.environ.get("SHORT_TUT_3", "https://t.me/How_To_Open_Shortners")
 
-# Legacy fallbacks to prevent core repository structural breakdown
+# Legacy compatibility layers
 SHORT_URL = SHORT_URL_1
 SHORT_API = SHORT_API_1
 SHORT_TUT = SHORT_TUT_1
