@@ -266,7 +266,7 @@ async def deliver_files_routing(client, message, base64_string, original_payload
     except Exception as e:
         return await client.send_message(chat_target, "<b>✗ ɪɴᴠᴀʟɪᴅ ᴏʀ ᴇxᴘɪʀᴇᴅ ꜰɪʟᴇ ʟɪɴᴋ.</b>")
 
-    temp_msg = await client.send_message(chat_target, "<b><blockquote>›› ꜰᴇᴛᴄʜɪɴɢ ʏᴏᴜʀ ꜰɪʟᴇs, ᴘʟᴇᴀsᴇ ᴡᴀɪᴛ...</blockquote></b>")
+    temp_msg = await client.send_message(chat_target, "<b><i>Wait A Sec...</i></b>")
     messages = []
 
     try:
@@ -310,7 +310,7 @@ async def deliver_files_routing(client, message, base64_string, original_payload
     # FIXED: String wrapper modified to single quotes to balance nested HTML double quotes smoothly
     if media_messages:
         warning_banner_text = (
-            '<b><u>⚠️ This File is deleting automatically in <a href="https://t.me/RezeFilesBot">30 Minutes...</a>Forward in your Saved Messages..!</u></b>'
+            '<b>⚠️ This File is deleting automatically in <a href="https://t.me/RezeFilesBot">30 Minutes...</a> Forward in your Saved Messages..!</b>'
         )
         try:
             banner_msg = await client.send_message(chat_id=chat_target, text=warning_banner_text)
