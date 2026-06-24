@@ -86,34 +86,57 @@ async def back_to_home_callback(client: Client, query: CallbackQuery):
     await query.answer("↩️ Returning back to home dashboard...")
     user_id = query.from_user.id
     
+    # Exact structure matching the main start menu alignment
     buttons = [[InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data="ABOUT"), InlineKeyboardButton("ᴄʟᴏsᴇ •", callback_data='close')]]
     if user_id in client.admins:
         buttons.insert(0, [InlineKeyboardButton("• ꜱᴇᴛᴛɪɴɢs •", callback_data="settings")])
         
     start_caption = config.MESSAGES.get('START', '').format(
+        first=query.from_user.first_name,
+        last=query.from_user.last_name or "",
+        username=None if not query.from_user.username else '@' + query.from_user.username,
         mention=query.from_user.mention,
         id=user_id
     )
     
-    await query.message.edit_text(
-        text=start_caption,
-        reply_markup=InlineKeyboardMarkup(buttons)
-    )
+    try:
+        # Fixed: Editing photo caption instead of breaking into text view
+        await query.message.edit_caption(
+            caption=start_caption,
+            reply_markup=InlineKeyboardMarkup(buttons)
+        )
+    except Exception:
+        try:
+            await query.message.edit_text(
+                text=start_caption,
+                reply_markup=InlineKeyboardMarkup(buttons)
+            )
+        except Exception:
+            pass
 
 @Client.on_callback_query(filters.regex("^ABOUT$"))
 async def render_about_callback_query(client: Client, query: CallbackQuery):
     await query.answer("ℹ️ Loading about documentation details...")
     
     about_text = config.MESSAGES.get('ABOUT', '').format(
-        bot_name=client.username
+        bot_name=client.name,
+        mention=query.from_user.mention
     )
     
     back_markup = InlineKeyboardMarkup([[InlineKeyboardButton("‹ ʙᴀᴄᴋ", callback_data="home")]])
-    await query.message.edit_text(text=about_text, reply_markup=back_markup)
+    
+    try:
+        # Fixed: Editing caption smoothly for the photo background interface
+        await query.message.edit_caption(caption=about_text, reply_markup=back_markup)
+    except Exception:
+        try:
+            await query.message.edit_text(text=about_text, reply_markup=back_markup)
+        except Exception:
+            pass
 
 @Client.on_callback_query(filters.regex("^close$"))
 async def close_panel_callback_query(client: Client, query: CallbackQuery):
-    await query.answer("🗑️ Interface interface closed.")
+    await query.answer("🗑️ Interface closed.")
     await query.message.delete()
 
 #===============================================================#
