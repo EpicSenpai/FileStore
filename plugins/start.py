@@ -2,16 +2,25 @@ from helper.helper_func import *
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 import humanize
-from config import MSG_EFFECT, OWNER_ID, SHORT_API, SHORT_URL, SHORT_TUT
+import asyncio
+from config import (
+    MSG_EFFECT, OWNER_ID, 
+    SHORT_URL_1, SHORT_API_1, SHORT_TUT_1,
+    SHORT_URL_2, SHORT_API_2, SHORT_TUT_2,
+    SHORT_URL_3, SHORT_API_3, SHORT_TUT_3
+)
 from plugins.shortner import get_short
 from helper.helper_func import get_messages, force_sub, decode, batch_auto_del_notification
-import asyncio
+
+# Global counter to distribute shorteners evenly line-by-line across user clicks
+CLICK_COUNTER = 0
 
 #===============================================================#
 
 @Client.on_message(filters.command('start') & filters.private)
 @force_sub
 async def start_command(client: Client, message: Message):
+    global CLICK_COUNTER
     user_id = message.from_user.id
 
     # 1. Add user if not present
@@ -47,42 +56,68 @@ async def start_command(client: Client, message: Message):
         # 4. Check if shortner is enabled
         shortner_enabled = getattr(client, 'shortner_enabled', True)
 
-        # FIX: Strict check validation - agar config me shortener empty hai ya false hai, to block skip ho jaye
-        if (SHORT_URL and SHORT_API) and not is_user_pro and user_id != OWNER_ID and not is_short_link and shortner_enabled:
-            try:
-                short_link = get_short(f"https://t.me/{client.username}?start=yu3elk{base64_string}7", client)
-                short_photo = client.messages.get("SHORT_PIC", "")
-                
-                short_caption_raw = client.messages.get("SHORT_MSG", "HEY {user_mention}")
-                short_caption = short_caption_raw.format(
-                    first=message.from_user.first_name,
-                    last=message.from_user.last_name or "",
-                    username=None if not message.from_user.username else '@' + message.from_user.username,
-                    user_mention=message.from_user.mention,
-                    id=message.from_user.id
-                )
-                
-                tutorial_link = SHORT_TUT if SHORT_TUT else "https://t.me/Premiium_Tube/6"
+        # MULTI-SHORTENER ROTATION LOGIC FOR FREE USERS
+        if not is_user_pro and user_id != OWNER_ID and not is_short_link and shortner_enabled:
+            
+            # Select settings based on rotation count
+            current_rotation = CLICK_COUNTER % 3
+            CLICK_COUNTER += 1 # Auto-increment loop for next click
+            
+            current_url = SHORT_URL_1
+            current_api = SHORT_API_1
+            current_tut = SHORT_TUT_1
+            
+            if current_rotation == 1 and SHORT_URL_2 and SHORT_API_2:
+                current_url = SHORT_URL_2
+                current_api = SHORT_API_2
+                current_tut = SHORT_TUT_2
+            elif current_rotation == 2 and SHORT_URL_3 and SHORT_API_3:
+                current_url = SHORT_URL_3
+                current_api = SHORT_API_3
+                current_tut = SHORT_TUT_3
 
-                await client.send_photo(
-                    chat_id=message.chat.id,
-                    photo=short_photo,
-                    caption=short_caption,
-                    reply_markup=InlineKeyboardMarkup([
-                        [
-                            InlineKeyboardButton("• ᴏᴘᴇɴ ʟɪɴᴋ", url=short_link),
-                            InlineKeyboardButton("ᴛᴜᴛᴏʀɪᴀʟ •", url=tutorial_link)
-                        ],
-                        [
-                            InlineKeyboardButton(" • ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ •", url="https://t.me/Premiium_Tube/6")
-                        ]
-                    ])
-                )
-                return
-            except Exception as e:
-                client.LOGGER(__name__, client.name).warning(f"Shortener bypassed or failed: {e}")
-                # Crash hone ke bajay direct file send karne ke liye processing flow chalne dega
-                pass
+            # Only execute if the selected shortener is configured properly
+            if current_url and current_api:
+                try:
+                    # Dynamically patch client attribute so get_short reads the correct credentials
+                    client.shortner_url = current_url
+                    client.shortner_api = current_api
+                    
+                    short_link = get_short(f"https://t.me/{client.username}?start=yu3elk{base64_string}7", client)
+                    short_photo = client.messages.get("SHORT_PIC", "https://litter.catbox.moe/q9aqxh.jpg")
+                    
+                    short_caption_raw = client.messages.get("SHORT_MSG", "<b>✦ ʜᴇʏ {user_mention} ~\n\n‼️ ɢᴇᴛ ᴀʟʟ ꜰɪʟᴇs ɪɴ ᴀ sɪɴɢʟᴇ ʟɪɴᴋ ‼️\n\n⌂ ʏᴏᴜʀ ʟɪɴᴋ ɪs ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴏᴘᴇɴ ʟɪɴᴋ ʙᴜᴛᴛᴏɴ..</b>")
+                    try:
+                        short_caption = short_caption_raw.format(
+                            first=message.from_user.first_name,
+                            last=message.from_user.last_name or "",
+                            username=None if not message.from_user.username else '@' + message.from_user.username,
+                            user_mention=message.from_user.mention,
+                            id=message.from_user.id
+                        )
+                    except:
+                        short_caption = short_caption_raw
+
+                    tutorial_link = current_tut if current_tut else "https://t.me/PRIME_SMP"
+
+                    await client.send_photo(
+                        chat_id=message.chat.id,
+                        photo=short_photo,
+                        caption=short_caption,
+                        reply_markup=InlineKeyboardMarkup([
+                            [
+                                InlineKeyboardButton("• ᴏᴘᴇɴ ʟɪɴᴋ", url=short_link),
+                                InlineKeyboardButton("ᴛᴜᴛᴏʀɪᴀʟ •", url=tutorial_link)
+                            ],
+                            [
+                                InlineKeyboardButton(" • ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ •", url="https://t.me/PRIME_SMP")
+                            ]
+                        ])
+                    )
+                    return
+                except Exception as e:
+                    client.LOGGER(__name__, client.name).warning(f"Shortener rotation node failed: {e}")
+                    pass
 
         # 6. Decode and prepare file IDs
         try:
@@ -103,7 +138,6 @@ async def start_command(client: Client, message: Message):
                     source_channel_id = client.db
                     start = start_primary
                     end = end_primary
-                    client.LOGGER(__name__, client.name).info(f"Decoded batch from primary channel {source_channel_id}: {start}-{end}")
                 else:
                     db_channels = getattr(client, 'db_channels', {})
                     for channel_id_str in db_channels.keys():
@@ -116,7 +150,6 @@ async def start_command(client: Client, message: Message):
                             source_channel_id = channel_id
                             start = start_test
                             end = end_test
-                            client.LOGGER(__name__, client.name).info(f"Decoded batch from secondary channel {source_channel_id}: {start}-{end}")
                             break
                     
                     if source_channel_id is None:
@@ -128,7 +161,6 @@ async def start_command(client: Client, message: Message):
 
             elif len(argument) == 2:
                 encoded_msg = int(argument[1])
-                
                 if hasattr(client, 'db_channel') and client.db_channel:
                     primary_multiplier = abs(client.db_channel.id)
                     msg_id_primary = int(encoded_msg / primary_multiplier)
@@ -142,12 +174,10 @@ async def start_command(client: Client, message: Message):
                             channel_id = int(channel_id_str)
                             channel_multiplier = abs(channel_id)
                             msg_id_test = int(encoded_msg / channel_multiplier)
-                            
                             if encoded_msg % channel_multiplier == 0:
                                 source_channel_id = channel_id
                                 ids = [msg_id_test]
                                 break
-                        
                         if source_channel_id is None:
                             source_channel_id = client.db_channel.id if hasattr(client, 'db_channel') else client.db
                             ids = [msg_id_primary]
@@ -156,41 +186,29 @@ async def start_command(client: Client, message: Message):
                     ids = [int(encoded_msg / abs(client.db))]
 
         except Exception as e:
-            client.LOGGER(__name__, client.name).warning(f"Error decoding base64: {e}")
             return await message.reply("⚠️ Invalid or expired link.")
 
-        # 7. Get messages from the specific source channel first
+        # 7. Get and send files
         temp_msg = await message.reply("Wait A Sec..")
         messages = []
 
         try:
             if source_channel_id:
-                client.LOGGER(__name__, client.name).info(f"Trying to get messages from source channel: {source_channel_id}")
                 try:
-                    msgs = await client.get_messages(
-                        chat_id=source_channel_id,
-                        message_ids=list(ids)
-                    )
+                    msgs = await client.get_messages(chat_id=source_channel_id, message_ids=list(ids))
                     valid_msgs = [msg for msg in msgs if msg is not None]
                     messages.extend(valid_msgs)
-                    client.LOGGER(__name__, client.name).info(f"Found {len(valid_msgs)} messages from source channel {source_channel_id}")
-                    
                     if len(valid_msgs) < len(list(ids)):
                         missing_ids = [mid for mid in ids if mid not in {msg.id for msg in valid_msgs}]
                         if missing_ids:
-                            client.LOGGER(__name__, client.name).info(f"Missing {len(missing_ids)} messages, trying fallback system")
                             additional_messages = await get_messages(client, missing_ids)
                             messages.extend(additional_messages)
-                            client.LOGGER(__name__, client.name).info(f"Found {len(additional_messages)} additional messages from fallback")
                 except Exception as e:
-                    client.LOGGER(__name__, client.name).warning(f"Error getting messages from source channel {source_channel_id}: {e}")
                     messages = await get_messages(client, ids)
             else:
-                client.LOGGER(__name__, client.name).info("No specific source channel identified, using multi-channel fallback")
                 messages = await get_messages(client, ids)
         except Exception as e:
             await temp_msg.edit_text("Something went wrong!")
-            client.LOGGER(__name__, client.name).warning(f"Error getting messages: {e}")
             return
 
         if not messages:
@@ -208,35 +226,19 @@ async def start_command(client: Client, message: Message):
             reply_markup = msg.reply_markup if not client.disable_btn else None
 
             try:
-                copied_msg = await msg.copy(
-                    chat_id=message.from_user.id,
-                    caption=caption,
-                    reply_markup=reply_markup,
-                    protect_content=client.protect
-                )
+                copied_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, reply_markup=reply_markup, protect_content=client.protect)
                 yugen_msgs.append(copied_msg)
             except FloodWait as e:
                 await asyncio.sleep(e.x)
-                copied_msg = await msg.copy(
-                    chat_id=message.from_user.id,
-                    caption=caption,
-                    reply_markup=reply_markup,
-                    protect_content=client.protect
-                )
+                copied_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, reply_markup=reply_markup, protect_content=client.protect)
                 yugen_msgs.append(copied_msg)
             except Exception as e:
-                client.LOGGER(__name__, client.name).warning(f"Failed to send message: {e}")
                 pass
 
         if messages and client.auto_del > 0:
             transfer_link = original_payload
             asyncio.create_task(batch_auto_del_notification(
-                bot_username=client.username,
-                messages=yugen_msgs,
-                delay_time=client.auto_del,
-                transfer_link=transfer_link,
-                chat_id=message.from_user.id,
-                client=client
+                bot_username=client.username, messages=yugen_msgs, delay_time=client.auto_del, transfer_link=transfer_link, chat_id=message.from_user.id, client=client
             ))
         return
 
@@ -256,20 +258,9 @@ async def start_command(client: Client, message: Message):
         )
 
         if photo:
-            await client.send_photo(
-                chat_id=message.chat.id,
-                photo=photo,
-                caption=start_caption,
-                message_effect_id=MSG_EFFECT,
-                reply_markup=InlineKeyboardMarkup(buttons)
-            )
+            await client.send_photo(chat_id=message.chat.id, photo=photo, caption=start_caption, message_effect_id=MSG_EFFECT, reply_markup=InlineKeyboardMarkup(buttons))
         else:
-            await client.send_message(
-                chat_id=message.chat.id,
-                text=start_caption,
-                message_effect_id=MSG_EFFECT,
-                reply_markup=InlineKeyboardMarkup(buttons)
-            )
+            await client.send_message(chat_id=message.chat.id, text=start_caption, message_effect_id=MSG_EFFECT, reply_markup=InlineKeyboardMarkup(buttons))
         return
 
 #===============================================================#
@@ -285,14 +276,9 @@ async def request_command(client: Client, message: Message):
         return
 
     if not is_user_premium: 
-        BUTTON_URL = "https://t.me/hanime_arena/5"
-        reply_markup = InlineKeyboardMarkup([
-            [InlineKeyboardButton("💎 Upgrade to Premium", url=BUTTON_URL)]
-        ])
-        await message.reply(
-            "❌ **You are not a premium user.**\nUpgrade to premium to access this feature.",
-            reply_markup=reply_markup
-        )
+        BUTTON_URL = "https://t.me/PRIME_SMP"
+        reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("💎 Upgrade to Premium", url=BUTTON_URL)]])
+        await message.reply("❌ **You are not a premium user.**\nUpgrade to premium to access this feature.", reply_markup=reply_markup)
         return
 
     if len(message.command) < 2:
@@ -300,13 +286,7 @@ async def request_command(client: Client, message: Message):
         return
 
     requested = " ".join(message.command[1:])
-
-    owner_message = (
-        f"📩 **New Request from {message.from_user.mention}**\n\n"
-        f"🆔 User ID: `{user_id}`\n"
-        f"📝 Request: `{requested}`"
-    )
-
+    owner_message = f"📩 **New Request from {message.from_user.mention}**\n\n🆔 User ID: `{user_id}`\n📝 Request: `{requested}`"
     await client.send_message(OWNER_ID, owner_message)
     await message.reply("✅ **Thanks for your request!**\nYour request will be reviewed soon. Please wait.")
 
@@ -324,20 +304,7 @@ async def my_plan(client: Client, message: Message):
     is_user_premium = await client.mongodb.is_pro(user_id)
 
     if is_user_premium:
-        await message.reply_text(
-            "**👤 Profile Information:**\n\n"
-            "🔸 Ads: Disabled\n"
-            "🔸 Plan: Premium\n"
-            "🔸 Request: Enabled\n\n"
-            "🌟 You're a Premium User!"
-        )
+        await message.reply_text("**👤 Profile Information:**\n\n🔸 Ads: Disabled\n🔸 Plan: Premium\n🔸 Request: Enabled\n\n🌟 You're a Premium User!")
     else:
-        await message.reply_text(
-            "**👤 Profile Information:**\n\n"
-            "🔸 Ads: Enabled\n"
-            "🔸 Plan: Free\n"
-            "🔸 Request: Disabled\n\n"
-            "🔓 Unlock Premium to get more benefits\n"
-            "Contact: @NPCContactBot"
-                                )
-        
+        await message.reply_text("**👤 Profile Information:**\n\n🔸 Ads: Enabled\n🔸 Plan: Free\n🔸 Request: Disabled\n\n🔓 Unlock Premium to get more benefits\nContact: @EpicSenpai")
+    
