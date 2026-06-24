@@ -1,6 +1,7 @@
 from helper.helper_func import *
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+from pyrogram.errors import FloodWait
 import humanize
 import asyncio
 from config import (
@@ -30,7 +31,7 @@ async def start_command(client: Client, message: Message):
     # 2. Check if banned
     is_banned = await client.mongodb.is_banned(user_id)
     if is_banned:
-        return await message.reply("<b>✗ ʏᴏᴜ ʜᴀᴠᴇ ʙᴇᴇɴ ʙᴀɴɴᴇ Dil ꜰʀᴏᴍ ᴜsɪɴɢ ᴛʜɪs ʙᴏᴛ!</b>")
+        return await message.reply("<b>✗ ʏᴏᴜ ʜᴀᴠᴇ ʙᴇᴇɴ ʙᴀɴɴᴇᴅ ꜰʀᴏᴍ ᴜsɪɴɢ ᴛʜɪs ʙᴏᴛ!</b>")
 
     text = message.text
     if len(text) > 7:
@@ -50,18 +51,18 @@ async def start_command(client: Client, message: Message):
         shortner_enabled = getattr(client, 'shortner_enabled', True)
 
         #===============================================================#
-        # SMART DATABASE ROTATION & TOKEN LOGIC FOR FREE USERS
+        # SMART DATABASE ROTATION & 3-CREDITS AUTOMATION Protocol
         #===============================================================#
         if not is_user_pro and user_id != OWNER_ID and shortner_enabled:
             
-            # Fetch real-time mapping from database collection
+            # Fetch specific configuration layer from MongoDB
             user_data = await client.mongodb.db.users.find_one({"id": user_id}) or {}
             user_credits = user_data.get("credits", 0)
             rotation_index = user_data.get("rotation_index", 0)
 
-            # Case A: User successfully bypassed the token verification link
+            # Case A: User successfully bypassed the active shortener token
             if is_short_link:
-                user_credits = 3  # Reward exactly 3 tokens
+                user_credits = 3  # Load exactly 3 standard token units
                 next_rotation = (rotation_index + 1) % 3
                 await client.mongodb.db.users.update_one(
                     {"id": user_id}, 
@@ -69,8 +70,8 @@ async def start_command(client: Client, message: Message):
                     upsert=True
                 )
                 
-                # Successful Verification Layout Screen (Image 1 Style)
-                success_photo = client.messages.get("SHORT_PIC", "https://litter.catbox.moe/w9bw9z.jpg")
+                # Successful Verification Confirm Screen Layout (Image 1 Format)
+                success_photo = "https://litter.catbox.moe/w9bw9z.jpg"
                 success_msg = (
                     "<b>● ʏᴏᴜʀ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ɪs sᴜᴄᴄᴇssꜰᴜʟ!\n\n"
                     "⧗ 3 ᴄʀᴇᴅɪᴛs ᴀᴅᴅᴇᴅ ᴛᴏ ʏᴏᴜʀ\nᴀᴄᴄᴏᴜɴᴛ.</b>"
@@ -86,11 +87,11 @@ async def start_command(client: Client, message: Message):
                 )
                 return
             
-            # Case B: Token is expired (0 Credits State) -> Prompt Token Expired View
+            # Case B: Token Expired (0 Credits State) -> Link Engine Generation Loop
             elif user_credits <= 0:
                 current_url, current_api, current_tut = SHORT_URL_1, SHORT_API_1, SHORT_TUT_1
                 
-                # Dynamic line-by-line verification parsing
+                # Line-by-line validation tracking
                 if rotation_index == 1 and SHORT_URL_2 and SHORT_API_2:
                     current_url, current_api, current_tut = SHORT_URL_2, SHORT_API_2, SHORT_TUT_2
                 elif rotation_index == 2 and SHORT_URL_3 and SHORT_API_3:
@@ -105,12 +106,11 @@ async def start_command(client: Client, message: Message):
                         short_photo = client.messages.get("SHORT_PIC", "https://litter.catbox.moe/q9aqxh.jpg")
                         tutorial_link = current_tut if current_tut else "https://t.me/How_To_Open_Shortners"
 
-                        # Aesthetic layout parsing using clean HTML quote tags
                         custom_credit_msg = (
                             "<b><i>◍ Yeah the link's ready :), Here is your link ⬇️</i>\n\n"
                             "⧗ ᴄʀᴇᴅɪᴛs ᴍᴏᴅᴇ:\n"
                             "<blockquote>◍ Eᴀᴄʜ ᴀᴅ ʙʏᴘᴀss ʀᴇᴡᴀʀᴅs ʏᴏᴜ ᴡɪᴛʜ 3 ᴄʀᴇᴅɪᴛs.</blockquote>\n"
-                            "<blockquote>◍ Oɴᴇ ᴄʀᴇᴅɪᴛ ɪs ᴄᴏɴsᴜᴍᴇᴅ ᴘᴇʀ ғɪʟᴇ/ʟɪɴᴋ ᴀᴄᴄᴇss.</blockquote></b>"
+                            "<blockquote>◍ Oɴᴇ ᴄʀᴇᴅɪᴛ ɪs ᴄᴏɴsᴜᴍᴇḍ ᴘᴇʀ ғɪʟᴇ/ʟɪɴᴋ ᴀᴄᴄᴇss.</blockquote></b>"
                         )
 
                         await client.send_photo(
@@ -129,19 +129,19 @@ async def start_command(client: Client, message: Message):
                         )
                         return
                     except Exception as e:
-                        client.LOGGER(__name__, client.name).warning(f"Shortener node tracking failed: {e}")
+                        client.LOGGER(__name__, client.name).warning(f"Shortener generation failed: {e}")
                         pass
 
-            # Case C: Free user has structural active tokens -> Deduct single unit smoothly
+            # Case C: Valid credits available -> Deduct single credit unit cleanly
             if user_credits > 0 and not is_short_link:
                 user_credits -= 1
                 await client.mongodb.db.users.update_one({"id": user_id}, {"$set": {"credits": user_credits}})
 
-        # Deliver files dynamically if conditions are already satisfied
+        # Deliver files dynamically if condition tracks properly
         await deliver_files_routing(client, message, base64_string, original_payload)
         return
 
-    # Normal start layout execution
+    # Normal start message layout
     else:
         buttons = [[InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data="ABOUT"), InlineKeyboardButton("ᴄʟᴏꜱᴇ •", callback_data='close')]]
         if user_id in client.admins:
@@ -163,23 +163,19 @@ async def start_command(client: Client, message: Message):
         return
 
 #===============================================================#
-# INTERACTIVE CALLBACK PROCESSING TO EXECUTE SECURE LINKS
+# CALLBACK HANDLER ROUTER FOR VERIFICATION ENDPOINT
 #===============================================================#
 
 @Client.on_callback_query(filters.regex("^getfiles_"))
 async def process_file_button_callback(client: Client, query: CallbackQuery):
-    await query.answer("🚀 Redirecting to download endpoint...")
+    await query.answer("🚀 Processing secure file delivery pipeline...")
     base64_string = query.data.split("_")[1]
     original_payload = base64_string
-    
-    # Clear the confirmation interface layout
     await query.message.delete()
-    
-    # Process secure link routing destination
     await deliver_files_routing(client, query.message, base64_string, original_payload, is_callback=True)
 
 #===============================================================#
-# CORE CORE STRUCTURAL ROUTING REDIRECTION METHOD
+# CORE FILE ROUTING & AUTO-DELETE SCHEDULER DISPATCHER
 #===============================================================#
 
 async def deliver_files_routing(client, message, base64_string, original_payload, is_callback=False):
@@ -243,19 +239,65 @@ async def deliver_files_routing(client, message, base64_string, original_payload
     except Exception as e:
         return await client.send_message(chat_target, "<b>✗ ɪɴᴠᴀʟɪᴅ ᴏʀ ᴇxᴘɪʀᴇᴅ ꜰɪʟᴇ ʟɪɴᴋ.</b>")
 
-    # Redirect deep-link text formatting layer matching Image 2 style perfectly
-    nova_redirect_url = f"https://t.me/NovaFileBot?start={original_payload}"
-    delivery_msg_text = (
-        f"<b>Download Link: <a href='{nova_redirect_url}'>{nova_redirect_url}</a>\n\n"
-        f"This File is deleting automatically in 10 Minutes.. "
-        f"Forward in your Saved Messages..!</b>"
-    )
-    
-    await client.send_message(
-        chat_id=chat_target,
-        text=delivery_msg_text,
-        disable_web_page_preview=False
-    )
+    temp_msg = await client.send_message(chat_target, "<b><blockquote>›› ꜰᴇᴛᴄʜɪɴɢ ʏᴏᴜʀ ꜰɪʟᴇs, ᴘʟᴇᴀsᴇ ᴡᴀɪᴛ...</blockquote></b>")
+    messages = []
+
+    try:
+        if source_channel_id:
+            try:
+                msgs = await client.get_messages(chat_id=source_channel_id, message_ids=list(ids))
+                valid_msgs = [msg for msg in msgs if msg is not None]
+                messages.extend(valid_msgs)
+            except Exception as e:
+                messages = await get_messages(client, ids)
+        else:
+            messages = await get_messages(client, ids)
+    except Exception as e:
+        await temp_msg.edit_text("<b>✗ sᴏᴍᴇᴛʜɪɴɢ ᴡᴇɴᴛ ᴡʀᴏɴɢ ᴡʜɪʟᴇ ʀᴇᴛʀɪᴇᴠɪɴɢ ᴅᴀᴛᴀ!</b>")
+        return
+
+    if not messages:
+        return await temp_msg.edit("<b>✗ ᴄᴏᴜʟᴅɴ'ᴛ ꜰɪɴᴅ ᴛʜᴇ ꜰɪʟᴇs ɪɴ ᴛʜᴇ ᴅᴀᴛᴀʙᴀsᴇ!</b>")
+    await temp_msg.delete()
+
+    yugen_msgs = []
+    for msg in messages:
+        # Strict custom auto-delete bold + underlined markdown warning attached to caption
+        copyright_notice = (
+            "\n\n<b><u>⚠️ ᴛʜɪs ꜰɪʟᴇ ᴡɪʟʟ ʙᴇ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴅᴇʟᴇᴛᴇᴅ ɪɴ 30 ᴍɪɴᴜᴛᴇs ᴅᴜᴇ ᴛᴏ ᴄᴏᴘʏʀɪɢʜᴛ ɪssᴜᴇs! "
+            "ᴋɪɴᴅʟʏ ꜰᴏʀᴡᴀʀᴅ ɪᴛ ᴛᴏ ʏᴏᴜʀ sᴀᴠᴇᴅ ᴍᴇssᴀɢᴇs ᴏʀ ᴀɴʏ ᴏᴛʜᴇʀ sᴘᴀᴄᴇ, ᴛʜᴇɴ ᴅᴏᴡɴʟᴏᴀᴅ ᴛᴏ ᴡᴀᴛᴄʜ ɪᴛ sᴀꜰᴇʟʏ!</u></b>"
+        )
+        
+        caption = (
+            client.messages.get('CAPTION', '').format(
+                previouscaption=msg.caption.html if msg.caption else msg.document.file_name
+            ) if bool(client.messages.get('CAPTION', '')) and bool(msg.document)
+            else ("" if not msg.caption else msg.caption.html)
+        )
+        caption += copyright_notice
+        reply_markup = msg.reply_markup if not client.disable_btn else None
+
+        try:
+            copied_msg = await msg.copy(chat_id=chat_target, caption=caption, reply_markup=reply_markup, protect_content=client.protect)
+            yugen_msgs.append(copied_msg)
+        except FloodWait as e:
+            await asyncio.sleep(e.x)
+            copied_msg = await msg.copy(chat_id=chat_target, caption=caption, reply_markup=reply_markup, protect_content=client.protect)
+            yugen_msgs.append(copied_msg)
+        except Exception as e:
+            pass
+
+    # Strictly set to 30 Minutes (= 1800 seconds) auto-deletion timer loop
+    if messages:
+        transfer_link = original_payload
+        asyncio.create_task(batch_auto_del_notification(
+            bot_username=client.username, 
+            messages=yugen_msgs, 
+            delay_time=1800, 
+            transfer_link=transfer_link, 
+            chat_id=chat_target, 
+            client=client
+        ))
     return
 
 #===============================================================#
@@ -267,7 +309,7 @@ async def request_command(client: Client, message: Message):
     is_user_premium = await client.mongodb.is_pro(user_id)
 
     if is_admin or user_id == OWNER_ID:
-        await message.reply_text("<b>🔹 ʏᴏᴜ ᴀʀᴇ ᴍʏ sᴇɴsᴇɪ!\nᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ɪs ᴏɴʟʏ ꜰᴏʀ ᴜsᴇʀs.</b>")
+        await message.reply_text("<b>🔹 ʏᴏᴜ ᴀʀᴇ ᴍʏ sᴇɴsᴇɪ!\nᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ɪs ᴏɴʟʏ ꜰᴏ r ᴜsᴇʀs.</b>")
         return
 
     if not is_user_premium: 
@@ -293,7 +335,7 @@ async def my_plan(client: Client, message: Message):
     is_admin = user_id in client.admins
 
     if is_admin or user_id == OWNER_ID:
-        await message.reply_text("<b>🔹 ʏᴏᴜ'ʀᴇ ᴍʏ sᴇɴsᴇɪ! ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ɪs ᴏɴʟʏ ꜰᴏʀ ᴜsᴇʀs.</b>")
+        await message.reply_text("<b>🔹 ʏᴏᴜ'ʀᴇ ᴍʏ sᴇɴsᴇɪ! ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ɪs ᴏɴʟʏ ꜰᴏʀ ᴜsᴇ r s.</b>")
         return
     
     is_user_premium = await client.mongodb.is_pro(user_id)
@@ -304,4 +346,4 @@ async def my_plan(client: Client, message: Message):
         await message.reply_text("<b>👤 ᴘʀᴏꜰɪʟᴇ ɪɴꜰᴏʀᴍᴀᴛɪᴏɴ:\n\n🔸 ᴀᴅs: ᴅɪsᴀʙʟᴇᴅ\n🔸 ᴘʟᴀɴ: ᴘʀᴇᴍɪᴜᴍ\n🔸 ʀᴇǫᴜᴇsᴛ: ᴇɴᴀʙʟᴇᴅ\n\n🌟 ʏᴏᴜ'ʀᴇ ᴀ ᴘʀᴇᴍɪᴜᴍ ᴜsᴇʀ!</b>")
     else:
         await message.reply_text(f"<b>👤 ᴘʀᴏꜰɪʟᴇ ɪɴꜰᴏʀᴍᴀᴛɪᴏɴ:\n\n🔸 ᴀᴅs: ᴇɴᴀʙʟᴇᴅ\n🔸 ᴘʟᴀɴ: ꜰʀᴇᴇ\n🔸 ᴠᴀʟɪᴅ ᴄʀᴇᴅɪᴛs: <code>{user_credits}</code> ᴄʀᴇᴅɪᴛs\n🔸 ʀᴇǫᴜᴇsᴛ: ᴅɪsᴀʙʟᴇᴅ\n\n🔓 ᴜɴʟᴏᴄᴋ ᴘʀᴇᴍɪᴜᴍ ᴛᴏ ɢᴇᴛ ᴍᴏʀᴇ ʙᴇɴᴇꜰɪᴛs\nᴄᴏɴᴛᴀᴄᴛ: @EpicSenpai</b>")
-                                
+            
