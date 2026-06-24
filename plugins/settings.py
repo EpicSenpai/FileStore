@@ -5,6 +5,66 @@ import config
 from plugins.shortner import get_short
 
 #===============================================================#
+# HIGH-PRIORITY CORE CALLBACK MODULES (GLOBAL NAVIGATION FIX)
+#===============================================================#
+
+@Client.on_callback_query(filters.regex("^home$"))
+async def back_to_home_callback(client: Client, query: CallbackQuery):
+    await query.answer("↩️ Returning back to home dashboard...")
+    user_id = query.from_user.id
+    
+    # Static layout block using exact premium small caps fonts 
+    buttons = [[InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data="ABOUT"), InlineKeyboardButton("ᴄʟᴏsᴇ •", callback_data='close')]]
+    if user_id in client.admins:
+        buttons.insert(0, [InlineKeyboardButton("• ꜱᴇᴛᴛɪɴɢs •", callback_data="settings")])
+        
+    start_caption = config.MESSAGES.get('START', '').format(
+        first=query.from_user.first_name,
+        last=query.from_user.last_name or "",
+        username=None if not query.from_user.username else '@' + query.from_user.username,
+        mention=query.from_user.mention,
+        id=user_id
+    )
+    
+    try:
+        # Edit caption cleanly so the menu photo interface layout never breaks
+        await query.message.edit_caption(
+            caption=start_caption,
+            reply_markup=InlineKeyboardMarkup(buttons)
+        )
+    except Exception:
+        try:
+            await query.message.edit_text(
+                text=start_caption,
+                reply_markup=InlineKeyboardMarkup(buttons)
+            )
+        except Exception:
+            pass
+
+@Client.on_callback_query(filters.regex("^ABOUT$"))
+async def render_about_callback_query(client: Client, query: CallbackQuery):
+    await query.answer("ℹ️ Loading about documentation details...")
+    
+    about_text = config.MESSAGES.get('ABOUT', '').format(
+        bot_name=client.username
+    )
+    
+    back_markup = InlineKeyboardMarkup([[InlineKeyboardButton("‹ ʙᴀᴄᴋ", callback_data="home")]])
+    
+    try:
+        await query.message.edit_caption(caption=about_text, reply_markup=back_markup)
+    except Exception:
+        try:
+            await query.message.edit_text(text=about_text, reply_markup=back_markup)
+        except Exception:
+            pass
+
+@Client.on_callback_query(filters.regex("^close$"))
+async def close_panel_callback_query(client: Client, query: CallbackQuery):
+    await query.answer("🗑️ Interface closed.")
+    await query.message.delete()
+
+#===============================================================#
 # PAGE 1: CORE BOT SETTINGS PANEL
 #===============================================================#
 
@@ -32,8 +92,8 @@ async def settings(client, query):
 ›› <b>sʜᴏʀᴛɴᴇʀ 3:</b> <code>{config.SHORT_URL_3}</code> [<code>{"🟢 ᴏɴ" if getattr(config, 'SHORT_STATUS_3', True) else "🔴 ᴏғғ"}</code>]
     """
     reply_markup = InlineKeyboardMarkup([
-        [InlineKeyboardButton('ꜰꜱᴜʙ ᴄʜᴀɴɴᴇʟꜱ', 'fsub'), InlineKeyboardButton('ᴅʙ ᴄʜᴀɴɴᴇʟꜱ', 'db_channels')],
-        [InlineKeyboardButton('ᴀᴅᴍɪɴꜱ', 'admins'), InlineKeyboardButton('ᴀᴜᴛᴏ ᴅᴇʟᴇᴛᴇ', 'auto_del')],
+        [InlineKeyboardButton('ꜰsᴜʙ ᴄʜᴀɴɴᴇʟs', 'fsub'), InlineKeyboardButton('ᴅʙ ᴄʜᴀɴɴᴇʟs', 'db_channels')],
+        [InlineKeyboardButton('ᴀᴅᴍɪɴs', 'admins'), InlineKeyboardButton('ᴀᴜᴛᴏ ᴅᴇʟᴇᴛᴇ', 'auto_del')],
         [InlineKeyboardButton('ʜᴏᴍᴇ', 'home'), InlineKeyboardButton('›› ɴᴇxᴛ', 'settings_page_2')]
     ])
     await query.message.edit_text(msg, reply_markup=reply_markup)
@@ -54,90 +114,28 @@ async def settings_page_2(client, query):
 ›› <b>ᴘʀᴏᴛᴇᴄᴛ ᴄᴏɴᴛᴇɴᴛ:</b> <code>{"✓ ᴛʀᴜᴇ" if client.protect else "✗ ꜰᴀʟsᴇ"}</code>
 ›› <b>ᴅɪsᴀʙʟᴇ ʙᴜᴛᴛᴏɴ:</b> <code>{"✓ ᴛʀᴜᴇ" if client.disable_btn else "✗ ꜰᴀʟsᴇ"}</code>
 
-<blockquote><u><b>≡ 1sᴛ sʜᴏʀᴛᴇɴᴇʀ sᴇᴛᴛɪɴgs:</b></u></blockquote>
+<blockquote><u><b>≡ 1st sʜᴏʀᴛᴇɴᴇʀ sᴇᴛᴛɪɴgs:</b></u></blockquote>
 ›› <b>sᴛᴀᴛᴜs:</b> <code>{"🟢 ᴇɴᴀʙʟᴇᴅ" if getattr(config, 'SHORT_STATUS_1', True) else "🔴 ᴅɪsᴀʙʟᴇᴅ"}</code>
 ›› <b>ᴜʀʟ:</b> <code>{config.SHORT_URL_1}</code>
 ›› <b>ᴛᴜᴛᴏʀɪᴀʟ:</b> <code>{config.SHORT_TUT_1}</code>
 
-<blockquote><u><b>≡ 2ɴᴅ sʜᴏʀᴛᴇɴᴇʀ sᴇᴛᴛɪɴgs:</b></u></blockquote>
+<blockquote><u><b>≡ 2ɴᴅ sʜᴏʀᴛᴇɴᴇner sᴇᴛᴛɪɴgs:</b></u></blockquote>
 ›› <b>sᴛᴀᴛᴜs:</b> <code>{"🟢 ᴇɴᴀʙʟᴇᴅ" if getattr(config, 'SHORT_STATUS_2', True) else "🔴 ᴅɪsᴀʙʟᴇᴅ"}</code>
 ›› <b>ᴜʀʟ:</b> <code>{config.SHORT_URL_2}</code>
 ›› <b>ᴛᴜᴛᴏʀɪᴀʟ:</b> <code>{config.SHORT_TUT_2}</code>
 
-<blockquote><u><b>≡ 3ʀᴅ sʜᴏʀᴛᴇɴᴇʀ sᴇᴛᴛɪɴgs:</b></u></blockquote>
+<blockquote><u><b>≡ 3ʀᴅ sʜᴏʀᴛᴇɴᴇner sᴇᴛᴛɪɴgs:</b></u></blockquote>
 ›› <b>sᴛᴀᴛᴜs:</b> <code>{"🟢 ᴇɴᴀʙʟᴇᴅ" if getattr(config, 'SHORT_STATUS_3', True) else "🔴 ᴅɪsᴀʙʟᴇᴅ"}</code>
 ›› <b>ᴜʀʟ:</b> <code>{config.SHORT_URL_3}</code>
 ›› <b>ᴛᴜᴛᴏʀɪᴀʟ:</b> <code>{config.SHORT_TUT_3}</code>
     """
     reply_markup = InlineKeyboardMarkup([
         [InlineKeyboardButton('ᴘʀᴏᴛᴇᴄᴛ ᴄᴏɴᴛᴇɴᴛ', 'protect'), InlineKeyboardButton('ᴘʜᴏᴛᴏs', 'photos')],
-        [InlineKeyboardButton('ᴛᴇxᴛs', 'texts'), InlineKeyboardButton('🛠️ sʜᴏʀᴛɴᴇʀ sᴇᴛᴛɪɴɢs', 'manage_shortners')],
+        [InlineKeyboardButton('ᴛᴇxᴛs', 'texts'), InlineKeyboardButton('🛠️ sʜᴏʀᴛɴᴇʀ sᴇᴛᴛɪɴgs', 'manage_shortners')],
         [InlineKeyboardButton('‹ ᴘʀᴇᴠ', 'settings'), InlineKeyboardButton('ʜᴏᴍᴇ', 'home')]
     ])
     await query.message.edit_text(msg, reply_markup=reply_markup)
     return
-
-#===============================================================#
-# HIGH-PRIORITY INTERACTIVE NAVIGATION LAYER (FIXED COMPLIANCE)
-#===============================================================#
-
-@Client.on_callback_query(filters.regex("^home$"))
-async def back_to_home_callback(client: Client, query: CallbackQuery):
-    await query.answer("↩️ Returning back to home dashboard...")
-    user_id = query.from_user.id
-    
-    # Exact structure matching the main start menu alignment
-    buttons = [[InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data="ABOUT"), InlineKeyboardButton("ᴄʟᴏsᴇ •", callback_data='close')]]
-    if user_id in client.admins:
-        buttons.insert(0, [InlineKeyboardButton("• ꜱᴇᴛᴛɪɴɢs •", callback_data="settings")])
-        
-    start_caption = config.MESSAGES.get('START', '').format(
-        first=query.from_user.first_name,
-        last=query.from_user.last_name or "",
-        username=None if not query.from_user.username else '@' + query.from_user.username,
-        mention=query.from_user.mention,
-        id=user_id
-    )
-    
-    try:
-        # Fixed: Editing photo caption instead of breaking into text view
-        await query.message.edit_caption(
-            caption=start_caption,
-            reply_markup=InlineKeyboardMarkup(buttons)
-        )
-    except Exception:
-        try:
-            await query.message.edit_text(
-                text=start_caption,
-                reply_markup=InlineKeyboardMarkup(buttons)
-            )
-        except Exception:
-            pass
-
-@Client.on_callback_query(filters.regex("^ABOUT$"))
-async def render_about_callback_query(client: Client, query: CallbackQuery):
-    await query.answer("ℹ️ Loading about documentation details...")
-    
-    about_text = config.MESSAGES.get('ABOUT', '').format(
-        bot_name=client.name,
-        mention=query.from_user.mention
-    )
-    
-    back_markup = InlineKeyboardMarkup([[InlineKeyboardButton("‹ ʙᴀᴄᴋ", callback_data="home")]])
-    
-    try:
-        # Fixed: Editing caption smoothly for the photo background interface
-        await query.message.edit_caption(caption=about_text, reply_markup=back_markup)
-    except Exception:
-        try:
-            await query.message.edit_text(text=about_text, reply_markup=back_markup)
-        except Exception:
-            pass
-
-@Client.on_callback_query(filters.regex("^close$"))
-async def close_panel_callback_query(client: Client, query: CallbackQuery):
-    await query.answer("🗑️ Interface closed.")
-    await query.message.delete()
 
 #===============================================================#
 # MULTI-SHORTENER DYNAMIC ACTIONS PROTOCOL
@@ -157,7 +155,7 @@ async def manage_shortners(client, query):
 __<b>ᴄʟɪᴄᴋ ᴏɴ ᴀɴʏ sʜᴏʀᴛᴇɴᴇʀ ʙᴇʟᴏᴡ ᴛᴏ ᴄʜᴀɴɢᴇ ɪᴛs sᴇᴛᴛɪɴɢs, sᴡɪᴛᴄʜ sᴛᴀᴛᴜs ᴏʀ ʀᴜɴ ᴀ ᴛᴇsᴛ sʜᴏʀᴛᴇɴ!</b>__"""
     
     reply_markup = InlineKeyboardMarkup([
-        [InlineKeyboardButton('🔧 sʜᴏʀᴛɴᴇʀ 1', 'edit_short_1'), InlineKeyboardButton('🔧 sʜᴏʀᴛɴᴇʀ 2', 'edit_short_2')],
+        [InlineKeyboardButton('🔧 sʜᴏʀᴛɴᴇʀ 1', 'edit_short_1'), InlineKeyboardButton('🔧 sʜᴏʀᴛɴᴇner 2', 'edit_short_2')],
         [InlineKeyboardButton('🔧 sʜᴏʀᴛɴᴇʀ 3', 'edit_short_3')],
         [InlineKeyboardButton('‹ ʙᴀᴄᴋ', 'settings_page_2')]
     ])
@@ -176,7 +174,7 @@ async def edit_specific_shortner(client, query):
     status_val = getattr(config, f"SHORT_STATUS_{num}", True)
     
     msg = f"""<blockquote>🛠️ ᴄᴏɴꜰɪɢᴜʀᴇ sʜᴏʀᴛᴇɴᴇʀ {num}</blockquote>
-›› <b>ᴄᴜʀʀᴇɴᴛ sᴛᴀᴛᴜs:</b> <code>{"🟢 ᴀᴄᴛɪᴠᴇ / ᴏɴ" if status_val else "🔴 ɪɴᴀᴄᴛɪᴠᴇ / ᴏғғ"}</code>
+›› <b>sᴛᴀᴛᴜs:</b> <code>{"🟢 ᴀᴄᴛɪᴠᴇ / ᴏɴ" if status_val else "🔴 ɪɴᴀᴄᴛɪᴠᴇ / ᴏғғ"}</code>
 ›› <b>ᴄᴜʀʀᴇɴᴛ ᴜʀʟ:</b> <code>{url_val}</code>
 ›› <b>ᴄᴜʀʀᴇɴᴛ ᴛᴜᴛᴏʀɪᴀʟ:</b> <code>{tut_val}</code>
 
@@ -293,7 +291,7 @@ async def fsub(client, query):
             channel_list.append(f"• <code>{channel_name}</code> (<code>{channel_id}</code>) - {request_status}, {timer_status}")
         channels_display = "\n".join(channel_list)
     else:
-        channels_display = "_ɴᴏ ꜰᴏʀᴄᴇ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴄʜᴀɴɴᴇʟs ᴄᴏɴғɪɢᴜʀᴇᴅ_"
+        channels_display = "_ɴᴏ ꜰᴏʀᴄᴇ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴄʜᴀɴɴᴇʟs ᴄᴏɴғɪɢᴜʀᴇ_"
     
     msg = f"""<blockquote>✦ ꜰᴏʀᴄᴇ sᴜʙsᴄʀɪᴘᴛɪᴏɴ sᴇᴛᴛɪɴgs</blockquote>
 ›› <b>ᴄᴏɴғɪɢᴜʀᴇᴅ ᴄʜᴀɴɴᴇʟs:</b>
@@ -319,7 +317,7 @@ async def db_channels(client, query):
     else: 
         channels_display = "_ɴᴏ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟs ᴄᴏɴғɪɢᴜʀᴇᴅ_"
     primary_db = getattr(client, 'primary_db_channel', client.db)
-    msg = f"""<blockquote>✦ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟs sᴇᴛᴛɪɴɢs</blockquote>\n›› <b>ᴄᴜʀʀᴇɴᴛ ᴘʀɪᴍᴀʀʏ ᴅʙ:</b> <code>{primary_db}</code>\n›› <b>ᴛᴏᴛᴀʟ ᴅʙ ᴄʜᴀɴɴᴇʟs:</b> <code>{len(db_channels)}</code> \n\n**<b>ᴄᴏɴғɪɢᴜʀᴇᴅ ᴄʜᴀɴɴᴇʟs:</b>**\n{channels_display}\n\n__<b>ᴜsᴇ ᴛʜᴇ ᴀᴘᴘʀᴏᴘʀɪᴀᴛᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ᴍᴀɴᴀɢᴇ ʏᴏᴜʀ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟs!</b>__"""
+    msg = f"""<blockquote>✦ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟs sᴇᴛᴛɪɴɢs</blockquote>\n›› <b><b>ᴄᴜʀʀᴇɴᴛ ᴘʀɪᴍᴀʀʏ ᴅʙ:</b></b> <code>{primary_db}</code>\n›› <b><b>ᴛᴏᴛᴀʟ ᴅʙ ᴄʜᴀɴɴᴇʟs:</b></b> <code>{len(db_channels)}</code> \n\n**<b>ᴄᴏɴғɪɢᴜʀᴇᴅ ᴄʜᴀɴɴᴇʟs:</b>**\n{channels_display}\n\n__<b>ᴜsᴇ ᴛʜᴇ ᴀᴘᴘʀᴏᴘʀɪᴀᴛᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ᴍᴀɴᴀɢᴇ ʏᴏᴜʀ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟs!</b>__"""
     reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton('›› ᴀᴅᴅ ᴅʙ ᴄʜᴀɴɴᴇʟ', 'add_db_channel'), InlineKeyboardButton('›› ʀᴇᴍᴏᴠᴇ ᴅʙ ᴄʜᴀɴɴᴇʟ', 'rm_db_channel')], [InlineKeyboardButton('›› sᴇᴛ ᴘʀɪᴍᴀʀʏ', 'set_primary_db'), InlineKeyboardButton('›› sᴛᴀᴛᴜs', 'toggle_db_status')], [InlineKeyboardButton('‹ ʙᴀᴄᴋ', 'settings')]])
     await query.message.edit_text(msg, reply_markup=reply_markup)
     
