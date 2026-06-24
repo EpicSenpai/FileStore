@@ -13,22 +13,22 @@ from config import (
 from plugins.shortner import get_short
 from helper.helper_func import get_messages, force_sub, decode
 
-# Background clean scheduler loop task handler
-async def schedule_dynamic_deletion(client: Client, chat_id: int, copied_messages: list, transfer_link: str):
-    # 30 Minutes structural deletion latency = 1800 seconds
+# Background scheduler task to handle file deletion and warning text update
+async def schedule_dynamic_deletion(client: Client, chat_id: int, media_messages: list, banner_msg: Message, transfer_link: str):
+    # 30 Minutes delay time = 1800 seconds (Aap test karne ke liye ise kam bhi kar sakte hain)
     await asyncio.sleep(1800)
     
-    # 1. Purge all media nodes and warning alert cards
-    for msg in copied_messages:
+    # 1. Sirf media files (video/photos) ko delete karein
+    for msg in media_messages:
         try:
             await msg.delete()
         except Exception:
             pass
 
-    # 2. Render the short and crisp structural recovery text block with aesthetic small caps
+    # 2. Warning message ko delete karne ke bajaye ussi ko EDIT karke chhota retrieval message banayein
     retrieval_text = (
         "<b>›› ᴘʀᴇᴠɪᴏᴜs ᴍᴇssᴀɢᴇ ᴡᴀs ᴅᴇʟᴇᴛᴇᴅ\n\n"
-        "ɪꜰ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ɢᴇᴛ ᴛʜᴇ ꜰɪʟᴇs ᴀɢᴀɪɴ, ᴛʜᴇɴ ᴄʟɪᴄᴋ: • ɢᴇᴛ ꜰɪʟᴇs • "
+        "ɪꜰ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ɢᴇᴛ ᴛʜᴇ ꜰɪʟᴇs ᴀɢᴀɪɴ, ᴛʜᴇɴ ᴄʟɪᴄᴋ: • ɢᴇᴛ ꜰɪʟᴇꜱ • "
         "ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴇʟsᴇ ᴄʟᴏsᴇ ᴛʜɪs ᴍᴇssᴀɢᴇ.</b>"
     )
     
@@ -40,13 +40,16 @@ async def schedule_dynamic_deletion(client: Client, chat_id: int, copied_message
     ])
     
     try:
-        await client.send_message(
-            chat_id=chat_id,
+        await banner_msg.edit_text(
             text=retrieval_text,
             reply_markup=retrieval_markup
         )
     except Exception:
-        pass
+        # Agar user ne chat delete kar di ho ya koi error aaye toh backup backup message send ho jaye
+        try:
+            await client.send_message(chat_id=chat_id, text=retrieval_text, reply_markup=retrieval_markup)
+        except Exception:
+            pass
 
 #===============================================================#
 
@@ -83,16 +86,11 @@ async def start_command(client: Client, message: Message):
         is_user_pro = await client.mongodb.is_pro(user_id)
         shortner_enabled = getattr(client, 'shortner_enabled', True)
 
-        #===============================================================#
-        # MONGO TOKEN TRACKING LOGIC
-        #===============================================================#
         if not is_user_pro and user_id != OWNER_ID and shortner_enabled:
-            
             user_data = await client.mongodb.db.users.find_one({"id": user_id}) or {}
             user_credits = user_data.get("credits", 0)
             rotation_index = user_data.get("rotation_index", 0)
 
-            # Case A: Shortener successfully bypassed -> Reward interface pipeline
             if is_short_link:
                 user_credits = 3  
                 next_rotation = (rotation_index + 1) % 3
@@ -102,16 +100,14 @@ async def start_command(client: Client, message: Message):
                     upsert=True
                 )
                 
-                # Image 2 Style Exact Verification parsing structure with precise HTML alignment
                 success_msg = (
                     "<b>◍ ʏᴏᴜʀ ᴠᴇʀɪғɪᴄᴀᴛɪᴏɴ ɪꜱ ꜱᴜᴄᴄᴇssғᴜʟ!\n\n"
                     "<blockquote>⧗ 3 ᴄʀᴇᴅɪᴛꜱ ᴀᴅᴅᴇᴅ ᴛᴏ ʏᴏᴜʀ ᴀᴄᴄᴏᴜɴᴛ.</blockquote></b>"
                 )
                 
-                # Fixed: Sent exactly as a REPLY matching image orientation
                 await message.reply_text(
                     text=success_msg,
-                    quote=True, # Explicit configuration to force standard reply formatting
+                    quote=True, 
                     reply_markup=InlineKeyboardMarkup([
                         [InlineKeyboardButton("✨ ᴄʟɪᴄᴋ ʜᴇʀᴇ ✨", callback_data=f"getfiles_{base64_string}")],
                         [InlineKeyboardButton("• ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ •", url="https://t.me/Premiium_Tube/6")]
@@ -119,7 +115,6 @@ async def start_command(client: Client, message: Message):
                 )
                 return
             
-            # Case B: Free user token loop expired screen layout
             elif user_credits <= 0:
                 current_url, current_api, current_tut = SHORT_URL_1, SHORT_API_1, SHORT_TUT_1
                 
@@ -277,14 +272,14 @@ async def deliver_files_routing(client, message, base64_string, original_payload
         else:
             messages = await get_messages(client, ids)
     except Exception as e:
-        await temp_msg.edit_text("<b>✗ s... ᴡᴇɴᴛ ᴡʀᴏɴɢ ᴡʜɪʟᴇ ʀᴇᴛʀɪᴇᴠɪɴɢ ᴅᴀᴛᴀ!</b>")
+        await temp_msg.edit_text("<b>✗ sᴏᴍᴇᴛʜɪɴɢ ᴡᴇɴᴛ ᴡʀᴏɴɢ ᴡʜɪʟᴇ ʀᴇᴛʀɪᴇᴠɪɴɢ ᴅᴀᴛᴀ!</b>")
         return
 
     if not messages:
         return await temp_msg.edit("<b>✗ ᴄᴏᴜʟᴅɴ'ᴛ ꜰɪɴᴅ ᴛʜᴇ ꜰɪʟᴇs ɪɴ ᴛʜᴇ ᴅᴀᴛᴀʙᴀsᴇ!</b>")
     await temp_msg.delete()
 
-    yugen_msgs = []
+    media_messages = []
     for msg in messages:
         caption = (
             client.messages.get('CAPTION', '').format(
@@ -296,34 +291,34 @@ async def deliver_files_routing(client, message, base64_string, original_payload
 
         try:
             copied_msg = await msg.copy(chat_id=chat_target, caption=caption, reply_markup=reply_markup, protect_content=client.protect)
-            yugen_msgs.append(copied_msg)
+            media_messages.append(copied_msg)
         except FloodWait as e:
             await asyncio.sleep(e.x)
             copied_msg = await msg.copy(chat_id=chat_target, caption=caption, reply_markup=reply_markup, protect_content=client.protect)
-            yugen_msgs.append(copied_msg)
+            media_messages.append(copied_msg)
         except Exception:
             pass
 
-    # Notice card is dispatched inside an isolated text message container (Image 2 style validation)
-    if yugen_msgs:
+    # Notice card is dispatched inside an isolated text message container
+    if media_messages:
         warning_banner_text = (
-            "<b><u>⚠️ ᴛʜɪs ꜰɪʟᴇ ᴡɪʟʟ ʙᴇ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴅᴇʟᴇᴛᴇᴅ ɪɴ 30 ᴍɪɴᴜᴛᴇs ᴅᴜᴇ ᴛᴏ ᴄᴏᴘʏʀɪɢʜᴛ ɪssᴜᴇs! "
+            "<b><u>⚠️ ᴛʜɪs ꜰɪʟᴇ ᴡɪʟʟ ʙᴇ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴅᴇʟᴇᴛᴇᴅ ɪɴ 30 ᴍɪɴᴜᴛᴇs ᴅᴜᴇ ᴛᴏ ᴄᴏᴘʏʀɪɢʜᴛ ɪssᴜes! "
             "ᴋɪɴᴅʟʏ ꜰᴏʀᴡᴀʀᴅ ɪᴛ ᴛᴏ ʏᴏᴜʀ sᴀᴠᴇᴅ ᴍᴇssᴀɢᴇs ᴏʀ ᴀɴʏ ᴏᴛʜᴇʀ sᴘᴀᴄᴇ, ᴛʜᴇɴ ᴅᴏᴡɴʟᴏᴀᴅ ᴛᴏ ᴡᴀᴛᴄʜ ɪᴛ sᴀꜰᴇʟʏ!</u></b>"
         )
         try:
             banner_msg = await client.send_message(chat_id=chat_target, text=warning_banner_text)
-            yugen_msgs.append(banner_msg)
+            
+            # Yahaan se background task trigger hoga jo sahi se edit handle karega
+            transfer_link = original_payload
+            asyncio.create_task(schedule_dynamic_deletion(
+                client=client, 
+                chat_id=chat_target, 
+                media_messages=media_messages, 
+                banner_msg=banner_msg,
+                transfer_link=transfer_link
+            ))
         except Exception:
             pass
-
-        # Trigger execution of retrieval loop thread 
-        transfer_link = original_payload
-        asyncio.create_task(schedule_dynamic_deletion(
-            client=client, 
-            chat_id=chat_target, 
-            copied_messages=yugen_msgs, 
-            transfer_link=transfer_link
-        ))
     return
 
 #===============================================================#
@@ -372,4 +367,4 @@ async def my_plan(client: Client, message: Message):
         await message.reply_text("<b>👤 ᴘʀᴏꜰɪʟᴇ ɪɴꜰᴏʀᴍᴀᴛɪᴏɴ:\n\n🔸 ᴀᴅs: ᴅɪsᴀʙʟᴇᴅ\n🔸 ᴘʟᴀɴ: ᴘʀᴇᴍɪᴜᴍ\n🔸 ʀᴇǫᴜᴇsᴛ: ᴇɴᴀʙʟᴇᴅ\n\n🌟 ʏᴏᴜ'ʀᴇ ᴀ ᴘʀᴇᴍɪᴜᴍ ᴜsᴇʀ!</b>")
     else:
         await message.reply_text(f"<b>👤 ᴘʀᴏꜰɪʟᴇ ɪɴꜰᴏʀᴍᴀᴛɪᴏɴ:\n\n🔸 ᴀᴅs: ᴇɴᴀʙʟᴇᴅ\n🔸 ᴘʟᴀɴ: ꜰʀᴇᴇ\n🔸 ᴠᴀʟɪᴅ ᴄʀᴇᴅɪᴛs: <code>{user_credits}</code> ᴄʀᴇᴅɪᴛs\n🔸 ʀᴇǫᴜᴇsᴛ: ᴅɪsᴀʙʟᴇᴅ\n\n🔓 ᴜɴʟᴏᴄᴋ ᴘʀᴇᴍɪᴜᴍ ᴛᴏ ɢᴇᴛ ᴍᴏʀᴇ ʙᴇɴᴇꜰɪᴛs\nᴄᴏɴᴛᴀᴄᴛ: @EpicSenpai</b>")
-    
+                
