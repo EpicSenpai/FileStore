@@ -12,7 +12,7 @@ logging.basicConfig(
     ]
 )
 
-# Smart Logger wrapper wrapper to handle bot.py custom method formatting dynamically
+# Smart Logger wrapper to handle bot.py custom method formatting dynamically
 class SmartLogger:
     def __init__(self, name=__name__):
         self._logger = logging.getLogger(name)
@@ -32,9 +32,31 @@ PORT = os.environ.get("PORT", "5010")
 OWNER_ID = int(os.environ.get("OWNER_ID", "824793853"))
 MSG_EFFECT = int(os.environ.get("MSG_EFFECT", "5046509860389126442"))
 
-SHORT_URL = os.environ.get("SHORT_URL", "gplinks.com") 
-SHORT_API = os.environ.get("SHORT_API", "540e6d65d2851a9c645d0eafb573535af3d33943")
-SHORT_TUT = os.environ.get("SHORT_TUT", "https://t.me/How_To_Open_Shortners")
+#===============================================================#
+# LIVE MULTI-SHORTENER ROTATION CONFIGURATION (Line by Line)
+#===============================================================#
+
+# 1st Shortener Settings (GPLinks)
+SHORT_URL_1 = os.environ.get("SHORT_URL_1", "gplinks.com")
+SHORT_API_1 = os.environ.get("SHORT_API_1", "540e6d65d2851a9c645d0eafb573535af3d33943")
+SHORT_TUT_1 = os.environ.get("SHORT_TUT_1", "https://t.me/How_To_Open_Shortners")
+
+# 2nd Shortener Settings (LinkShortify)
+SHORT_URL_2 = os.environ.get("SHORT_URL_2", "linkshortify.com")
+SHORT_API_2 = os.environ.get("SHORT_API_2", "fec7b30d9561894979e5aa8999b16de8470315fb")
+SHORT_TUT_2 = os.environ.get("SHORT_TUT_2", "https://t.me/How_To_Open_Shortners")
+
+# 3rd Shortener Settings (VPLink)
+SHORT_URL_3 = os.environ.get("SHORT_URL_3", "vplink.in")
+SHORT_API_3 = os.environ.get("SHORT_API_3", "8b62a316f1b492d73f27d74aed48788c4b7a2bda")
+SHORT_TUT_3 = os.environ.get("SHORT_TUT_3", "https://t.me/How_To_Open_Shortners")
+
+# Legacy fallbacks to prevent core repository structural breakdown
+SHORT_URL = SHORT_URL_1
+SHORT_API = SHORT_API_1
+SHORT_TUT = SHORT_TUT_1
+
+#===============================================================#
 
 SESSION = os.environ.get("SESSION", "rezebot")
 TOKEN = os.environ.get("TOKEN", "8743100938:AAGhqbQ4M9uKPKIwjNht9AZ")
@@ -46,7 +68,7 @@ DB_URI = os.environ.get("DB_URI", "mongodb+srv://rezebot:bXtk6z31xL")
 DB_NAME = os.environ.get("DB_NAME", "rezebot")
 
 DB_CHANNEL = int(os.environ.get("DB_CHANNEL", "-1003819023656"))
-FSUBS = [] # Completely Removed
+FSUBS = [] 
 
 ADMINS = [int(x) for x in os.environ.get("ADMINS", "824793853,6341").split(",") if x.strip().isdigit()]
 
@@ -54,14 +76,14 @@ DISABLE_BTN = True
 PROTECT = False 
 AUTO_DEL = 1800
 
-# Fixed Messages Configuration with your exact requested custom hyperlinks format
+# Fixed Messages Configuration
 MESSAGES = {
     "START": "<b><blockquote>✦ ʜᴇʏ {mention} ~ </blockquote> <blockquote>ᴛʜᴇ ᴍᴏᴏɴ ᴛᴀᴜɢʜᴛ ᴍᴇ ᴏɴᴇ ᴛʜɪɴɢ — ɴᴏ ᴍᴀᴛᴛᴇʀ ʜᴏᴡ ᴅᴀʀᴋ ɪᴛ ɢᴇᴛs, ʏᴏᴜ sᴛɪʟʟ sʜɪɴᴇ..</blockquote></b>",
     "FSUB": "<b><blockquote>✦ ʜᴇʏ {mention} ~</blockquote> ʏᴏᴜʀ ꜰɪʟᴇ ɪs ʀᴇᴀᴅʏ! ᴋɪɴᴅʟʏ ᴊᴏɪɴ ᴏᴜʀ ᴄʜᴀɴɴᴇʟ ᴛᴏ ɢᴇᴛ ᴀᴄᴄᴇss.</b>",
     "ABOUT": "<b>✦ ᴍʏ ɴᴀᴍᴇ: {bot_name}\n<blockquote>›› ᴜᴘᴅᴀᴛᴇs ᴄʜᴀɴɴᴇʟ: <a href='https://t.me/AuraTube'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>\n›› ᴏᴡɴᴇʀ: @EpicSenpai\n›› ʟᴀɴɢᴜᴀɢᴇ: <a href='https://docs.python.org/'>ᴘʏᴛʜᴏɴ 3</a>\n›› ᴅᴀᴛᴀʙᴀsᴇ: <a href='https://www.mongodb.com/docs/'>ᴍᴏɴɢᴏ ᴅʙ</a>\n›› ᴅᴇᴠᴇʟᴏᴘᴇʀ: @EpicSenpai</blockquote></b>",
     "REPLY": "", 
     "SHORT_MSG": "<b><blockquote>✦ ʜᴇʏ {user_mention} ~</blockquote> ‼️ ɢᴇᴛ ᴀʟʟ ꜰɪʟᴇs ɪɴ ᴀ sɪɴɢʟᴇ ʟɪɴᴋ ‼️\n\n⌂ ʏᴏᴜʀ ʟɪɴᴋ ɪs ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴏᴘᴇɴ ʟɪɴᴋ ʙᴜᴛᴛᴏɴ..</b>",
-    "START_PHOTO": "https://litter.catbox.moe/s057cq.jpg",
+    "START_PHOTO": "https://litter.catbox.moe/q9aqxh.jpg",
     "FSUB_PHOTO": "https://litter.catbox.moe/w9bw9z.jpg",
     "SHORT_PIC": "https://litter.catbox.moe/q9aqxh.jpg"
 }
