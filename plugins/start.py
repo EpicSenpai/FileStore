@@ -4,7 +4,7 @@ from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 import humanize
 import asyncio
 from config import (
-    MSG_EFFECT, OWNER_ID, 
+    MESSAGES, MSG_EFFECT, OWNER_ID, 
     SHORT_URL_1, SHORT_API_1, SHORT_TUT_1,
     SHORT_URL_2, SHORT_API_2, SHORT_TUT_2,
     SHORT_URL_3, SHORT_API_3, SHORT_TUT_3
@@ -12,15 +12,11 @@ from config import (
 from plugins.shortner import get_short
 from helper.helper_func import get_messages, force_sub, decode, batch_auto_del_notification
 
-# Global counter to distribute shorteners evenly line-by-line across user clicks
-CLICK_COUNTER = 0
-
 #===============================================================#
 
 @Client.on_message(filters.command('start') & filters.private)
 @force_sub
 async def start_command(client: Client, message: Message):
-    global CLICK_COUNTER
     user_id = message.from_user.id
 
     # 1. Add user if not present
@@ -34,7 +30,7 @@ async def start_command(client: Client, message: Message):
     # 2. Check if banned
     is_banned = await client.mongodb.is_banned(user_id)
     if is_banned:
-        return await message.reply("**You have been banned from using this bot!**")
+        return await message.reply("<b>✗ ʏᴏᴜ ʜᴀᴠᴇ ʙᴇᴇɴ ʙᴀɴɴᴇᴅ ꜰʀᴏᴍ ᴜsɪɴɢ ᴛʜɪs ʙᴏᴛ!</b>")
 
     text = message.text
     if len(text) > 7:
@@ -48,78 +44,86 @@ async def start_command(client: Client, message: Message):
                 is_short_link = True
 
         except IndexError:
-            return await message.reply("Invalid command format.")
+            return await message.reply("<b>✗ ɪɴᴠᴀʟɪᴅ ᴄᴏᴍᴍᴀɴᴅ ꜰᴏʀᴍᴀᴛ.</b>")
 
-        # 3. Check premium status
         is_user_pro = await client.mongodb.is_pro(user_id)
-        
-        # 4. Check if shortner is enabled
         shortner_enabled = getattr(client, 'shortner_enabled', True)
 
-        # MULTI-SHORTENER ROTATION LOGIC FOR FREE USERS
-        if not is_user_pro and user_id != OWNER_ID and not is_short_link and shortner_enabled:
+        #===============================================================#
+        # SMART DATABASE ROTATION & TOKEN LOGIC
+        #===============================================================#
+        if not is_user_pro and user_id != OWNER_ID and shortner_enabled:
             
-            # Select settings based on rotation count
-            current_rotation = CLICK_COUNTER % 3
-            CLICK_COUNTER += 1 # Auto-increment loop for next click
-            
-            current_url = SHORT_URL_1
-            current_api = SHORT_API_1
-            current_tut = SHORT_TUT_1
-            
-            if current_rotation == 1 and SHORT_URL_2 and SHORT_API_2:
-                current_url = SHORT_URL_2
-                current_api = SHORT_API_2
-                current_tut = SHORT_TUT_2
-            elif current_rotation == 2 and SHORT_URL_3 and SHORT_API_3:
-                current_url = SHORT_URL_3
-                current_api = SHORT_API_3
-                current_tut = SHORT_TUT_3
+            # Fetch real-time documentation mapping from database collection
+            user_data = await client.mongodb.db.users.find_one({"id": user_id}) or {}
+            user_credits = user_data.get("credits", 0)
+            rotation_index = user_data.get("rotation_index", 0)
 
-            # Only execute if the selected shortener is configured properly
-            if current_url and current_api:
-                try:
-                    # Dynamically patch client attribute so get_short reads the correct credentials
-                    client.shortner_url = current_url
-                    client.shortner_api = current_api
-                    
-                    short_link = get_short(f"https://t.me/{client.username}?start=yu3elk{base64_string}7", client)
-                    short_photo = client.messages.get("SHORT_PIC", "https://litter.catbox.moe/q9aqxh.jpg")
-                    
-                    short_caption_raw = client.messages.get("SHORT_MSG", "<b>✦ ʜᴇʏ {user_mention} ~\n\n‼️ ɢᴇᴛ ᴀʟʟ ꜰɪʟᴇs ɪɴ ᴀ sɪɴɢʟᴇ ʟɪɴᴋ ‼️\n\n⌂ ʏᴏᴜʀ ʟɪɴᴋ ɪs ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴏᴘᴇɴ ʟɪɴᴋ ʙᴜᴛᴛᴏɴ..</b>")
+            # Case A: User successfully bypassed the token verification link
+            if is_short_link:
+                user_credits = 3  # Load exactly 3 credits
+                # Progress rotation to next node array securely inside DB
+                next_rotation = (rotation_index + 1) % 3
+                await client.mongodb.db.users.update_one(
+                    {"id": user_id}, 
+                    {"$set": {"credits": user_credits, "rotation_index": next_rotation}}, 
+                    upsert=True
+                )
+            
+            # Case B: Token is expired (0 Credits State) -> Link Generation
+            elif user_credits <= 0:
+                current_url, current_api, current_tut = SHORT_URL_1, SHORT_API_1, SHORT_TUT_1
+                
+                # Check line-by-line validation logic dynamically
+                if rotation_index == 1 and SHORT_URL_2 and SHORT_API_2:
+                    current_url, current_api, current_tut = SHORT_URL_2, SHORT_API_2, SHORT_TUT_2
+                elif rotation_index == 2 and SHORT_URL_3 and SHORT_API_3:
+                    current_url, current_api, current_tut = SHORT_URL_3, SHORT_API_3, SHORT_TUT_3
+
+                if current_url and current_api:
                     try:
-                        short_caption = short_caption_raw.format(
-                            first=message.from_user.first_name,
-                            last=message.from_user.last_name or "",
-                            username=None if not message.from_user.username else '@' + message.from_user.username,
-                            user_mention=message.from_user.mention,
-                            id=message.from_user.id
+                        client.shortner_url = current_url
+                        client.shortner_api = current_api
+                        
+                        short_link = get_short(f"https://t.me/{client.username}?start=yu3elk{base64_string}7", client)
+                        short_photo = client.messages.get("SHORT_PIC", "https://litter.catbox.moe/q9aqxh.jpg")
+                        tutorial_link = current_tut if current_tut else "https://t.me/How_To_Open_Shortners"
+
+                        # Fixed requested custom aesthetic message theme layout with zero formatting flaws
+                        custom_credit_msg = (
+                            "<b><i>◍ Yeah the link's ready :), Here is your link ⬇️</i>\n\n"
+                            "⧗ ᴄʀᴇᴅɪᴛs ᴍᴏᴅᴇ:\n"
+                            "<blockquote>◍ Eᴀᴄʜ ᴀᴅ ʙʏᴘᴀss ʀᴇᴡᴀʀᴅs ʏᴏᴜ ᴡɪᴛʜ 3 ᴄʀᴇᴅɪᴛs.</blockquote>\n"
+                            "<blockquote>◍ Oɴᴇ ᴄʀᴇᴅɪᴛ ɪs ᴄᴏɴsᴜᴍᴇᴅ ᴘᴇʀ ғɪʟᴇ/ʟɪɴᴋ ᴀᴄᴄᴇss.</blockquote></b>"
                         )
-                    except:
-                        short_caption = short_caption_raw
 
-                    tutorial_link = current_tut if current_tut else "https://t.me/PRIME_SMP"
+                        await client.send_photo(
+                            chat_id=message.chat.id,
+                            photo=short_photo,
+                            caption=custom_credit_msg,
+                            reply_markup=InlineKeyboardMarkup([
+                                [
+                                    InlineKeyboardButton("• ᴏᴘᴇɴ ʟɪɴᴋ", url=short_link),
+                                    InlineKeyboardButton("ᴛᴜᴛᴏʀɪᴀʟ •", url=tutorial_link)
+                                ],
+                                [
+                                    InlineKeyboardButton(" • ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ •", url="https://t.me/Premiium_Tube/6")
+                                ]
+                            ])
+                        )
+                        return
+                    except Exception as e:
+                        client.LOGGER(__name__, client.name).warning(f"Shortener node tracking failed: {e}")
+                        pass
 
-                    await client.send_photo(
-                        chat_id=message.chat.id,
-                        photo=short_photo,
-                        caption=short_caption,
-                        reply_markup=InlineKeyboardMarkup([
-                            [
-                                InlineKeyboardButton("• ᴏᴘᴇɴ ʟɪɴᴋ", url=short_link),
-                                InlineKeyboardButton("ᴛᴜᴛᴏʀɪᴀʟ •", url=tutorial_link)
-                            ],
-                            [
-                                InlineKeyboardButton(" • ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ •", url="https://t.me/PRIME_SMP")
-                            ]
-                        ])
-                    )
-                    return
-                except Exception as e:
-                    client.LOGGER(__name__, client.name).warning(f"Shortener rotation node failed: {e}")
-                    pass
+            # Case C: Free user has structural active tokens -> Deduct single unit
+            if user_credits > 0 and not is_short_link:
+                user_credits -= 1
+                await client.mongodb.db.users.update_one({"id": user_id}, {"$set": {"credits": user_credits}})
 
-        # 6. Decode and prepare file IDs
+        #===============================================================#
+        # 6. File Decoder & Core Delivery Protocol
+        #===============================================================#
         try:
             string = await decode(base64_string)
             argument = string.split("-")
@@ -136,26 +140,20 @@ async def start_command(client: Client, message: Message):
                 
                 if encoded_start % primary_multiplier == 0 and encoded_end % primary_multiplier == 0:
                     source_channel_id = client.db
-                    start = start_primary
-                    end = end_primary
+                    start, end = start_primary, end_primary
                 else:
                     db_channels = getattr(client, 'db_channels', {})
                     for channel_id_str in db_channels.keys():
                         channel_id = int(channel_id_str)
                         channel_multiplier = abs(channel_id)
-                        start_test = int(encoded_start / channel_multiplier)
-                        end_test = int(encoded_end / channel_multiplier)
-                        
                         if encoded_start % channel_multiplier == 0 and encoded_end % channel_multiplier == 0:
                             source_channel_id = channel_id
-                            start = start_test
-                            end = end_test
+                            start = int(encoded_start / channel_multiplier)
+                            end = int(encoded_end / channel_multiplier)
                             break
-                    
                     if source_channel_id is None:
                         source_channel_id = client.db
-                        start = start_primary
-                        end = end_primary
+                        start, end = start_primary, end_primary
                 
                 ids = range(start, end + 1) if start <= end else list(range(start, end - 1, -1))
 
@@ -163,33 +161,29 @@ async def start_command(client: Client, message: Message):
                 encoded_msg = int(argument[1])
                 if hasattr(client, 'db_channel') and client.db_channel:
                     primary_multiplier = abs(client.db_channel.id)
-                    msg_id_primary = int(encoded_msg / primary_multiplier)
-                    
                     if encoded_msg % primary_multiplier == 0:
                         source_channel_id = client.db_channel.id
-                        ids = [msg_id_primary]
+                        ids = [int(encoded_msg / primary_multiplier)]
                     else:
                         db_channels = getattr(client, 'db_channels', {})
                         for channel_id_str in db_channels.keys():
                             channel_id = int(channel_id_str)
-                            channel_multiplier = abs(channel_id)
-                            msg_id_test = int(encoded_msg / channel_multiplier)
-                            if encoded_msg % channel_multiplier == 0:
+                            if encoded_msg % abs(channel_id) == 0:
                                 source_channel_id = channel_id
-                                ids = [msg_id_test]
+                                ids = [int(encoded_msg / abs(channel_id))]
                                 break
                         if source_channel_id is None:
                             source_channel_id = client.db_channel.id if hasattr(client, 'db_channel') else client.db
-                            ids = [msg_id_primary]
+                            ids = [int(encoded_msg / primary_multiplier)]
                 else:
                     source_channel_id = client.db
                     ids = [int(encoded_msg / abs(client.db))]
 
         except Exception as e:
-            return await message.reply("⚠️ Invalid or expired link.")
+            return await message.reply("<b>✗ ɪɴᴠᴀʟɪᴅ ᴏʀ ᴇxᴘɪʀᴇᴅ ꜰɪʟᴇ ʟɪɴᴋ.</b>")
 
-        # 7. Get and send files
-        temp_msg = await message.reply("Wait A Sec..")
+        # 7. Media Fetcher Pipeline
+        temp_msg = await message.reply("<b><blockquote>›› ꜰᴇᴛᴄʜɪɴɢ ʏᴏᴜʀ ꜰɪʟᴇs, ᴘʟᴇᴀsᴇ ᴡᴀɪᴛ...</blockquote></b>")
         messages = []
 
         try:
@@ -208,11 +202,11 @@ async def start_command(client: Client, message: Message):
             else:
                 messages = await get_messages(client, ids)
         except Exception as e:
-            await temp_msg.edit_text("Something went wrong!")
+            await temp_msg.edit_text("<b>✗ sᴏᴍᴇᴛʜɪɴɢ ᴡᴇɴᴛ ᴡʀᴏɴɢ ᴡʜɪʟᴇ ʀᴇᴛʀɪᴇᴠɪɴɢ ᴅᴀᴛᴀ!</b>")
             return
 
         if not messages:
-            return await temp_msg.edit("Couldn't find the files in the database.")
+            return await temp_msg.edit("<b>✗ ᴄᴏᴜʟᴅɴ'ᴛ ꜰɪɴᴅ ᴛʜᴇ ꜰɪʟᴇs ɪɴ ᴛʜᴇ ᴅᴀᴛᴀʙᴀsᴇ!</b>")
         await temp_msg.delete()
 
         yugen_msgs = []
@@ -242,9 +236,9 @@ async def start_command(client: Client, message: Message):
             ))
         return
 
-    # 9. Normal start message
+    # 9. Normal start layout execution
     else:
-        buttons = [[InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data="about"), InlineKeyboardButton("ᴄʟᴏꜱᴇ •", callback_data='close')]]
+        buttons = [[InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data="ABOUT"), InlineKeyboardButton("ᴄʟᴏꜱᴇ •", callback_data='close')]]
         if user_id in client.admins:
             buttons.insert(0, [InlineKeyboardButton("• ꜱᴇᴛᴛɪɴɢꜱ •", callback_data="settings")])
 
@@ -272,23 +266,23 @@ async def request_command(client: Client, message: Message):
     is_user_premium = await client.mongodb.is_pro(user_id)
 
     if is_admin or user_id == OWNER_ID:
-        await message.reply_text("🔹 **You are my sensei!**\nThis command is only for users.")
+        await message.reply_text("<b>🔹 ʏᴏᴜ ᴀʀᴇ ᴍʏ sᴇɴsᴇɪ!\nᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ɪs ᴏɴʟʏ ꜰᴏʀ ᴜsᴇʀs.</b>")
         return
 
     if not is_user_premium: 
-        BUTTON_URL = "https://t.me/PRIME_SMP"
+        BUTTON_URL = "https://t.me/Premiium_Tube/6"
         reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("💎 Upgrade to Premium", url=BUTTON_URL)]])
-        await message.reply("❌ **You are not a premium user.**\nUpgrade to premium to access this feature.", reply_markup=reply_markup)
+        await message.reply("<b>✗ ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴀ ᴘʀᴇᴍɪᴜᴍ ᴜsᴇʀ.\nᴜᴘɢʀᴀᴅᴇ ᴛᴏ ᴘʀᴇᴍɪᴜᴍ ᴛᴏ ᴀᴄᴄᴇs sᴛʀᴜᴄᴛᴜʀᴀʟ ꜰᴇᴀᴛᴜʀᴇs.</b>", reply_markup=reply_markup)
         return
 
     if len(message.command) < 2:
-        await message.reply("⚠️ **Send me your request in this format:**\n`/request Your_Request_Here`")
+        await message.reply("<b>⚠️ sᴇɴᴅ ᴍᴇ ʏᴏᴜʀ ʀᴇǫᴜᴇsᴛ ɪɴ ᴛʜɪs ꜰᴏʀᴍᴀᴛ:\n<code>/request Your_Request_Here</code></b>")
         return
 
     requested = " ".join(message.command[1:])
-    owner_message = f"📩 **New Request from {message.from_user.mention}**\n\n🆔 User ID: `{user_id}`\n📝 Request: `{requested}`"
+    owner_message = f"<b>📩 ɴᴇᴡ ʀᴇǫᴜᴇsᴛ ꜰʀᴏᴍ {message.from_user.mention}\n\n🆔 ᴜsᴇʀ ɪᴅ: <code>{user_id}</code>\n📝 ʀᴇǫᴜᴇsᴛ: <code>{requested}</code></b>"
     await client.send_message(OWNER_ID, owner_message)
-    await message.reply("✅ **Thanks for your request!**\nYour request will be reviewed soon. Please wait.")
+    await message.reply("<b>✅ ᴛʜᴀɴᴋs ꜰᴏʀ ʏᴏᴜʀ ʀᴇǫᴜᴇsᴛ!\nʏᴏᴜʀ ʀᴇǫᴜᴇsᴛ ᴡɪʟʟ ʙᴇ ʀᴇᴠɪᴇᴡᴇᴅ sᴏᴏɴ.</b>")
 
 #===============================================================#
 
@@ -298,13 +292,15 @@ async def my_plan(client: Client, message: Message):
     is_admin = user_id in client.admins
 
     if is_admin or user_id == OWNER_ID:
-        await message.reply_text("🔹 You're my sensei! This command is only for users.")
+        await message.reply_text("<b>🔹 ʏᴏᴜ'ʀᴇ ᴍʏ sᴇɴsᴇɪ! ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ɪs ᴏɴʟʏ ꜰᴏʀ ᴜsᴇʀs.</b>")
         return
     
     is_user_premium = await client.mongodb.is_pro(user_id)
+    user_data = await client.mongodb.db.users.find_one({"id": user_id}) or {}
+    user_credits = user_data.get("credits", 0)
 
     if is_user_premium:
-        await message.reply_text("**👤 Profile Information:**\n\n🔸 Ads: Disabled\n🔸 Plan: Premium\n🔸 Request: Enabled\n\n🌟 You're a Premium User!")
+        await message.reply_text("<b>👤 ᴘʀᴏꜰɪʟᴇ ɪɴꜰᴏʀᴍᴀᴛɪᴏɴ:\n\n🔸 ᴀᴅs: ᴅɪsᴀʙʟᴇᴅ\n🔸 ᴘʟᴀɴ: ᴘʀᴇᴍɪᴜᴍ\n🔸 ʀᴇǫᴜᴇsᴛ: ᴇɴᴀʙʟᴇᴅ\n\n🌟 ʏᴏᴜ'ʀᴇ ᴀ ᴘʀᴇᴍɪᴜᴍ ᴜsᴇʀ!</b>")
     else:
-        await message.reply_text("**👤 Profile Information:**\n\n🔸 Ads: Enabled\n🔸 Plan: Free\n🔸 Request: Disabled\n\n🔓 Unlock Premium to get more benefits\nContact: @EpicSenpai")
-    
+        await message.reply_text(f"<b>👤 ᴘʀᴏꜰɪʟᴇ ɪɴꜰᴏʀᴍᴀᴛɪᴏɴ:\n\n🔸 ᴀᴅs: ᴇɴᴀʙʟᴇᴅ\n🔸 ᴘʟᴀɴ: ꜰʀᴇᴇ\n🔸 ᴠᴀʟɪᴅ ᴄʀᴇᴅɪᴛs: <code>{user_credits}</code> ᴄʀᴇᴅɪᴛs\n🔸 ʀᴇǫᴜᴇsᴛ: ᴅɪsᴀʙʟᴇᴅ\n\n🔓 ᴜɴʟᴏᴄᴋ ᴘʀᴇᴍɪᴜᴍ ᴛᴏ ɢᴇᴛ ᴍᴏʀᴇ ʙᴇɴᴇꜰɪᴛs\nᴄᴏɴᴛᴀᴄᴛ: @EpicSenpai</b>")
+        
