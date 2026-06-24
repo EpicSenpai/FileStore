@@ -1,6 +1,6 @@
 from helper.helper_func import *
 from pyrogram import Client, filters
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 import humanize
 import asyncio
 from config import (
@@ -30,7 +30,7 @@ async def start_command(client: Client, message: Message):
     # 2. Check if banned
     is_banned = await client.mongodb.is_banned(user_id)
     if is_banned:
-        return await message.reply("<b>✗ ʏᴏᴜ ʜᴀᴠᴇ ʙᴇᴇɴ ʙᴀɴɴᴇᴅ ꜰʀᴏᴍ ᴜsɪɴɢ ᴛʜɪs ʙᴏᴛ!</b>")
+        return await message.reply("<b>✗ ʏᴏᴜ ʜᴀᴠᴇ ʙᴇᴇɴ ʙᴀɴɴᴇ Dil ꜰʀᴏᴍ ᴜsɪɴɢ ᴛʜɪs ʙᴏᴛ!</b>")
 
     text = message.text
     if len(text) > 7:
@@ -50,31 +50,47 @@ async def start_command(client: Client, message: Message):
         shortner_enabled = getattr(client, 'shortner_enabled', True)
 
         #===============================================================#
-        # SMART DATABASE ROTATION & TOKEN LOGIC
+        # SMART DATABASE ROTATION & TOKEN LOGIC FOR FREE USERS
         #===============================================================#
         if not is_user_pro and user_id != OWNER_ID and shortner_enabled:
             
-            # Fetch real-time documentation mapping from database collection
+            # Fetch real-time mapping from database collection
             user_data = await client.mongodb.db.users.find_one({"id": user_id}) or {}
             user_credits = user_data.get("credits", 0)
             rotation_index = user_data.get("rotation_index", 0)
 
             # Case A: User successfully bypassed the token verification link
             if is_short_link:
-                user_credits = 3  # Load exactly 3 credits
-                # Progress rotation to next node array securely inside DB
+                user_credits = 3  # Reward exactly 3 tokens
                 next_rotation = (rotation_index + 1) % 3
                 await client.mongodb.db.users.update_one(
                     {"id": user_id}, 
                     {"$set": {"credits": user_credits, "rotation_index": next_rotation}}, 
                     upsert=True
                 )
+                
+                # Successful Verification Layout Screen (Image 1 Style)
+                success_photo = client.messages.get("SHORT_PIC", "https://litter.catbox.moe/w9bw9z.jpg")
+                success_msg = (
+                    "<b>● ʏᴏᴜʀ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ɪs sᴜᴄᴄᴇssꜰᴜʟ!\n\n"
+                    "⧗ 3 ᴄʀᴇᴅɪᴛs ᴀᴅᴅᴇᴅ ᴛᴏ ʏᴏᴜʀ\nᴀᴄᴄᴏᴜɴᴛ.</b>"
+                )
+                
+                await client.send_photo(
+                    chat_id=message.chat.id,
+                    photo=success_photo,
+                    caption=success_msg,
+                    reply_markup=InlineKeyboardMarkup([
+                        [InlineKeyboardButton("✨ ᴄʟɪᴄᴋ ʜᴇʀᴇ ✨", callback_data=f"getfiles_{base64_string}")]
+                    ])
+                )
+                return
             
-            # Case B: Token is expired (0 Credits State) -> Link Generation
+            # Case B: Token is expired (0 Credits State) -> Prompt Token Expired View
             elif user_credits <= 0:
                 current_url, current_api, current_tut = SHORT_URL_1, SHORT_API_1, SHORT_TUT_1
                 
-                # Check line-by-line validation logic dynamically
+                # Dynamic line-by-line verification parsing
                 if rotation_index == 1 and SHORT_URL_2 and SHORT_API_2:
                     current_url, current_api, current_tut = SHORT_URL_2, SHORT_API_2, SHORT_TUT_2
                 elif rotation_index == 2 and SHORT_URL_3 and SHORT_API_3:
@@ -89,7 +105,7 @@ async def start_command(client: Client, message: Message):
                         short_photo = client.messages.get("SHORT_PIC", "https://litter.catbox.moe/q9aqxh.jpg")
                         tutorial_link = current_tut if current_tut else "https://t.me/How_To_Open_Shortners"
 
-                        # Fixed requested custom aesthetic message theme layout with zero formatting flaws
+                        # Aesthetic layout parsing using clean HTML quote tags
                         custom_credit_msg = (
                             "<b><i>◍ Yeah the link's ready :), Here is your link ⬇️</i>\n\n"
                             "⧗ ᴄʀᴇᴅɪᴛs ᴍᴏᴅᴇ:\n"
@@ -116,127 +132,16 @@ async def start_command(client: Client, message: Message):
                         client.LOGGER(__name__, client.name).warning(f"Shortener node tracking failed: {e}")
                         pass
 
-            # Case C: Free user has structural active tokens -> Deduct single unit
+            # Case C: Free user has structural active tokens -> Deduct single unit smoothly
             if user_credits > 0 and not is_short_link:
                 user_credits -= 1
                 await client.mongodb.db.users.update_one({"id": user_id}, {"$set": {"credits": user_credits}})
 
-        #===============================================================#
-        # 6. File Decoder & Core Delivery Protocol
-        #===============================================================#
-        try:
-            string = await decode(base64_string)
-            argument = string.split("-")
-            ids = []
-            source_channel_id = None
-
-            if len(argument) == 3:
-                encoded_start = int(argument[1])
-                encoded_end = int(argument[2])
-                
-                primary_multiplier = abs(client.db)
-                start_primary = int(encoded_start / primary_multiplier)
-                end_primary = int(encoded_end / primary_multiplier)
-                
-                if encoded_start % primary_multiplier == 0 and encoded_end % primary_multiplier == 0:
-                    source_channel_id = client.db
-                    start, end = start_primary, end_primary
-                else:
-                    db_channels = getattr(client, 'db_channels', {})
-                    for channel_id_str in db_channels.keys():
-                        channel_id = int(channel_id_str)
-                        channel_multiplier = abs(channel_id)
-                        if encoded_start % channel_multiplier == 0 and encoded_end % channel_multiplier == 0:
-                            source_channel_id = channel_id
-                            start = int(encoded_start / channel_multiplier)
-                            end = int(encoded_end / channel_multiplier)
-                            break
-                    if source_channel_id is None:
-                        source_channel_id = client.db
-                        start, end = start_primary, end_primary
-                
-                ids = range(start, end + 1) if start <= end else list(range(start, end - 1, -1))
-
-            elif len(argument) == 2:
-                encoded_msg = int(argument[1])
-                if hasattr(client, 'db_channel') and client.db_channel:
-                    primary_multiplier = abs(client.db_channel.id)
-                    if encoded_msg % primary_multiplier == 0:
-                        source_channel_id = client.db_channel.id
-                        ids = [int(encoded_msg / primary_multiplier)]
-                    else:
-                        db_channels = getattr(client, 'db_channels', {})
-                        for channel_id_str in db_channels.keys():
-                            channel_id = int(channel_id_str)
-                            if encoded_msg % abs(channel_id) == 0:
-                                source_channel_id = channel_id
-                                ids = [int(encoded_msg / abs(channel_id))]
-                                break
-                        if source_channel_id is None:
-                            source_channel_id = client.db_channel.id if hasattr(client, 'db_channel') else client.db
-                            ids = [int(encoded_msg / primary_multiplier)]
-                else:
-                    source_channel_id = client.db
-                    ids = [int(encoded_msg / abs(client.db))]
-
-        except Exception as e:
-            return await message.reply("<b>✗ ɪɴᴠᴀʟɪᴅ ᴏʀ ᴇxᴘɪʀᴇᴅ ꜰɪʟᴇ ʟɪɴᴋ.</b>")
-
-        # 7. Media Fetcher Pipeline
-        temp_msg = await message.reply("<b><blockquote>›› ꜰᴇᴛᴄʜɪɴɢ ʏᴏᴜʀ ꜰɪʟᴇs, ᴘʟᴇᴀsᴇ ᴡᴀɪᴛ...</blockquote></b>")
-        messages = []
-
-        try:
-            if source_channel_id:
-                try:
-                    msgs = await client.get_messages(chat_id=source_channel_id, message_ids=list(ids))
-                    valid_msgs = [msg for msg in msgs if msg is not None]
-                    messages.extend(valid_msgs)
-                    if len(valid_msgs) < len(list(ids)):
-                        missing_ids = [mid for mid in ids if mid not in {msg.id for msg in valid_msgs}]
-                        if missing_ids:
-                            additional_messages = await get_messages(client, missing_ids)
-                            messages.extend(additional_messages)
-                except Exception as e:
-                    messages = await get_messages(client, ids)
-            else:
-                messages = await get_messages(client, ids)
-        except Exception as e:
-            await temp_msg.edit_text("<b>✗ sᴏᴍᴇᴛʜɪɴɢ ᴡᴇɴᴛ ᴡʀᴏɴɢ ᴡʜɪʟᴇ ʀᴇᴛʀɪᴇᴠɪɴɢ ᴅᴀᴛᴀ!</b>")
-            return
-
-        if not messages:
-            return await temp_msg.edit("<b>✗ ᴄᴏᴜʟᴅɴ'ᴛ ꜰɪɴᴅ ᴛʜᴇ ꜰɪʟᴇs ɪɴ ᴛʜᴇ ᴅᴀᴛᴀʙᴀsᴇ!</b>")
-        await temp_msg.delete()
-
-        yugen_msgs = []
-        for msg in messages:
-            caption = (
-                client.messages.get('CAPTION', '').format(
-                    previouscaption=msg.caption.html if msg.caption else msg.document.file_name
-                ) if bool(client.messages.get('CAPTION', '')) and bool(msg.document)
-                else ("" if not msg.caption else msg.caption.html)
-            )
-            reply_markup = msg.reply_markup if not client.disable_btn else None
-
-            try:
-                copied_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, reply_markup=reply_markup, protect_content=client.protect)
-                yugen_msgs.append(copied_msg)
-            except FloodWait as e:
-                await asyncio.sleep(e.x)
-                copied_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, reply_markup=reply_markup, protect_content=client.protect)
-                yugen_msgs.append(copied_msg)
-            except Exception as e:
-                pass
-
-        if messages and client.auto_del > 0:
-            transfer_link = original_payload
-            asyncio.create_task(batch_auto_del_notification(
-                bot_username=client.username, messages=yugen_msgs, delay_time=client.auto_del, transfer_link=transfer_link, chat_id=message.from_user.id, client=client
-            ))
+        # Deliver files dynamically if conditions are already satisfied
+        await deliver_files_routing(client, message, base64_string, original_payload)
         return
 
-    # 9. Normal start layout execution
+    # Normal start layout execution
     else:
         buttons = [[InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data="ABOUT"), InlineKeyboardButton("ᴄʟᴏꜱᴇ •", callback_data='close')]]
         if user_id in client.admins:
@@ -256,6 +161,102 @@ async def start_command(client: Client, message: Message):
         else:
             await client.send_message(chat_id=message.chat.id, text=start_caption, message_effect_id=MSG_EFFECT, reply_markup=InlineKeyboardMarkup(buttons))
         return
+
+#===============================================================#
+# INTERACTIVE CALLBACK PROCESSING TO EXECUTE SECURE LINKS
+#===============================================================#
+
+@Client.on_callback_query(filters.regex("^getfiles_"))
+async def process_file_button_callback(client: Client, query: CallbackQuery):
+    await query.answer("🚀 Redirecting to download endpoint...")
+    base64_string = query.data.split("_")[1]
+    original_payload = base64_string
+    
+    # Clear the confirmation interface layout
+    await query.message.delete()
+    
+    # Process secure link routing destination
+    await deliver_files_routing(client, query.message, base64_string, original_payload, is_callback=True)
+
+#===============================================================#
+# CORE CORE STRUCTURAL ROUTING REDIRECTION METHOD
+#===============================================================#
+
+async def deliver_files_routing(client, message, base64_string, original_payload, is_callback=False):
+    chat_target = message.chat.id if is_callback else message.from_user.id
+    
+    try:
+        string = await decode(base64_string)
+        argument = string.split("-")
+        ids = []
+        source_channel_id = None
+
+        if len(argument) == 3:
+            encoded_start = int(argument[1])
+            encoded_end = int(argument[2])
+            
+            primary_multiplier = abs(client.db)
+            start_primary = int(encoded_start / primary_multiplier)
+            end_primary = int(encoded_end / primary_multiplier)
+            
+            if encoded_start % primary_multiplier == 0 and encoded_end % primary_multiplier == 0:
+                source_channel_id = client.db
+                start, end = start_primary, end_primary
+            else:
+                db_channels = getattr(client, 'db_channels', {})
+                for channel_id_str in db_channels.keys():
+                    channel_id = int(channel_id_str)
+                    channel_multiplier = abs(channel_id)
+                    if encoded_start % channel_multiplier == 0 and encoded_end % channel_multiplier == 0:
+                        source_channel_id = channel_id
+                        start = int(encoded_start / channel_multiplier)
+                        end = int(encoded_end / channel_multiplier)
+                        break
+                if source_channel_id is None:
+                    source_channel_id = client.db
+                    start, end = start_primary, end_primary
+            
+            ids = range(start, end + 1) if start <= end else list(range(start, end - 1, -1))
+
+        elif len(argument) == 2:
+            encoded_msg = int(argument[1])
+            if hasattr(client, 'db_channel') and client.db_channel:
+                primary_multiplier = abs(client.db_channel.id)
+                if encoded_msg % primary_multiplier == 0:
+                    source_channel_id = client.db_channel.id
+                    ids = [int(encoded_msg / primary_multiplier)]
+                else:
+                    db_channels = getattr(client, 'db_channels', {})
+                    for channel_id_str in db_channels.keys():
+                        channel_id = int(channel_id_str)
+                        if encoded_msg % abs(channel_id) == 0:
+                            source_channel_id = channel_id
+                            ids = [int(encoded_msg / abs(channel_id))]
+                            break
+                    if source_channel_id is None:
+                        source_channel_id = client.db_channel.id if hasattr(client, 'db_channel') else client.db
+                        ids = [int(encoded_msg / primary_multiplier)]
+            else:
+                source_channel_id = client.db
+                ids = [int(encoded_msg / abs(client.db))]
+
+    except Exception as e:
+        return await client.send_message(chat_target, "<b>✗ ɪɴᴠᴀʟɪᴅ ᴏʀ ᴇxᴘɪʀᴇᴅ ꜰɪʟᴇ ʟɪɴᴋ.</b>")
+
+    # Redirect deep-link text formatting layer matching Image 2 style perfectly
+    nova_redirect_url = f"https://t.me/NovaFileBot?start={original_payload}"
+    delivery_msg_text = (
+        f"<b>Download Link: <a href='{nova_redirect_url}'>{nova_redirect_url}</a>\n\n"
+        f"This File is deleting automatically in 10 Minutes.. "
+        f"Forward in your Saved Messages..!</b>"
+    )
+    
+    await client.send_message(
+        chat_id=chat_target,
+        text=delivery_msg_text,
+        disable_web_page_preview=False
+    )
+    return
 
 #===============================================================#
 
@@ -303,4 +304,4 @@ async def my_plan(client: Client, message: Message):
         await message.reply_text("<b>👤 ᴘʀᴏꜰɪʟᴇ ɪɴꜰᴏʀᴍᴀᴛɪᴏɴ:\n\n🔸 ᴀᴅs: ᴅɪsᴀʙʟᴇᴅ\n🔸 ᴘʟᴀɴ: ᴘʀᴇᴍɪᴜᴍ\n🔸 ʀᴇǫᴜᴇsᴛ: ᴇɴᴀʙʟᴇᴅ\n\n🌟 ʏᴏᴜ'ʀᴇ ᴀ ᴘʀᴇᴍɪᴜᴍ ᴜsᴇʀ!</b>")
     else:
         await message.reply_text(f"<b>👤 ᴘʀᴏꜰɪʟᴇ ɪɴꜰᴏʀᴍᴀᴛɪᴏɴ:\n\n🔸 ᴀᴅs: ᴇɴᴀʙʟᴇᴅ\n🔸 ᴘʟᴀɴ: ꜰʀᴇᴇ\n🔸 ᴠᴀʟɪᴅ ᴄʀᴇᴅɪᴛs: <code>{user_credits}</code> ᴄʀᴇᴅɪᴛs\n🔸 ʀᴇǫᴜᴇsᴛ: ᴅɪsᴀʙʟᴇᴅ\n\n🔓 ᴜɴʟᴏᴄᴋ ᴘʀᴇᴍɪᴜᴍ ᴛᴏ ɢᴇᴛ ᴍᴏʀᴇ ʙᴇɴᴇꜰɪᴛs\nᴄᴏɴᴛᴀᴄᴛ: @EpicSenpai</b>")
-        
+                                
