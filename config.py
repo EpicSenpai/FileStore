@@ -32,9 +32,9 @@ PORT = os.environ.get("PORT", "5010")
 OWNER_ID = int(os.environ.get("OWNER_ID", "824793853"))
 MSG_EFFECT = int(os.environ.get("MSG_EFFECT", "5046509860389126442"))
 
-SHORT_URL = os.environ.get("SHORT_URL", "") 
-SHORT_API = os.environ.get("SHORT_API", "")
-SHORT_TUT = os.environ.get("SHORT_TUT", "")
+SHORT_URL = os.environ.get("SHORT_URL", "gplinks.com") 
+SHORT_API = os.environ.get("SHORT_API", "540e6d65d2851a9c645d0eafb573535af3d33943")
+SHORT_TUT = os.environ.get("SHORT_TUT", "https://t.me/How_To_Open_Shortners")
 
 SESSION = os.environ.get("SESSION", "rezebot")
 TOKEN = os.environ.get("TOKEN", "8743100938:AAGhqbQ4M9uKPKIwjNht9AZ")
