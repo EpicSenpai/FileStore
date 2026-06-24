@@ -284,7 +284,7 @@ async def deliver_files_routing(client, message, base64_string, original_payload
         return
 
     if not messages:
-        return await temp_msg.edit("<b>✗ <b>ᴄᴏᴜʟᴅɴ'ᴛ ꜰɪɴᴅ ᴛʜᴇ ꜰɪʟᴇs ɪɴ ᴛʜᴇ ᴅᴀᴛᴀʙᴀsᴇ!</b></b>")
+        return await temp_msg.edit("<b>✗ <b><b>ᴄᴏᴜʟᴅɴ'ᴛ ꜰɪɴᴅ ᴛʜᴇ ꜰɪʟᴇs ɪɴ ᴛʜᴇ ᴅᴀᴛᴀʙᴀsᴇ!</b></b></b>")
     await temp_msg.delete()
 
     media_messages = []
@@ -307,7 +307,7 @@ async def deliver_files_routing(client, message, base64_string, original_payload
         except Exception:
             pass
 
-    # FIXED: String wrapper modified to single quotes to balance nested HTML double quotes smoothly
+    # FIXED: Standard Serious Text layer preserved exactly as requested (No small caps font replacement)
     if media_messages:
         warning_banner_text = (
             '<b>⚠️ This File is deleting automatically in <a href="https://t.me/RezeFilesBot">30 Minutes...</a> Forward in your Saved Messages..!</b>'
