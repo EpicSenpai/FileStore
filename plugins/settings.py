@@ -13,7 +13,6 @@ async def back_to_home_callback(client: Client, query: CallbackQuery):
     await query.answer("↩️ Returning back to home dashboard...")
     user_id = query.from_user.id
     
-    # Static layout block using exact premium small caps fonts 
     buttons = [[InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data="ABOUT"), InlineKeyboardButton("ᴄʟᴏsᴇ •", callback_data='close')]]
     if user_id in client.admins:
         buttons.insert(0, [InlineKeyboardButton("• ꜱᴇᴛᴛɪɴɢs •", callback_data="settings")])
@@ -27,7 +26,6 @@ async def back_to_home_callback(client: Client, query: CallbackQuery):
     )
     
     try:
-        # Edit caption cleanly so the menu photo interface layout never breaks
         await query.message.edit_caption(
             caption=start_caption,
             reply_markup=InlineKeyboardMarkup(buttons)
@@ -70,6 +68,9 @@ async def close_panel_callback_query(client: Client, query: CallbackQuery):
 
 @Client.on_callback_query(filters.regex("^settings$"))
 async def settings(client, query):
+    if not query.from_user.id in client.admins:
+        return await query.answer('✗ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs!', show_alert=True)
+        
     total_fsub = len(client.fsub_dict)
     request_enabled = sum(1 for data in client.fsub_dict.values() if data[2])
     timer_enabled = sum(1 for data in client.fsub_dict.values() if data[3] > 0)
@@ -87,9 +88,9 @@ async def settings(client, query):
 ›› <b>ᴀᴅᴍɪɴs:</b> <code>{len(client.admins)}</code>
 
 <blockquote><u><b>≡ ᴍᴜʟᴛɪ-sʜᴏʀᴛᴇɴᴇʀ sᴛᴀᴛᴜs:</b></u></blockquote>
-›› <b>sʜᴏʀᴛɴᴇʀ 1:</b> <code>{config.SHORT_URL_1}</code> [<code>{"🟢 ᴏɴ" if getattr(config, 'SHORT_STATUS_1', True) else "🔴 ᴏғғ"}</code>]
-›› <b>sʜᴏʀᴛɴᴇʀ 2:</b> <code>{config.SHORT_URL_2}</code> [<code>{"🟢 ᴏɴ" if getattr(config, 'SHORT_STATUS_2', True) else "🔴 ᴏғғ"}</code>]
-›› <b>sʜᴏʀᴛɴᴇʀ 3:</b> <code>{config.SHORT_URL_3}</code> [<code>{"🟢 ᴏɴ" if getattr(config, 'SHORT_STATUS_3', True) else "🔴 ᴏғғ"}</code>]
+›› <b>sʜᴏʀᴛɴᴇʀ 1:</b> <code>{getattr(config, 'SHORT_URL_1', 'None')}</code> [<code>{"✔️ ᴏɴ" if getattr(config, 'SHORT_STATUS_1', True) else "❌ ᴏғғ"}</code>]
+›› <b>sʜᴏʀᴛɴᴇʀ 2:</b> <code>{getattr(config, 'SHORT_URL_2', 'None')}</code> [<code>{"✔️ ᴏɴ" if getattr(config, 'SHORT_STATUS_2', True) else "❌ ᴏғғ"}</code>]
+›› <b>sʜᴏʀᴛɴᴇʀ 3:</b> <code>{getattr(config, 'SHORT_URL_3', 'None')}</code> [<code>{"✔️ ᴏɴ" if getattr(config, 'SHORT_STATUS_3', True) else "❌ ᴏғғ"}</code>]
     """
     reply_markup = InlineKeyboardMarkup([
         [InlineKeyboardButton('ꜰsᴜʙ ᴄʜᴀɴɴᴇʟs', 'fsub'), InlineKeyboardButton('ᴅʙ ᴄʜᴀɴɴᴇʟs', 'db_channels')],
@@ -105,29 +106,29 @@ async def settings(client, query):
 
 @Client.on_callback_query(filters.regex("^settings_page_2$"))
 async def settings_page_2(client, query):
+    if not query.from_user.id in client.admins:
+        return await query.answer('✗ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs!', show_alert=True)
+        
     total_fsub = len(client.fsub_dict)
     total_db_channels = len(getattr(client, 'db_channels', {}))
     
     msg = f"""<blockquote>✦ sᴇᴛᴛɪɴgs ᴏғ @{client.username} (ᴘᴀɢᴇ 2)</blockquote>
-›› <b>ꜰsᴜʙ ᴄʜᴀɴɴᴇʟs:</b> <code>{total_fsub}</code>
-›› <b>ᴅʙ ᴄʜᴀɴɴᴇʟs:</b> <code>{total_db_channels}</code>
-›› <b>ᴘʀᴏᴛᴇᴄᴛ ᴄᴏɴᴛᴇɴᴛ:</b> <code>{"✓ ᴛʀᴜᴇ" if client.protect else "✗ ꜰᴀʟsᴇ"}</code>
-›› <b>ᴅɪsᴀʙʟᴇ ʙᴜᴛᴛᴏɴ:</b> <code>{"✓ ᴛʀᴜᴇ" if client.disable_btn else "✗ ꜰᴀʟsᴇ"}</code>
+›› <b><b>ꜰsᴜʙ ᴄʜᴀɴɴᴇʟs:</b></b> <code>{total_fsub}</code>
+›› <b><b>ᴅʙ ᴄʜᴀɴɴᴇʟs:</b></b> <code>{total_db_channels}</code>
+›› <b><b>ᴘʀᴏᴛᴇᴄᴛ ᴄᴏɴᴛᴇɴᴛ:</b></b> <code>{"✓ ᴛʀᴜᴇ" if client.protect else "✗ ꜰᴀʟsᴇ"}</code>
+›› <b><b>ᴅɪsᴀʙʟᴇ ʙᴜᴛᴛᴏɴ:</b></b> <code>{"✓ ᴛʀᴜᴇ" if client.disable_btn else "✗ ꜰᴀʟsᴇ"}</code>
 
-<blockquote><u><b>≡ 1st sʜᴏʀᴛᴇɴᴇʀ sᴇᴛᴛɪɴgs:</b></u></blockquote>
-›› <b>sᴛᴀᴛᴜs:</b> <code>{"🟢 ᴇɴᴀʙʟᴇᴅ" if getattr(config, 'SHORT_STATUS_1', True) else "🔴 ᴅɪsᴀʙʟᴇᴅ"}</code>
-›› <b>ᴜʀʟ:</b> <code>{config.SHORT_URL_1}</code>
-›› <b>ᴛᴜᴛᴏʀɪᴀʟ:</b> <code>{config.SHORT_TUT_1}</code>
+<blockquote><u><b>≡ 1sᴛ sʜᴏʀᴛᴇɴᴇʀ sᴇᴛᴛɪɴgs:</b></u></blockquote>
+›› <b>sᴛᴀᴛᴜs:</b> <code>{"✔️ ᴇɴᴀʙʟᴇᴅ" if getattr(config, 'SHORT_STATUS_1', True) else "❌ ᴅɪsᴀʙʟᴇᴅ"}</code>
+›› <b>ᴜʀʟ:</b> <code>{getattr(config, 'SHORT_URL_1', 'None')}</code>
 
-<blockquote><u><b>≡ 2ɴᴅ sʜᴏʀᴛᴇɴᴇner sᴇᴛᴛɪɴgs:</b></u></blockquote>
-›› <b>sᴛᴀᴛᴜs:</b> <code>{"🟢 ᴇɴᴀʙʟᴇᴅ" if getattr(config, 'SHORT_STATUS_2', True) else "🔴 ᴅɪsᴀʙʟᴇᴅ"}</code>
-›› <b>ᴜʀʟ:</b> <code>{config.SHORT_URL_2}</code>
-›› <b>ᴛᴜᴛᴏʀɪᴀʟ:</b> <code>{config.SHORT_TUT_2}</code>
+<blockquote><u><b>≡ 2ɴᴅ sʜᴏʀᴛᴇɴᴇʀ sᴇᴛᴛɪɴgs:</b></u></blockquote>
+›› <b>sᴛᴀᴛᴜs:</b> <code>{"✔️ ᴇɴᴀʙʟᴇᴅ" if getattr(config, 'SHORT_STATUS_2', True) else "❌ ᴅɪsᴀʙʟᴇᴅ"}</code>
+›› <b>ᴜʀʟ:</b> <code>{getattr(config, 'SHORT_URL_2', 'None')}</code>
 
-<blockquote><u><b>≡ 3ʀᴅ sʜᴏʀᴛᴇɴᴇner sᴇᴛᴛɪɴgs:</b></u></blockquote>
-›› <b>sᴛᴀᴛᴜs:</b> <code>{"🟢 ᴇɴᴀʙʟᴇᴅ" if getattr(config, 'SHORT_STATUS_3', True) else "🔴 ᴅɪsᴀʙʟᴇᴅ"}</code>
-›› <b>ᴜʀʟ:</b> <code>{config.SHORT_URL_3}</code>
-›› <b>ᴛᴜᴛᴏʀɪᴀʟ:</b> <code>{config.SHORT_TUT_3}</code>
+<blockquote><u><b>≡ 3ʀᴅ sʜᴏʀᴛᴇɴᴇʀ sᴇᴛᴛɪɴgs:</b></u></blockquote>
+›› <b>sᴛᴀᴛᴜs:</b> <code>{"✔️ ᴇɴᴀʙʟᴇᴅ" if getattr(config, 'SHORT_STATUS_3', True) else "❌ ᴅɪsᴀʙʟᴇᴅ"}</code>
+›› <b>ᴜʀʟ:</b> <code>{getattr(config, 'SHORT_URL_3', 'None')}</code>
     """
     reply_markup = InlineKeyboardMarkup([
         [InlineKeyboardButton('ᴘʀᴏᴛᴇᴄᴛ ᴄᴏɴᴛᴇɴᴛ', 'protect'), InlineKeyboardButton('ᴘʜᴏᴛᴏs', 'photos')],
@@ -138,7 +139,7 @@ async def settings_page_2(client, query):
     return
 
 #===============================================================#
-# MULTI-SHORTENER DYNAMIC ACTIONS PROTOCOL
+# MULTI-SHORTENER MANAGEMENT INTERFACE PANEL
 #===============================================================#
 
 @Client.on_callback_query(filters.regex("^manage_shortners$"))
@@ -146,21 +147,23 @@ async def manage_shortners(client, query):
     if not query.from_user.id in client.admins:
         return await query.answer('✗ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs!', show_alert=True)
     
-    msg = f"""<blockquote>✦ ᴍᴜʟᴛɪ-sʜᴏʀᴛᴇɴᴇʀ ᴍᴀɴᴀɢᴇᴍᴇɴᴛ ᴘᴀɴᴇʟ</blockquote>
+    msg = f"""<blockquote>✦ ᴍᴜʟᴛɪ-sʜᴏʀᴛᴇɴᴇʀ ᴍᴀɴᴀɢᴇᴍᴇnt ᴘᴀɴᴇʟ</blockquote>
 
-›› <b>1sᴛ:</b> <code>{config.SHORT_URL_1}</code> [<code>{"🟢 ᴏɴ" if getattr(config, 'SHORT_STATUS_1', True) else "🔴 ᴏғғ"}</code>]
-›› <b>2ɴᴅ:</b> <code>{config.SHORT_URL_2}</code> [<code>{"🟢 ᴏɴ" if getattr(config, 'SHORT_STATUS_2', True) else "🔴 ᴏғғ"}</code>]
-›› <b>3ʀᴅ:</b> <code>{config.SHORT_URL_3}</code> [<code>{"🟢 ᴏɴ" if getattr(config, 'SHORT_STATUS_3', True) else "🔴 ᴏғғ"}</code>]
+›› <b>1sᴛ:</b> <code>{getattr(config, 'SHORT_URL_1', 'None')}</code> [<code>{"✔️ ᴏɴ" if getattr(config, 'SHORT_STATUS_1', True) else "❌ ᴏғғ"}</code>]
+›› <b>2ɴᴅ:</b> <code>{getattr(config, 'SHORT_URL_2', 'None')}</code> [<code>{"✔️ ᴏɴ" if getattr(config, 'SHORT_STATUS_2', True) else "❌ ᴏғғ"}</code>]
+›› <b>3ʀᴅ:</b> <code>{getattr(config, 'SHORT_URL_3', 'None')}</code> [<code>{"✔️ ᴏɴ" if getattr(config, 'SHORT_STATUS_3', True) else "❌ ᴏғғ"}</code>]
 
 __<b>ᴄʟɪᴄᴋ ᴏɴ ᴀɴʏ sʜᴏʀᴛᴇɴᴇʀ ʙᴇʟᴏᴡ ᴛᴏ ᴄʜᴀɴɢᴇ ɪᴛs sᴇᴛᴛɪɴɢs, sᴡɪᴛᴄʜ sᴛᴀᴛᴜs ᴏʀ ʀᴜɴ ᴀ ᴛᴇsᴛ sʜᴏʀᴛᴇɴ!</b>__"""
     
     reply_markup = InlineKeyboardMarkup([
-        [InlineKeyboardButton('🔧 sʜᴏʀᴛɴᴇʀ 1', 'edit_short_1'), InlineKeyboardButton('🔧 sʜᴏʀᴛɴᴇner 2', 'edit_short_2')],
-        [InlineKeyboardButton('🔧 sʜᴏʀᴛɴᴇʀ 3', 'edit_short_3')],
+        [InlineKeyboardButton('sʜᴏʀᴛɴᴇʀ 1', 'edit_short_1'), InlineKeyboardButton('sʜᴏʀᴛɴᴇer 2', 'edit_short_2')],
+        [InlineKeyboardButton('sʜᴏʀᴛɴᴇer 3', 'edit_short_3')],
         [InlineKeyboardButton('‹ ʙᴀᴄᴋ', 'settings_page_2')]
     ])
     await query.message.edit_text(msg, reply_markup=reply_markup)
 
+#===============================================================#
+# EXPLICIT PARAMETER LAYER FOR INDIVIDUAL SHORTENERS
 #===============================================================#
 
 @Client.on_callback_query(filters.regex("^edit_short_(1|2|3)$"))
@@ -169,26 +172,40 @@ async def edit_specific_shortner(client, query):
         return await query.answer('✗ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs!', show_alert=True)
     
     num = query.data.split("_")[2]
-    url_val = getattr(config, f"SHORT_URL_{num}")
-    tut_val = getattr(config, f"SHORT_TUT_{num}")
+    url_val = getattr(config, f"SHORT_URL_{num}", "None")
+    tut_val = getattr(config, f"SHORT_TUT_{num}", "None")
     status_val = getattr(config, f"SHORT_STATUS_{num}", True)
     
+    # Fetch real-time total clicks from MongoDB dynamically
+    analytics = await client.mongodb.db.shortner_analytics.find_one({"shortner_id": int(num)}) or {}
+    total_clicks = analytics.get("clicks", 0)
+    
     msg = f"""<blockquote>🛠️ ᴄᴏɴꜰɪɢᴜʀᴇ sʜᴏʀᴛᴇɴᴇʀ {num}</blockquote>
-›› <b>sᴛᴀᴛᴜs:</b> <code>{"🟢 ᴀᴄᴛɪᴠᴇ / ᴏɴ" if status_val else "🔴 ɪɴᴀᴄᴛɪᴠᴇ / ᴏғғ"}</code>
+›› <b>sᴛᴀᴛᴜs:</b> <code>{"✔️ ᴀᴄᴛɪᴠᴇ / ᴏɴ" if status_val else "❌ ɪɴᴀᴄᴛɪᴠᴇ / ᴏғғ"}</code>
 ›› <b>ᴄᴜʀʀᴇɴᴛ ᴜʀʟ:</b> <code>{url_val}</code>
 ›› <b>ᴄᴜʀʀᴇɴᴛ ᴛᴜᴛᴏʀɪᴀʟ:</b> <code>{tut_val}</code>
 
 __<b>ᴍᴀɴᴀɢᴇ sᴡɪᴛᴄʜ, ᴜᴘᴅᴀᴛᴇ ᴘᴀʀᴀᴍᴇᴛᴇʀs ᴏʀ ᴛᴇsᴛ API connectivity:</b>__"""
     
-    status_text = "🔴 ᴅɪsᴀʙʟᴇ / ᴛᴜʀɴ ᴏғғ" if status_val else "🟢 ᴇɴᴀʙʟᴇ / ᴛᴜʀɴ ᴏɴ"
+    status_text = "❌ ᴅɪsᴀʙʟᴇ / ᴛᴜʀɴ ᴏғғ" if status_val else "✔️ ᴇɴᴀʙʟᴇ / ᴛᴜʀɴ ᴏɴ"
     
     reply_markup = InlineKeyboardMarkup([
         [InlineKeyboardButton(status_text, f'toggle_status_{num}')],
-        [InlineKeyboardButton('🌐 sᴇᴛ ᴜʀʟ', f'set_url_{num}'), InlineKeyboardButton('🔑 sᴇᴛ ᴀᴘɪ', f'set_api_{num}')],
-        [InlineKeyboardButton('🎬 sᴇᴛ ᴛᴜᴛᴏʀɪᴀʟ', f'set_tut_{num}'), InlineKeyboardButton('🧪 ᴛᴇsᴛ sʜᴏʀᴛɴᴇʀ', f'test_api_{num}')],
+        [InlineKeyboardButton('ᴠᴇʀɪꜰɪᴇᴅ ᴛᴏᴅᴀʏ: ' + str(total_clicks), f'clicks_stats_{num}')],
+        [InlineKeyboardButton('sᴇᴛ ᴜʀʟ', f'set_url_{num}'), InlineKeyboardButton('sᴇᴛ ᴀᴘɪ', f'set_api_{num}')],
+        [InlineKeyboardButton('sᴇᴛ ᴛᴜᴛᴏʀɪᴀʟ', f'set_tut_{num}'), InlineKeyboardButton('ᴛᴇsᴛ sʜᴏʀᴛɴᴇʀ', f'test_api_{num}')],
         [InlineKeyboardButton('‹ ʙᴀᴄᴋ', 'manage_shortners')]
     ])
     await query.message.edit_text(msg, reply_markup=reply_markup)
+
+#===============================================================#
+
+@Client.on_callback_query(filters.regex("^clicks_stats_(1|2|3)$"))
+async def stats_alert_callback(client, query):
+    num = query.data.split("_")[2]
+    analytics = await client.mongodb.db.shortner_analytics.find_one({"shortner_id": int(num)}) or {}
+    clicks = analytics.get("clicks", 0)
+    await query.answer(f"📊 Shortener {num} has processed {clicks} complete bypass verifications today!", show_alert=True)
 
 #===============================================================#
 
@@ -204,38 +221,15 @@ async def toggle_shortner_status(client, query):
     new_status = not current_status
     setattr(config, var_name, new_status)
     
+    # Save the status persistently to database
+    await client.mongodb.db.shortner_config.update_one(
+        {"shortner_id": int(num)}, 
+        {"$set": {"enabled": new_status}}, 
+        upsert=True
+    )
+    
     await query.answer(f"Shortener {num} Turned {'ON' if new_status else 'OFF'}!", show_alert=True)
     await edit_specific_shortner(client, query)
-
-#===============================================================#
-
-@Client.on_callback_query(filters.regex("^test_api_(1|2|3)$"))
-async def test_shortner_connectivity(client, query):
-    if not query.from_user.id in client.admins:
-        return await query.answer('✗ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs!', show_alert=True)
-    
-    num = query.data.split("_")[2]
-    url_val = getattr(config, f"SHORT_URL_{num}")
-    api_val = getattr(config, f"SHORT_API_{num}")
-    
-    if not url_val or not api_val:
-        return await query.answer("✗ URL or API Key is missing/empty!", show_alert=True)
-        
-    await query.answer("⏳ Testing connectivity... Please wait.")
-    
-    try:
-        client.shortner_url = url_val
-        client.shortner_api = api_val
-        
-        test_link = get_short("https://t.me/PRIME_SMP", client)
-        if test_link and test_link.startswith("http"):
-            msg = f"<blockquote><b>✓ ᴛᴇsᴛ sᴜᴄᴄᴇssꜰᴜʟʟʏ ᴘᴀssᴇᴅ!</b></blockquote>\n\n›› <b>sʜᴏʀᴛᴇɴᴇʀ {num} ɪs ᴡᴏʀᴋɪɴɢ ᴘᴇʀꜰᴇᴄᴛʟʏ!</b>\n›› <b>ɢᴇɴᴇʀᴀᴛᴇᴅ ʟɪɴᴋ:</b> {test_link}"
-        else:
-            msg = f"<blockquote><b>✗ ᴛᴇsᴛ ꜰᴀɪʟᴇᴅ!</b></blockquote>\n\n›› sʜᴏʀᴛᴇɴᴇner website returned an invalid response. Check API token syntax."
-    except Exception as e:
-        msg = f"<blockquote><b>✗ ᴄᴏɴɴᴇᴄᴛɪᴏɴ ᴇʀʀᴏʀ!</b></blockquote>\n\n›› <b>ᴇʀʀᴏʀ:</b> <code>{str(e)}</code>"
-        
-    await query.message.edit_text(msg, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('‹ ʙᴀᴄᴋ', f'edit_short_{num}')]]))
 
 #===============================================================#
 
@@ -261,15 +255,20 @@ __<b>sᴇɴᴅ ᴛʜᴇ ɴᴇᴡ ᴠᴀʟᴜᴇ ɪɴ ᴛʜᴇ ɴᴇxᴛ 60 sᴇ�
         res = await client.listen(user_id=query.from_user.id, filters=filters.text, timeout=60)
         new_value = res.text.strip()
         
+        # Clean inputs if domain
+        if field == "url":
+            new_value = new_value.replace('https://', '').replace('http://', '').replace('/', '')
+            
         target_var = f"SHORT_{field.upper()}_{num}"
         setattr(config, target_var, new_value)
         
-        if num == "1":
-            setattr(config, f"SHORT_{field.upper()}", new_value)
-            if field == "url":
-                client.shortner_url = new_value
-            elif field == "api":
-                client.shortner_api = new_value
+        # Persistent write parameters into MongoDB cluster
+        db_field_map = {"url": "short_url", "api": "short_api", "tut": "tutorial_link"}
+        await client.mongodb.db.shortner_config.update_one(
+            {"shortner_id": int(num)}, 
+            {"$set": {db_field_map[field]: new_value}}, 
+            upsert=True
+        )
                 
         await query.message.edit_text(f"<blockquote><b>✓ sʜᴏʀᴛᴇɴᴇʀ {num} {field.upper()} ᴜᴘᴅᴀᴛᴇᴅ sᴜᴄᴄᴇssꜰᴜʟʟʏ!</b></blockquote>\n\n›› <b>ɴᴇᴡ ᴠᴀʟᴜᴇ:</b> <code>{new_value}</code>", 
                                     reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('‹ ʙᴀᴄᴋ', f'edit_short_{num}')]]))
@@ -278,6 +277,39 @@ __<b>sᴇɴᴅ ᴛʜᴇ ɴᴇᴡ ᴠᴀʟᴜᴇ ɪɴ ᴛʜᴇ ɴᴇxᴛ 60 sᴇ�
         await query.message.edit_text("<blockquote><b>✗ ᴛɪᴍᴇᴏᴜᴛ! ʏᴏᴜ ᴅɪᴅ ɴᴏᴛ sᴇɴᴅ ᴀɴʏ ᴛᴇxᴛ ᴡɪᴛʜɪɴ 60 sᴇᴄᴏɴᴅs.</b></blockquote>", 
                                     reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('‹ ʙᴀᴄᴋ', f'edit_short_{num}')]]))
 
+#===============================================================#
+
+@Client.on_callback_query(filters.regex("^test_api_(1|2|3)$"))
+async def test_shortner_connectivity(client, query):
+    if not query.from_user.id in client.admins:
+        return await query.answer('✗ ᴏɴʟʏ ᴀᴅᴍɪɴs <b>ᴄᴀɴ ᴜsᴇ ᴛʜɪs!</b>', show_alert=True)
+    
+    num = query.data.split("_")[2]
+    url_val = getattr(config, f"SHORT_URL_{num}", None)
+    api_val = getattr(config, f"SHORT_API_{num}", None)
+    
+    if not url_val or not api_val or url_val == "None" or api_val == "None":
+        return await query.answer("✗ URL or API Key is missing/empty!", show_alert=True)
+        
+    await query.answer("⏳ Testing connectivity... Please wait.")
+    
+    try:
+        # Temporary runtime mount to invoke api validation test link
+        client.shortner_url = url_val
+        client.shortner_api = api_val
+        
+        test_link = get_short("https://t.me/PRIME_SMP", client)
+        if test_link and test_link.startswith("http"):
+            msg = f"<blockquote><b>✓ ᴛᴇsᴛ sᴜᴄᴄᴇssꜰᴜʟʟʏ ᴘᴀssᴇᴅ!</b></blockquote>\n\n›› <b>sʜᴏʀᴛᴇɴᴇʀ {num} ɪs ᴡᴏʀᴋɪɴɢ ᴘᴇʀꜰᴇᴄᴛʟʏ!</b>\n›› <b>ɢᴇɴᴇʀᴀᴛᴇᴅ ʟɪɴᴋ:</b> {test_link}"
+        else:
+            msg = f"<blockquote><b>✗ ᴛᴇsᴛ ꜰᴀɪʟᴇᴅ!</b></blockquote>\n\n›› sʜᴏʀᴛᴇɴᴇʀ website returned an invalid response. Check API token syntax."
+    except Exception as e:
+        msg = f"<blockquote><b>✗ ᴄᴏɴɴᴇᴄᴛɪᴏɴ ᴇʀʀᴏʀ!</b></blockquote>\n\n›› <b>ᴇʀʀᴏʀ:</b> <code>{str(e)}</code>"
+        
+    await query.message.edit_text(msg, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('‹ ʙᴀᴄᴋ', f'edit_short_{num}')]]))
+
+#===============================================================#
+# SYSTEM CONFIG BACKWARD COMPATIBLE HANDLERS
 #===============================================================#
 
 @Client.on_callback_query(filters.regex("^fsub$"))
@@ -291,7 +323,7 @@ async def fsub(client, query):
             channel_list.append(f"• <code>{channel_name}</code> (<code>{channel_id}</code>) - {request_status}, {timer_status}")
         channels_display = "\n".join(channel_list)
     else:
-        channels_display = "_ɴᴏ ꜰᴏʀᴄᴇ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴄʜᴀɴɴᴇʟs ᴄᴏɴғɪɢᴜʀᴇ_"
+        channels_display = "_ɴᴏ ꜰᴏʀᴄᴇ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴄʜᴀɴɴᴇʟs ᴄᴏɴғɪɢᴜʀᴇᴅ_"
     
     msg = f"""<blockquote>✦ ꜰᴏʀᴄᴇ sᴜʙsᴄʀɪᴘᴛɪᴏɴ sᴇᴛᴛɪɴgs</blockquote>
 ›› <b>ᴄᴏɴғɪɢᴜʀᴇᴅ ᴄʜᴀɴɴᴇʟs:</b>
@@ -305,10 +337,10 @@ __<b>ᴜsᴇ ᴛʜᴇ ᴀᴘᴘʀᴏᴘʀɪᴀᴛᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏ
 async def db_channels(client, query):
     if not query.from_user.id in client.admins: 
         return await query.answer('✗ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs!', show_alert=True)
-    db_channels = getattr(client, 'db_channels', {})
-    if db_channels:
+    db_channels_data = getattr(client, 'db_channels', {})
+    if db_channels_data:
         channel_list = []
-        for channel_id_str, channel_data in db_channels.items():
+        for channel_id_str, channel_data in db_channels_data.items():
             channel_name = channel_data.get('name', 'Unknown')
             is_primary = "✓ ᴘʀɪᴍᴀʀʏ" if channel_data.get('is_primary', False) else "• sᴇᴄᴏɴᴅᴀʀʏ"
             is_active = "✓ ᴀᴄᴛɪᴠᴇ" if channel_data.get('is_active', True) else "✗ ɪɴᴀᴄᴛɪᴠᴇ"
@@ -317,7 +349,7 @@ async def db_channels(client, query):
     else: 
         channels_display = "_ɴᴏ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟs ᴄᴏɴғɪɢᴜʀᴇᴅ_"
     primary_db = getattr(client, 'primary_db_channel', client.db)
-    msg = f"""<blockquote>✦ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟs sᴇᴛᴛɪɴɢs</blockquote>\n›› <b><b>ᴄᴜʀʀᴇɴᴛ ᴘʀɪᴍᴀʀʏ ᴅʙ:</b></b> <code>{primary_db}</code>\n›› <b><b>ᴛᴏᴛᴀʟ ᴅʙ ᴄʜᴀɴɴᴇʟs:</b></b> <code>{len(db_channels)}</code> \n\n**<b>ᴄᴏɴғɪɢᴜʀᴇᴅ ᴄʜᴀɴɴᴇʟs:</b>**\n{channels_display}\n\n__<b>ᴜsᴇ ᴛʜᴇ ᴀᴘᴘʀᴏᴘʀɪᴀᴛᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ᴍᴀɴᴀɢᴇ ʏᴏᴜʀ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟs!</b>__"""
+    msg = f"""<blockquote>✦ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟs sᴇᴛᴛɪɴɢs</blockquote>\n›› <b>ᴄᴜʀʀᴇɴᴛ ᴘʀɪᴍᴀʀʏ ᴅʙ:</b> <code>{primary_db}</code>\n›› <b>ᴛᴏᴛᴀʟ ᴅʙ ᴄʜᴀɴɴᴇʟs:</b> <code>{len(db_channels_data)}</code> \n\n**<b>ᴄᴏɴғɪɢᴜʀᴇᴅ ᴄʜᴀɴɴᴇʟs:</b>**\n{channels_display}\n\n__<b>ᴜsᴇ ᴛʜᴇ ᴀᴘᴘʀᴏᴘʀɪᴀᴛᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ᴍᴀɴᴀɢᴇ ʏᴏᴜʀ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟs!</b>__"""
     reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton('›› ᴀᴅᴅ ᴅʙ ᴄʜᴀɴɴᴇʟ', 'add_db_channel'), InlineKeyboardButton('›› ʀᴇᴍᴏᴠᴇ ᴅʙ ᴄʜᴀɴɴᴇʟ', 'rm_db_channel')], [InlineKeyboardButton('›› sᴇᴛ ᴘʀɪᴍᴀʀʏ', 'set_primary_db'), InlineKeyboardButton('›› sᴛᴀᴛᴜs', 'toggle_db_status')], [InlineKeyboardButton('‹ ʙᴀᴄᴋ', 'settings')]])
     await query.message.edit_text(msg, reply_markup=reply_markup)
     
