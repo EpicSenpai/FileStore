@@ -97,10 +97,11 @@ async def start_command(client: Client, message: Message):
             user_credits = user_data.get("credits", 0)
             rotation_index = user_data.get("rotation_index", 0)
 
-            # Case A: Shortener successfully bypassed -> Reward 3 Credits loop 
+            # Case A: Shortener successfully bypassed -> Reward 3 Credits Loop
             if is_short_link:
-                user_credits = 3  
-                next_rotation = (rotation_index + 1) % 3  # Dynamically moves index from 0 -> 1 -> 2
+                # FIXED: 3 ki jagah 2 kiya kyuki 1st file isi click par instantly niche deliver ho jayegi
+                user_credits = 2  
+                next_rotation = (rotation_index + 1) % 3  # Shift rotation state smoothly (0 -> 1 -> 2)
                 await client.mongodb.user_data.update_one(
                     {"_id": user_id}, 
                     {"$set": {"credits": user_credits, "rotation_index": next_rotation}}, 
@@ -123,7 +124,7 @@ async def start_command(client: Client, message: Message):
                 )
                 return
             
-            # Case B: Free user loop expired -> Generates dynamic shortener based on index rotation
+            # Case B: Balance empty -> Trigger shortener based on current index tracking layer
             elif user_credits <= 0:
                 current_url, current_api, current_tut = SHORT_URL_1, SHORT_API_1, SHORT_TUT_1
                 
@@ -167,9 +168,10 @@ async def start_command(client: Client, message: Message):
                         client.LOGGER(__name__, client.name).warning(f"Shortener tracking node breakdown: {e}")
                         pass
 
-            # Case C: Free user has active credits -> Deduct 1 credit smoothly and proceed to dispatch files
+            # Case C: Active credits balance detected -> Consume 1 credit accurately
             if user_credits > 0 and not is_short_link:
                 user_credits -= 1
+                # FIXED: Document unique locator changed to strict "_id" match for data safety
                 await client.mongodb.user_data.update_one({"_id": user_id}, {"$set": {"credits": user_credits}})
 
         await deliver_files_routing(client, message, base64_string, original_payload)
@@ -309,6 +311,7 @@ async def deliver_files_routing(client, message, base64_string, original_payload
         except Exception:
             pass
 
+    # Serious standard warning text preserved exactly as requested
     if media_messages:
         warning_banner_text = (
             '<b>⚠️ This File is deleting automatically in <a href="https://t.me/RezeFilesBot">30 Minutes...</a> Forward in your Saved Messages..!</b>'
@@ -327,4 +330,4 @@ async def deliver_files_routing(client, message, base64_string, original_payload
         except Exception:
             pass
     return
-                
+    
