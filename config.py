@@ -75,7 +75,7 @@ AUTO_DEL = 1800
 
 # Fixed Messages Configuration
 MESSAGES = {
-    "START": "<b><blockquote>✦ ʜᴇʏ {mention} ~ </blockquote> <blockquote>ᴛʜᴇ ᴍᴏᴏɴ ᴛᴀᴜɢʜᴛ ᴍᴇ ᴏɴᴇ ᴛʜɪɴɢ — ɴᴏ ᴍᴀᴛᴛᴇʀ ʜᴏᴡ ᴅᴀʀᴋ ɪᴛ ɢᴇᴛs, ʏᴏᴜ sᴛɪʟʟ sʜɪɴᴇ..</blockquote></b>",
+    "START": "<b><blockquote>✦ ʜᴇʏ {mention} ~ </blockquote> <blockquote>🪼 ᴛʜᴇ ᴏᴄᴇᴀɴ ᴛᴀᴜɢʜᴛ ᴍᴇ ᴏɴᴇ ᴛʜɪɴɢ — ᴇᴠᴇɴ ᴛʜᴇ ᴅᴇᴇᴘᴇꜱᴛ ꜱɪʟᴇɴᴄᴇ ᴄᴀɴ ʜᴏʟᴅ ᴛʜᴇ ʟᴏᴜᴅᴇꜱᴛ ꜰᴇᴇʟɪɴɢꜱ.</blockquote></b>",
     "FSUB": "<b><blockquote>✦ ʜᴇʏ {mention} ~</blockquote> ʏᴏᴜʀ ꜰɪʟᴇ ɪs ʀᴇᴀᴅʏ! ᴋɪɴᴅʟʏ ᴊᴏɪɴ ᴏᴜʀ ᴄʜᴀɴɴᴇʟ ᴛᴏ ɢᴇᴛ ᴀᴄᴄᴇss.</b>",
     "ABOUT": "<b>✦ ᴍʏ ɴᴀᴍᴇ: {bot_name}\n<blockquote>›› ᴜᴘᴅᴀᴛᴇs ᴄʜᴀɴɴᴇʟ: <a href='https://t.me/AuraTube'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>\n›› ᴏᴡɴᴇʀ: @EpicSenpai\n›› ʟᴀɴɢᴜᴀɢᴇ: <a href='https://docs.python.org/'>ᴘʏᴛʜᴏɴ 3</a>\n›› ᴅᴀᴛᴀʙᴀsᴇ: <a href='https://www.mongodb.com/docs/'>ᴍᴏɴɢᴏ ᴅʙ</a>\n›› ᴅᴇᴠᴇʟᴏᴘᴇʀ: @EpicSenpai</blockquote></b>",
     "REPLY": "", 
