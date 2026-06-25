@@ -86,11 +86,15 @@ async def start_command(client: Client, message: Message):
         shortner_enabled = getattr(client, 'shortner_enabled', True)
 
         #===============================================================#
-        # MONGO TOKEN TRACKING LOGIC
+        # MONGO TOKEN TRACKING LOGIC (FIXED DRIVER & NATIVE _ID MAPPING)
         #===============================================================#
         if not is_user_pro and user_id != OWNER_ID and shortner_enabled:
             
-            user_data = await client.mongodb.db.users.find_one({"id": user_id}) or {}
+            # Fixed mapping target point reference to client database user collection layout
+            user_data = await client.mongodb.user_data.find_one({"_id": user_id})
+            if not user_data:
+                user_data = {}
+                
             user_credits = user_data.get("credits", 0)
             rotation_index = user_data.get("rotation_index", 0)
 
@@ -98,19 +102,17 @@ async def start_command(client: Client, message: Message):
             if is_short_link:
                 user_credits = 3  
                 next_rotation = (rotation_index + 1) % 3
-                await client.mongodb.db.users.update_one(
-                    {"id": user_id}, 
+                await client.mongodb.user_data.update_one(
+                    {"_id": user_id}, 
                     {"$set": {"credits": user_credits, "rotation_index": next_rotation}}, 
                     upsert=True
                 )
                 
-                # Image 2 Style Exact Verification parsing structure with exact custom photo
                 success_msg = (
                     "<b>◍ ʏᴏᴜʀ ᴠᴇʀɪғɪᴄᴀᴛɪᴏɴ ɪs sᴜᴄᴄᴇssғᴜʟ!\n\n"
                     "<blockquote>⧗ 3 ᴄʀᴇᴅɪᴛs ᴀᴅᴅᴇᴅ ᴛᴏ ʏᴏᴜʀ ᴀᴄᴄᴏᴜɴᴛ.</blockquote></b>"
                 )
                 
-                # Dynamic Photo response injected via explicit reply formatting
                 await message.reply_photo(
                     photo="https://litter.catbox.moe/2zd2uk.jpg",
                     caption=success_msg,
@@ -168,7 +170,7 @@ async def start_command(client: Client, message: Message):
 
             if user_credits > 0 and not is_short_link:
                 user_credits -= 1
-                await client.mongodb.db.users.update_one({"id": user_id}, {"$set": {"credits": user_credits}})
+                await client.mongodb.user_data.update_one({"id": user_id}, {"$set": {"credits": user_credits}})
 
         await deliver_files_routing(client, message, base64_string, original_payload)
         return
@@ -266,7 +268,7 @@ async def deliver_files_routing(client, message, base64_string, original_payload
     except Exception as e:
         return await client.send_message(chat_target, "<b>✗ ɪɴᴠᴀʟɪᴅ ᴏʀ ᴇxᴘɪʀᴇᴅ ꜰɪʟᴇ ʟɪɴᴋ.</b>")
 
-    temp_msg = await client.send_message(chat_target, "<b><i>Wait A Sec...</i></b>")
+    temp_msg = await client.send_message(chat_target, "<i>Wait A Sec...</i>")
     messages = []
 
     try:
@@ -307,7 +309,7 @@ async def deliver_files_routing(client, message, base64_string, original_payload
         except Exception:
             pass
 
-    # FIXED: Standard Serious Text layer preserved exactly as requested (No small caps font replacement)
+    # Serious standard warning layer preserved beautifully 
     if media_messages:
         warning_banner_text = (
             '<b>⚠️ This File is deleting automatically in <a href="https://t.me/RezeFilesBot">30 Minutes...</a> Forward in your Saved Messages..!</b>'
@@ -326,4 +328,4 @@ async def deliver_files_routing(client, message, base64_string, original_payload
         except Exception:
             pass
     return
-                
+        
