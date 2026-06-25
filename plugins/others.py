@@ -1,10 +1,9 @@
+from helper.helper_func import *
 from pyrogram import Client, filters
 from pyrogram.types import CallbackQuery, Message, InlineKeyboardButton, InlineKeyboardMarkup
 from config import MSG_EFFECT
-
-from pyrogram import Client, filters
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.errors.pyromod import ListenerTimeout
+import config
 
 #===============================================================#
 
@@ -32,10 +31,10 @@ async def db_channels_command(client: Client, message: Message):
     
     msg = f"""<blockquote>✦ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟs ᴍᴀɴᴀɢᴇᴍᴇɴᴛ</blockquote>
 
-›› **ᴄᴜʀʀᴇɴᴛ ᴘʀɪᴍᴀʀʏ ᴅʙ:** `{primary_db}`
-›› **ᴛᴏᴛᴀʟ ᴅʙ ᴄʜᴀɴɴᴇʟs:** `{len(db_channels)}`
+›› **<b>ᴄᴜʀʀᴇɴᴛ ᴘʀɪᴍᴀʀʏ ᴅʙ:</b>** `{primary_db}`
+›› **<b>ᴛᴏᴛᴀʟ ᴅʙ ᴄʜᴀɴɴᴇʟs:</b>** `{len(db_channels)}`
 
-**ᴄᴏɴғɪɢᴜʀᴇᴅ ᴄʜᴀɴɴᴇʟs:**
+<b>ᴄᴏɴғɪɢᴜʀᴇᴅ ᴄʜᴀɴɴᴇʟs:</b>
 {channels_display}
 
 __ᴜsᴇ ᴛʜᴇ ʙᴜᴛᴛᴏɴs ʙᴇʟᴏᴡ ᴛᴏ ᴍᴀɴᴀɢᴇ ʏᴏᴜʀ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟs!__
@@ -52,9 +51,6 @@ __ᴜsᴇ ᴛʜᴇ ʙᴜᴛᴛᴏɴs ʙᴇʟᴏᴡ ᴛᴏ ᴍᴀɴᴀɢᴇ ʏᴏ
     await message.reply(msg, reply_markup=reply_markup)
 
 #===============================================================#
-# NOTE: Callback handlers for add_db_channel, rm_db_channel, set_primary_db, and toggle_db_status
-# are implemented in settings.py to avoid conflicts. Only direct commands are handled here.
-#===============================================================#
 
 @Client.on_callback_query(filters.regex("^db_details$"))
 async def db_details(client, query):
@@ -69,8 +65,8 @@ async def db_details(client, query):
     
     msg = f"""<blockquote>✦ ᴅᴇᴛᴀɪʟᴇᴅ ᴅʙ ᴄʜᴀɴɴᴇʟs ɪɴғᴏʀᴍᴀᴛɪᴏɴ</blockquote>
 
-›› **ᴘʀɪᴍᴀʀʏ ᴅʙ ᴄʜᴀɴɴᴇʟ:** `{primary_db}`
-›› **ᴛᴏᴛᴀʟ ᴄᴏɴғɪɢᴜʀᴇᴅ:** `{len(db_channels)}`
+›› **<b>ᴘʀɪᴍᴀʀʏ ᴅʙ ᴄʜᴀɴɴᴇʟ:</b>** `{primary_db}`
+›› **<b>ᴛᴏᴛᴀʟ ᴄᴏɴғɪɢᴜʀᴇᴅ:</b>** `{len(db_channels)}`
 
 """
     
@@ -85,10 +81,10 @@ async def db_details(client, query):
             active_emoji = "✓" if is_active else "✗"
             
             msg += f"""**{i}. {channel_name}**
-• **ɪᴅ:** `{channel_id_str}`
-• **sᴛᴀᴛᴜs:** {status_emoji} {'ᴘʀɪᴍᴀʀʏ' if is_primary else 'sᴇᴄᴏɴᴅᴀʀʏ'}
-• **ᴀᴄᴛɪᴠᴇ:** {active_emoji} {'ʏᴇs' if is_active else 'ɴᴏ'}
-• **ᴀᴅᴅᴇᴅ ʙʏ:** `{added_by}`
+• **<b>ɪᴅ:</b>** `{channel_id_str}`
+• **<b>sᴛᴀᴛᴜs:</b>** {status_emoji} {'ᴘʀɪᴍᴀʀʏ' if is_primary else 'sᴇᴄᴏɴᴅᴀʀʏ'}
+• **<b>ᴀᴄᴛɪᴠᴇ:</b>** {active_emoji} {'ʏᴇs' if is_active else 'ɴᴏ'}
+• **<b>ᴀᴅᴅᴇᴅ ʙʏ:</b>** `{added_by}`
 
 """
     else:
@@ -116,7 +112,6 @@ async def back_to_db_management(client, query):
     
     await query.answer()
     
-    # Redirect to main dbchannels display
     db_channels = getattr(client, 'db_channels', {})
     primary_db = getattr(client, 'primary_db_channel', client.db)
     
@@ -134,10 +129,10 @@ async def back_to_db_management(client, query):
     
     msg = f"""<blockquote>✦ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟs ᴍᴀɴᴀɢᴇᴍᴇɴᴛ</blockquote>
 
-›› **ᴄᴜʀʀᴇɴᴛ ᴘʀɪᴍᴀʀʏ ᴅʙ:** `{primary_db}`
-›› **ᴛᴏᴛᴀʟ ᴅʙ ᴄʜᴀɴɴᴇʟs:** `{len(db_channels)}`
+›› **<b>ᴄᴜʀʀᴇɴᴛ ᴘʀɪᴍᴀʀʏ ᴅʙ:</b>** `{primary_db}`
+›› **<b>ᴛᴏᴛᴀʟ ᴅʙ ᴄʜᴀɴɴᴇʟs:</b>** `{len(db_channels)}`
 
-**ᴄᴏɴғɪɢᴜʀᴇᴅ ᴄʜᴀɴɴᴇʟs:**
+<b>ᴄᴏɴғɪɢᴜʀᴇᴅ ᴄʜᴀɴɴᴇʟs:</b>
 {channels_display}
 
 __ᴜsᴇ ᴛʜᴇ ʙᴜᴛᴛᴏɴs ʙᴇʟᴏᴡ ᴛᴏ ᴍᴀɴᴀɢᴇ ʏᴏᴜʀ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟs!__
@@ -151,7 +146,6 @@ __ᴜsᴇ ᴛʜᴇ ʙᴜᴛᴛᴏɴs ʙᴇʟᴏᴡ ᴛᴏ ᴍᴀɴᴀɢᴇ ʏᴏ
         [InlineKeyboardButton('›› ᴠɪᴇᴡ ᴅᴇᴛᴀɪʟs', 'db_details')]
     ])
     
-    
     await query.message.edit_text(msg, reply_markup=reply_markup)
 
 #===============================================================#
@@ -162,66 +156,60 @@ async def quick_add_db(client: Client, message: Message):
     if message.from_user.id not in client.admins:
         return await message.reply(client.reply_text)
     
-    # Check if channel ID is provided in the command
     args = message.text.split()
     if len(args) < 2:
         return await message.reply("""<blockquote>✦ ᴀᴅᴅ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟ</blockquote>
 
-›› **ᴜsᴀɢᴇ:** `/adddb <channel_id>`
-›› **ᴇxᴀᴍᴘʟᴇ:** `/adddb -1001234567890`
+›› **<b>ᴜsᴀɢᴇ:</b>** `/adddb <channel_id>`
+›› **<b>ᴇxᴀᴍᴘʟᴇ:</b>** `/adddb -1001234567890`
 
-**ɴᴏᴛᴇ:** ᴍᴀᴋᴇ sᴜʀᴇ ᴛʜᴇ ʙᴏᴛ ɪs ᴀᴅᴍɪɴ ɪɴ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ!""")
+**<b>ɴᴏᴛᴇ:</b>** ᴍᴀᴋᴇ sᴜʀᴇ ᴛʜᴇ ʙᴏᴛ ɪs ᴀᴅᴍɪɴ ɪɴ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ!""")
     
     try:
         channel_id = int(args[1])
     except ValueError:
         return await message.reply("**✗ ɪɴᴠᴀʟɪᴅ ᴄʜᴀɴɴᴇʟ ɪᴅ! ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴠᴀʟɪᴅ ɴᴇɢᴀᴛɪᴠᴇ ɪɴᴛᴇɢᴇʀ.**")
     
-    # Check if channel already exists
     db_channels = getattr(client, 'db_channels', {})
     if str(channel_id) in db_channels:
         return await message.reply(f"**✗ ᴄʜᴀɴɴᴇʟ `{channel_id}` ɪs ᴀʟʀᴇᴀᴅʏ ᴀᴅᴅᴇᴅ ᴀs ᴀ ᴅʙ ᴄʜᴀɴɴᴇʟ!**")
     
-    # Verify bot can access the channel
     try:
         chat = await client.get_chat(channel_id)
         test_msg = await client.send_message(chat_id=channel_id, text="ᴛᴇsᴛɪɴɢ ᴅʙ ᴄʜᴀɴɴᴇʟ ᴀᴄᴄᴇss - @Okabe_xRintarou")
         await test_msg.delete()
         
-        # Add channel to database
         channel_data = {
             'name': chat.title,
-            'is_primary': len(db_channels) == 0,  # First channel becomes primary
+            'is_primary': len(db_channels) == 0,
             'is_active': True,
             'added_by': message.from_user.id
         }
         
         await client.mongodb.add_db_channel(channel_id, channel_data)
         
-        # Update client attributes
         if not hasattr(client, 'db_channels'):
             client.db_channels = {}
         client.db_channels[str(channel_id)] = channel_data
         
-        # Set as primary if it's the first channel
         if channel_data['is_primary']:
             client.primary_db_channel = channel_id
             await client.mongodb.set_primary_db_channel(channel_id)
         
         await message.reply(f"""**✓ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟ ᴀᴅᴅᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ!**
 
-›› **ᴄʜᴀɴɴᴇʟ:** `{chat.title}`
-›› **ɪᴅ:** `{channel_id}`
-›› **sᴛᴀᴛᴜs:** {'ᴘʀɪᴍᴀʀʏ' if channel_data['is_primary'] else 'sᴇᴄᴏɴᴅᴀʀʏ'}
+›› **<b><b>ᴄʜᴀɴɴᴇʟ:</b></b>** `{chat.title}`
+›› **<b><b>ɪᴅ:</b></b>** `{channel_id}`
+›› **<b><b>sᴛᴀᴛᴜs:</b></b>** {'ᴘʀɪᴍᴀʀʏ' if channel_data['is_primary'] else 'sᴇᴄᴏɴᴅᴀʀʏ'}
 
 ᴜsᴇ `/dbchannels` ᴛᴏ ᴍᴀɴᴀɢᴇ ᴀʟʟ ʏᴏᴜʀ ᴅʙ ᴄʜᴀɴɴᴇʟs.""")
     
     except Exception as e:
         await message.reply(f"""**✗ ᴇʀʀᴏʀ ᴀᴄᴄᴇssɪɴɢ ᴄʜᴀɴɴᴇʟ!**
 
-›› **ᴇʀʀᴏʀ:** `{str(e)}`
+›› **<b>ᴇʀʀᴏʀ:</b>** `{str(e)}`
 
-**ᴘʟᴇᴀsᴇ ᴍᴀᴋᴇ sᴜʀᴇ:**
+**<b>ᴘʟᴇᴀsᴇ ᴍᴀᴋᴇ sᴜʀᴇ:</b>**
 • ʙᴏᴛ ɪs ᴀᴅᴍɪɴ ɪɴ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ
 • ᴄʜᴀɴɴᴇʟ ɪᴅ ɪs ᴄᴏʀʀᴇᴄᴛ
 • ᴄʜᴀɴɴᴇʟ ᴇxɪsᴛs""")
@@ -234,7 +222,6 @@ async def quick_remove_db(client: Client, message: Message):
     if message.from_user.id not in client.admins:
         return await message.reply(client.reply_text)
     
-    # Check if channel ID is provided in the command
     args = message.text.split()
     if len(args) < 2:
         db_channels = getattr(client, 'db_channels', {})
@@ -243,9 +230,9 @@ async def quick_remove_db(client: Client, message: Message):
         
         msg = """<blockquote>✦ ʀᴇᴍᴏᴠᴇ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟ</blockquote>
 
-›› **ᴜsᴀɢᴇ:** `/removedb <channel_id>`
+›› **<b>ᴜsᴀɢᴇ:</b>** `/removedb <channel_id>`
 
-**ᴀᴠᴀɪʟᴀʙʟᴇ ᴄʜᴀɴɴᴇʟs:**
+**<b>ᴀcodeᴠᴀɪʟᴀʙʟᴇ ᴄʜᴀɴɴᴇʟs:</b>**
 """
         for channel_id_str, channel_data in db_channels.items():
             channel_name = channel_data.get('name', 'ᴜɴᴋɴᴏᴡɴ')
@@ -260,71 +247,86 @@ async def quick_remove_db(client: Client, message: Message):
         return await message.reply("**✗ ɪɴᴠᴀʟɪᴅ ᴄʜᴀɴɴᴇʟ ɪᴅ! ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴠᴀʟɪᴅ ɴᴇɢᴀᴛɪᴠᴇ ɪɴᴛᴇɢᴇʀ.**")
     
     db_channels = getattr(client, 'db_channels', {})
-    
     if str(channel_id) not in db_channels:
         return await message.reply(f"**✗ ᴄʜᴀɴɴᴇʟ `{channel_id}` ɪs ɴᴏᴛ ɪɴ ᴛʜᴇ ᴅʙ ᴄʜᴀɴɴᴇʟs ʟɪsᴛ!**")
     
-    # Check if trying to remove primary channel
     if db_channels[str(channel_id)].get('is_primary', False) and len(db_channels) > 1:
-        return await message.reply("**✗ ᴄᴀɴɴᴏᴛ ʀᴇᴍᴏᴠᴇ ᴘʀɪᴍᴀʀʏ ᴄʜᴀɴɴᴇʟ!**\n\n__ᴘʟᴇᴀsᴇ sᴇᴛ ᴀɴᴏᴛʜᴇʀ ᴄʜᴀɴɴᴇʟ ᴀs ᴘʀɪᴍᴀʀʏ ғɪʀsᴛ ᴜsɪɴɢ `/dbchannels`.__")
+        return await message.reply("**✗ ᴄᴀɴɴᴏᴛ ʀᴇᴍᴏᴠᴇ ᴘʀɪᴍᴀʀʏ ᴄʜᴀɴɴᴇʟ!**\n\n__ᴘʟᴇᴀsᴇ sᴇᴛ ᴀɴᴏᴛʜᴇ r ᴄʜᴀɴɴᴇʟ ᴀs ᴘʀɪᴍᴀʀʏ ғɪʀsᴛ.__")
     
-    # Remove from database and client
     channel_name = db_channels[str(channel_id)].get('name', 'ᴜɴᴋɴᴏᴡɴ')
     await client.mongodb.remove_db_channel(channel_id)
     del client.db_channels[str(channel_id)]
     
     await message.reply(f"""**✓ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟ ʀᴇᴍᴏᴠᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ!**
 
-›› **ʀᴇᴍᴏᴠᴇᴅ:** `{channel_name}` (`{channel_id}`)
+›› **<b>ʀᴇᴍᴏᴠᴇᴅ:</b>** `{channel_name}` (`{channel_id}`)
 
 ᴜsᴇ `/db` ᴛᴏ ᴍᴀɴᴀɢᴇ ʏᴏᴜʀ ʀᴇᴍᴀɪɴɪɴɢ ᴅʙ ᴄʜᴀɴɴᴇʟs.""")
 
-#===============================================================#
-
+#==========================================================================#        
+# HIGH-PRIORITY INTEGRACTIVE NAVIGATION COMPLIANCE WITH REAL PHOTO INTERFACE
 #==========================================================================#        
 
 @Client.on_callback_query(filters.regex('^home$'))
 async def home(client: Client, query: CallbackQuery):
-    buttons = [[InlineKeyboardButton("Help", callback_data = "about"), InlineKeyboardButton("Close", callback_data = "close")]]
-    if query.from_user.id in client.admins:
-        buttons.insert(0, [InlineKeyboardButton("⛩️ ꜱᴇᴛᴛɪɴɢꜱ ⛩️", callback_data="settings")])
-    await query.message.edit_text(
-        text=client.messages.get('START', 'No Start Message').format(
-            first=query.from_user.first_name,
-            last=query.from_user.last_name,
-            username=None if not query.from_user.username else '@' + query.from_user.username,
-            mention=query.from_user.mention,
-            id=query.from_user.id
-                
-        ),
-        reply_markup=InlineKeyboardMarkup(buttons)
+    await query.answer("↩️ Returning back to home dashboard...")
+    user_id = query.from_user.id
+    
+    buttons = [[InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data="ABOUT"), InlineKeyboardButton("ᴄʟᴏsᴇ •", callback_data="close")]]
+    if user_id in client.admins:
+        buttons.insert(0, [InlineKeyboardButton("• ꜱᴇᴛᴛɪɴɢs •", callback_data="settings")])
+        
+    start_caption = config.MESSAGES.get('START', '').format(
+        first=query.from_user.first_name,
+        last=query.from_user.last_name or "",
+        username=None if not query.from_user.username else '@' + query.from_user.username,
+        mention=query.from_user.mention,
+        id=user_id
     )
+    
+    try:
+        # Fixed: Safely edit photo caption layout to maintain exact font style constraints
+        await query.message.edit_caption(
+            caption=start_caption,
+            reply_markup=InlineKeyboardMarkup(buttons)
+        )
+    except Exception:
+        try:
+            await query.message.edit_text(
+                text=start_caption,
+                reply_markup=InlineKeyboardMarkup(buttons)
+            )
+        except Exception:
+            pass
     return
 
 #==========================================================================#        
 
-@Client.on_callback_query(filters.regex('^about$'))
+@Client.on_callback_query(filters.regex('^ABOUT$'))
 async def about(client: Client, query: CallbackQuery):
-    buttons = [[InlineKeyboardButton("Back", callback_data = "home"), InlineKeyboardButton("Close", callback_data = "close")]]
-    await query.message.edit_text(
-        text=client.messages.get('ABOUT', 'No Start Message').format(
-            owner_id=client.owner,
-            bot_username=client.username,
-            first=query.from_user.first_name,
-            last=query.from_user.last_name,
-            username=None if not query.from_user.username else '@' + query.from_user.username,
-            mention=query.from_user.mention,
-            id=query.from_user.id
-                
-        ),
-        reply_markup=InlineKeyboardMarkup(buttons)
+    await query.answer("ℹ️ Loading about documentation details...")
+    
+    about_text = config.MESSAGES.get('ABOUT', '').format(
+        bot_name=client.username,
+        mention=query.from_user.mention
     )
+    
+    back_markup = InlineKeyboardMarkup([[InlineKeyboardButton("‹ ʙᴀᴄᴋ", callback_data="home")]])
+    
+    try:
+        await query.message.edit_caption(caption=about_text, reply_markup=back_markup)
+    except Exception:
+        try:
+            await query.message.edit_text(text=about_text, reply_markup=back_markup)
+        except Exception:
+            pass
     return
 
 #==========================================================================#        
 
 @Client.on_callback_query(filters.regex('^close$'))
 async def close(client: Client, query: CallbackQuery):
+    await query.answer("🗑️ Interface interface closed.")
     await query.message.delete()
     try:
         await query.message.reply_to_message.delete()
@@ -352,7 +354,6 @@ async def ban(client: Client, message: Message):
                 await client.mongodb.ban_user(user_id)
         return await message.reply(f"__{c} users have been banned!__")
     except Exception as e:
-    
         return await message.reply(f"**Error:** `{e}`")
 
 #==========================================================================#        
@@ -376,8 +377,5 @@ async def unban(client: Client, message: Message):
                 await client.mongodb.unban_user(user_id)
         return await message.reply(f"__{c} users have been unbanned!__")
     except Exception as e:
-    
         return await message.reply(f"**Error:** `{e}`")
-
-#==========================================================================#                
-
+        
