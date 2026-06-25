@@ -15,8 +15,9 @@ from helper.helper_func import get_messages, force_sub, decode
 
 # Background clean scheduler loop task handler
 async def schedule_dynamic_deletion(client: Client, chat_id: int, media_messages: list, banner_msg: Message, transfer_link: str):
-    # 30 Minutes structural deletion latency = 1800 seconds
-    await asyncio.sleep(1800)
+    # Dynamic latency parsing based on settings configuration
+    deletion_seconds = getattr(client, 'auto_del', 1800)
+    await asyncio.sleep(deletion_seconds)
     
     # 1. Purge all media nodes safely from chat history
     for msg in media_messages:
@@ -99,14 +100,23 @@ async def start_command(client: Client, message: Message):
 
             # Case A: Shortener successfully bypassed -> Reward 3 Credits Loop
             if is_short_link:
-                # FIXED: 3 ki jagah 2 kiya kyuki 1st file isi click par instantly niche deliver ho jayegi
                 user_credits = 2  
-                next_rotation = (rotation_index + 1) % 3  # Shift rotation state smoothly (0 -> 1 -> 2)
+                next_rotation = (rotation_index + 1) % 3  
                 await client.mongodb.user_data.update_one(
                     {"_id": user_id}, 
                     {"$set": {"credits": user_credits, "rotation_index": next_rotation}}, 
                     upsert=True
                 )
+                
+                # Dynamic Click Counter increment mapping for settings panel analytics
+                try:
+                    await client.mongodb.db.shortner_analytics.update_one(
+                        {"shortner_id": int(rotation_index)}, 
+                        {"$inc": {"clicks": 1}}, 
+                        upsert=True
+                    )
+                except Exception:
+                    pass
                 
                 success_msg = (
                     "<b>◍ ʏᴏᴜʀ ᴠᴇʀɪғɪᴄᴀᴛɪᴏɴ ɪs sᴜᴄᴄᴇssғᴜʟ!\n\n"
@@ -171,7 +181,6 @@ async def start_command(client: Client, message: Message):
             # Case C: Active credits balance detected -> Consume 1 credit accurately
             if user_credits > 0 and not is_short_link:
                 user_credits -= 1
-                # FIXED: Document unique locator changed to strict "_id" match for data safety
                 await client.mongodb.user_data.update_one({"_id": user_id}, {"$set": {"credits": user_credits}})
 
         await deliver_files_routing(client, message, base64_string, original_payload)
@@ -311,10 +320,13 @@ async def deliver_files_routing(client, message, base64_string, original_payload
         except Exception:
             pass
 
-    # Serious standard warning text preserved exactly as requested
+    # Dynamic auto delete time text mapping based on settings variable
     if media_messages:
+        auto_del_seconds = getattr(client, 'auto_del', 1800)
+        readable_time = humanize.naturaldelta(auto_del_seconds)
+        
         warning_banner_text = (
-            '<b>⚠️ This File is deleting automatically in <a href="https://t.me/RezeFilesBot">30 Minutes...</a> Forward in your Saved Messages..!</b>'
+            f'<b>⚠️ This File is deleting automatically in <a href="https://t.me/{client.username}">{readable_time}...</a> Forward in your Saved Messages..!</b>'
         )
         try:
             banner_msg = await client.send_message(chat_id=chat_target, text=warning_banner_text)
@@ -330,4 +342,4 @@ async def deliver_files_routing(client, message, base64_string, original_payload
         except Exception:
             pass
     return
-    
+                        
