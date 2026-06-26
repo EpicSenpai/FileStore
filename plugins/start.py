@@ -15,18 +15,15 @@ from helper.helper_func import get_messages, force_sub, decode
 
 # Background clean scheduler loop task handler
 async def schedule_dynamic_deletion(client: Client, chat_id: int, media_messages: list, banner_msg: Message, transfer_link: str):
-    # Dynamic latency parsing based on settings configuration
     deletion_seconds = getattr(client, 'auto_del', 1800)
     await asyncio.sleep(deletion_seconds)
     
-    # 1. Purge all media nodes safely from chat history
     for msg in media_messages:
         try:
             await msg.delete()
         except Exception:
             pass
 
-    # 2. Render the short and crisp structural recovery text block with aesthetic small caps
     retrieval_text = (
         "<b>›› ᴘʀᴇᴠɪᴏᴜs ᴍᴇssᴀɢᴇ ᴡᴀs ᴅᴇʟᴇᴛᴇᴅ\n\n"
         "ɪꜰ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ɢᴇᴛ ᴛʜᴇ ꜰɪʟᴇs ᴀɢᴀɪɴ, ᴛʜᴇɴ ᴄʟɪᴄᴋ: • ɢᴇᴛ ꜰɪʟᴇs • "
@@ -85,6 +82,9 @@ async def start_command(client: Client, message: Message):
 
         is_user_pro = await client.mongodb.is_pro(user_id)
         shortner_enabled = getattr(client, 'shortner_enabled', True)
+        
+        # Dynamic variable fetch for global configured credits amount
+        reward_amount = await client.mongodb.get_set_credits_amount()
 
         #===============================================================#
         # MONGO TOKEN TRACKING LOGIC (DYNAMIC DEDUCTION & ROTATION)
@@ -98,9 +98,9 @@ async def start_command(client: Client, message: Message):
             user_credits = user_data.get("credits", 0)
             rotation_index = user_data.get("rotation_index", 0)
 
-            # Case A: Shortener successfully bypassed -> Reward 3 Credits Loop
+            # Case A: Shortener successfully bypassed -> Reward configured amount - 1 credit instantly
             if is_short_link:
-                user_credits = 2  
+                user_credits = reward_amount - 1  
                 next_rotation = (rotation_index + 1) % 3  
                 await client.mongodb.user_data.update_one(
                     {"_id": user_id}, 
@@ -108,7 +108,6 @@ async def start_command(client: Client, message: Message):
                     upsert=True
                 )
                 
-                # Dynamic Click Counter increment mapping for settings panel analytics
                 try:
                     await client.mongodb.db.shortner_analytics.update_one(
                         {"shortner_id": int(rotation_index)}, 
@@ -120,7 +119,7 @@ async def start_command(client: Client, message: Message):
                 
                 success_msg = (
                     "<b>◍ ʏᴏᴜʀ ᴠᴇʀɪғɪᴄᴀᴛɪᴏɴ ɪs sᴜᴄᴄᴇssғᴜʟ!\n\n"
-                    "<blockquote>⧗ 3 ᴄʀᴇᴅɪᴛs ᴀᴅᴅᴇᴅ ᴛᴏ ʏᴏᴜʀ ᴀᴄᴄᴏᴜɴᴛ.</blockquote></b>"
+                    f"<blockquote>⧗ {reward_amount} ᴄʀᴇᴅɪᴛs ᴀᴅᴅᴇᴅ ᴛᴏ ʏᴏᴜʀ ᴀᴄᴄᴏᴜɴᴛ.</blockquote></b>"
                 )
                 
                 await message.reply_photo(
@@ -134,7 +133,7 @@ async def start_command(client: Client, message: Message):
                 )
                 return
             
-            # Case B: Balance empty -> Trigger shortener based on current index tracking layer
+            # Case B: Balance empty -> Trigger shortener rotation link
             elif user_credits <= 0:
                 current_url, current_api, current_tut = SHORT_URL_1, SHORT_API_1, SHORT_TUT_1
                 
@@ -155,7 +154,7 @@ async def start_command(client: Client, message: Message):
                         custom_credit_msg = (
                             "<b><i>◍ Yeah the link's ready :), Here is your link ⬇️</i>\n\n"
                             "⧗ ᴄʀᴇᴅɪᴛs ᴍᴏᴅᴇ:\n"
-                            "<blockquote>◍ ᴇᴀᴄʜ ᴀᴅ ʙʏᴘᴀss ʀᴇᴡᴀʀᴅs ʏᴏᴜ ᴡɪᴛʜ 3 ᴄʀᴇᴅɪᴛs.</blockquote>\n"
+                            f"<blockquote>◍ ᴇᴀᴄʜ ᴀᴅ ʙʏᴘᴀss ʀᴇᴡᴀʀᴅs ʏᴏᴜ ᴡɪᴛʜ {reward_amount} ᴄʀᴇᴅɪᴛs.</blockquote>\n"
                             "<blockquote>◍ ᴏɴᴇ ᴄʀᴇᴅɪᴛ ɪs ᴄᴏɴsᴜᴍᴇᴅ ᴘᴇʀ ꜰɪʟᴇ/ʟɪɴᴋ ᴀᴄᴄᴇss.</blockquote></b>"
                         )
 
@@ -178,7 +177,6 @@ async def start_command(client: Client, message: Message):
                         client.LOGGER(__name__, client.name).warning(f"Shortener tracking node breakdown: {e}")
                         pass
 
-            # Case C: Active credits balance detected -> Consume 1 credit accurately
             if user_credits > 0 and not is_short_link:
                 user_credits -= 1
                 await client.mongodb.user_data.update_one({"_id": user_id}, {"$set": {"credits": user_credits}})
@@ -279,7 +277,7 @@ async def deliver_files_routing(client, message, base64_string, original_payload
     except Exception as e:
         return await client.send_message(chat_target, "<b>✗ ɪɴᴠᴀʟɪᴅ ᴏʀ ᴇxᴘɪʀᴇᴅ ꜰɪʟᴇ ʟɪɴᴋ.</b>")
 
-    temp_msg = await client.send_message(chat_target, "<i>Wait A Sec...</i>")
+    temp_msg = await client.send_message(chat_target, "<b><i>Wait A Sec...</i></b>")
     messages = []
 
     try:
@@ -320,7 +318,6 @@ async def deliver_files_routing(client, message, base64_string, original_payload
         except Exception:
             pass
 
-    # Dynamic auto delete time text mapping based on settings variable
     if media_messages:
         auto_del_seconds = getattr(client, 'auto_del', 1800)
         readable_time = humanize.naturaldelta(auto_del_seconds)
@@ -342,4 +339,4 @@ async def deliver_files_routing(client, message, base64_string, original_payload
         except Exception:
             pass
     return
-                        
+                
