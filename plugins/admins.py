@@ -132,7 +132,6 @@ async def render_premium_list_page(client, message_or_query, page: int, is_callb
             expiry_date = doc.get('expiry_date')
             added_at = doc.get('added_at', current_time)
             
-            # Math calculation for elapsed and structural times tracking
             elapsed = current_time - added_at
             elapsed_str = f"{elapsed.days}ᴅ ᴘᴀssᴇᴅ" if elapsed.days > 0 else "ᴀᴅᴅᴇᴅ ᴛᴏᴅᴀʏ"
             
@@ -159,11 +158,10 @@ async def render_premium_list_page(client, message_or_query, page: int, is_callb
     if nav_row:
         buttons.append(nav_row)
         
-    # Toggle button layout dynamically based on current routing position context
     if page > 1:
-        buttons.append([InlineKeyboardButton("‹ ʙᴀᴄᴋ ᴛᴏ ʜᴏᴍᴇ", callback_data="settings")])
+        buttons.append([InlineKeyboardButton("‹ ʙᴀᴄᴋ ᴛᴏ ʜᴏᴍｅ", callback_data="settings")])
     else:
-        buttons.append([InlineKeyboardButton("ᴄʟᴏsᴇ •", callback_data="close")])
+        buttons.append([InlineKeyboardButton("<b>ᴄʟᴏsᴇ •</b>", callback_data="close")])
         
     markup = InlineKeyboardMarkup(buttons)
     if is_callback:
@@ -204,7 +202,7 @@ async def add_credits_to_user_command(client: Client, message: Message):
     await client.mongodb.user_data.update_one({"_id": target_user}, {"$set": {"credits": new_credits}}, upsert=True)
     await message.reply(f"<blockquote><b>✓ ᴄʀᴇᴅɪᴛs sᴜᴄᴄᴇssfᴜʟʟʏ ɪɴᴊᴇᴄᴛᴇᴅ!</b></blockquote>\n\n›› ᴜsᴇʀ <code>{target_user}</code> balance up: <code>{current_credits}</code> -> <code>{new_credits}</code>")
     try:
-        await client.send_message(chat_id=target_user, text=f"<blockquote><b>✨ ʜᴇʏ sᴇɴᴘᴀɪ! ᴀᴅᴍɪɴ ʜᴀs ᴄʀᴇᴅɪᴛᴇᴅ ʏᴏᴜʀ ᴀᴄᴄᴏᴜɴᴛ!</b></blockquote>\n\n›› <b>ᴀᴅᴅᴇᴅ:</b> <code>{amount} ᴄʀᴇᴅɪᴛs</code>\n›› <b>ᴄᴜʀʀᴇɴᴛ ʙᴀʟᴀɴᴄᴇ:</b> <code>{new_credits} ᴄʀᴇᴅɪᴛs</code>")
+        await client.send_message(chat_id=target_user, text=f"<blockquote><b>✨ ʜᴇʏ sᴇɴᴘᴀɪ! ᴀᴅᴍɪɴ ʜᴀs ᴄʀᴇᴅɪᴛᴇᴅ ʏᴏᴜʀ ᴀᴄᴄᴏᴜɴᴛ!</b></blockquote>\n\n›› <b>ᴀᴅᴅᴇᴅ:</b> <code>{amount} ᴄʀᴇᴅɪᴛs</code>\n›› <b><b>ᴄᴜʀʀᴇɴᴛ ʙᴀʟᴀɴᴄᴇ:</b></b> <code>{new_credits} ᴄʀᴇᴅɪᴛs</code>")
     except Exception:
         pass
 
@@ -226,8 +224,10 @@ async def set_global_credits_config_command(client: Client, message: Message):
         return await message.reply("<b>✗ Amount must be an integer string numerical.</b>")
         
     await client.mongodb.set_global_credits_amount(new_amount)
-    await message.reply(f"<blockquote><b>✓ ɢʟᴏʙᴀʟ ᴄʀᴇᴅɪᴛs CONFIG ᴜᴘᴅᴀᴛᴇᴅ!</b></blockquote>\n\n›› <b>ɴᴇᴡ sᴇᴛ ᴀᴍᴏᴜɴᴛ:</b> <code>{new_amount} ᴄʀᴇᴅɪᴛs</code> per bypass loop validation. All menus aligned.")
+    await message.reply(f"<blockquote><b>✓ ɢʟᴏʙᴀʟ ᴄʀᴇᴅɪᴛs CONFIG ᴜᴘᴅᴀᴛᴇᴅ!</b></blockquote>\n\n›› <b><b>ɴᴇᴡ sᴇᴛ ᴀᴍᴏᴜɴᴛ:</b></b> <code>{new_amount} ᴄʀᴇᴅɪᴛs</code> per bypass loop validation. All menus aligned.")
 
+#===============================================================#
+# 📡 DYNAMIC AUTO-DELETE BROADCAST CONFIG HANDLER REGISTERED
 #===============================================================#
 
 @Client.on_message(filters.command("dbroadcast") & filters.private)
@@ -246,7 +246,7 @@ async def set_auto_delete_broadcast_latency_command(client: Client, message: Mes
         return await message.reply("<b>✗ Latency parameters must be integer metrics seconds.</b>")
         
     await client.mongodb.set_dbroadcast_latency(seconds)
-    await message.reply(f"<blockquote><b>✓ BROADCAST AUTO-DELETE TARGET LOADED!</b></blockquote>\n\n›› <b>sᴇᴛ sᴇᴄᴏɴᴅs:</b> <code>{seconds} sᴇᴄᴏɴᴅs</code>. All future broadcast modules will trigger scheduled dynamic execution nodes.")
+    await message.reply(f"<blockquote><b>✓ BROADCAST AUTO-DELETE TARGET LOADED!</b></blockquote>\n\n›› <b>sᴇᴛ sᴇᴄᴏɴᴅs:</b> <code>{seconds} sᴇᴄᴏɴᴅs</code>.")
 
 #===============================================================#
 
@@ -369,10 +369,10 @@ async def usage_cmd(client: Client, message: Message):
 {net_section}
 
 <blockquote><u>**≡ ʙᴏᴛ ʀᴇsᴏᴜʀᴄᴇ ᴜsᴀɢᴇ:**</u></blockquote>
-<blockquote>›› **ᴄᴘᴜ:** `{bot_cpu_usage:.2f}%`
+<blockquote>›› ᴄᴘᴜ: `{bot_cpu_usage:.2f}%`
 ›› **ᴍᴇᴍᴏʀʏ:** `{bot_memory_usage:.2f} ᴍʙ`</blockquote>
 
-<blockquote>**• ᴜsᴇ ᴛʜɪs ɪɴꜰᴏʀᴍᴀᴛɪᴏɴ ᴛᴏ ᴍᴏɴɪᴛᴏʀ ʏᴏᴜʀ ʙᴏᴛ's ᴘᴇʀꜰᴏʀᴍᴀɴᴄᴇ!**</blockquote>"""
+<blockquote><b>• ᴜsᴇ ᴛʜɪs ɪɴꜰᴏʀᴍᴀᴛɪᴏɴ ᴛᴏ ᴍᴏɴɪᴛᴏʀ ʏᴏᴜʀ ʙᴏᴛ's ᴘᴇʀꜰᴏʀᴍᴀɴᴄᴇ!</b></blockquote>"""
     await reply.edit_text(msg)
 
 #===============================================================#
@@ -413,4 +413,4 @@ async def remove_admins(client: Client, query: CallbackQuery):
         return await ids_msg.reply(f"Error: {e}")
     await admins(client, query)
     return await ids_msg.reply(f"__{len(ids)} admin {'id' if len(ids)==1 else 'ids'} have been removed!!__")
-                                   
+    
