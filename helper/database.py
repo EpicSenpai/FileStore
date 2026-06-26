@@ -52,13 +52,18 @@ class MongoDB:
         )
         return doc is not None
 
-    # ✅ PRO PREMIUM FEATURES
+    # ✅ PRO PREMIUM FEATURES (UPGRADED LAYER)
 
-    async def add_pro(self, user_id: int, expiry_date: datetime = None):
+    async def add_pro(self, user_id: int, expiry_date: datetime = None, total_days: int = None, is_lifetime: bool = False):
         try:
             await self.premium_users.update_one(
                 {'_id': user_id},
-                {'$set': {'expiry_date': expiry_date}},
+                {'$set': {
+                    'expiry_date': expiry_date,
+                    'total_days': total_days,
+                    'is_lifetime': is_lifetime,
+                    'added_at': datetime.now()
+                }},
                 upsert=True
             )
             return True
@@ -78,9 +83,9 @@ class MongoDB:
         doc = await self.premium_users.find_one({'_id': user_id})
         if not doc:
             return False
-        if 'expiry_date' not in doc:
-            return True  
-        if doc['expiry_date'] is None:
+        if doc.get('is_lifetime', False):
+            return True
+        if 'expiry_date' not in doc or doc['expiry_date'] is None:
             return True  
         return doc['expiry_date'] > datetime.now()
 
@@ -88,6 +93,7 @@ class MongoDB:
         current_time = datetime.now()
         cursor = self.premium_users.find({
             '$or': [
+                {'is_lifetime': True},
                 {'expiry_date': None},  
                 {'expiry_date': {'$exists': False}},  
                 {'expiry_date': {'$gt': current_time}}  
@@ -98,6 +104,29 @@ class MongoDB:
     async def get_expiry_date(self, user_id: int) -> datetime:
         doc = await self.premium_users.find_one({'_id': user_id})
         return doc.get('expiry_date') if doc else None
+
+    # ✅ DYNAMIC GLOBAL SETTINGS LAYER
+    async def get_set_credits_amount(self) -> int:
+        doc = await self.user_data.find_one({"_id": "global_credits_config"})
+        return doc.get("reward_amount", 3) if doc else 3
+
+    async def set_global_credits_amount(self, amount: int):
+        await self.user_data.update_one(
+            {"_id": "global_credits_config"},
+            {"$set": {"reward_amount": amount}},
+            upsert=True
+        )
+
+    async def get_dbroadcast_latency(self) -> int:
+        doc = await self.user_data.find_one({"_id": "global_dbroadcast_config"})
+        return doc.get("latency_seconds", 0) if doc else 0
+
+    async def set_dbroadcast_latency(self, seconds: int):
+        await self.user_data.update_one(
+            {"_id": "global_dbroadcast_config"},
+            {"$set": {"latency_seconds": seconds}},
+            upsert=True
+        )
 
     # ✅ USER FUNCTIONS
 
@@ -148,7 +177,7 @@ class MongoDB:
         current_data.pop(str(channel_id), None)
         await self.set_fsub_channels(current_data)
 
-    # ✅ UPGRADED MULTI-SHORTNER SETTINGS PERSISTENCE (Line by Line Saving)
+    # ✅ UPGRADED MULTI-SHORTNER SETTINGS PERSISTENCE
 
     async def set_shortner_settings(self, shortner_data: dict):
         await self.user_data.update_one(
@@ -173,7 +202,6 @@ class MongoDB:
     async def set_shortner_status(self, enabled: bool):
         await self.update_shortner_setting('enabled', enabled)
 
-    # Naye Database handlers specific shorteners data backup ke liye
     async def get_specific_shortner(self, num: int) -> dict:
         data = await self.user_data.find_one({"_id": f"shortner_node_{num}"})
         return data.get("data", {}) if data else {}
@@ -320,4 +348,4 @@ class MongoDB:
         except Exception as e:
             print(f"Error getting comprehensive fsub statistics: {e}")
             return {}
-            
+                                         
