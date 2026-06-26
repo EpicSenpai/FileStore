@@ -5,7 +5,7 @@ import config
 from plugins.shortner import get_short
 
 #===============================================================#
-# 🚀 REAL TEXT COMMAND ROUTER FOR /SETTINGS (PHOTO GRID SUPPORT)
+# 🚀 CORE TEXT COMMAND ROUTER FOR /SETTINGS (PHOTO GRID SUPPORT)
 #===============================================================#
 
 @Client.on_message(filters.command("settings") & filters.private)
@@ -21,14 +21,14 @@ async def settings_text_command(client: Client, message: Message):
     primary_db = getattr(client, 'primary_db_channel', client.db)
     
     msg = f"<blockquote>✦ sᴇᴛᴛɪɴgs ᴏғ @{client.username} (ᴘᴀɢᴇ 1)</blockquote>\n" \
-          f"›› <b>欲sᴜʙ ᴄʜᴀɴɴᴇʟs:</b> <code>{total_fsub}</code> (ʀᴇǫᴜᴇsᴛ: {request_enabled}, ᴛɪᴍᴇʀ: {timer_enabled})\n" \
+          f"›› <b>欲sᴜʙ ᴄʜᴀɴɴᴇʟs:</b> <code>{total_fsub}</code> (名ᴇǫᴜᴇsᴛ: {request_enabled}, ᴛɪᴍᴇʀ: {timer_enabled})\n" \
           f"›› <b>ᴅʙ ᴄʜᴀɴɴᴇʟs:</b> <code>{total_db_channels}</code> (ᴘʀɪᴍᴀʀʏ: <code>{primary_db}</code>)\n" \
-          f"›› <b>ᴀᴜᴛᴏ ᴅᴇʟᴇᴛᴇ ᴛɪᴍᴇʀ:</b> <code>{client.auto_del}</code>\n" \
-          f"›› <b>ᴘʀᴏᴛᴇᴄᴛ ᴄᴏɴᴛᴇɴᴛ:</b> <code>{"✓ ᴛʀᴜᴇ" if client.protect else "✗ 𝖥ᴀʟsᴇ"}</code>\n" \
-          f"›› <b>ᴅɪsᴀʙʟᴇ ʙᴜᴛᴛᴏɴ:</b> <code>{"✓ ᴛʀᴜᴇ" if client.disable_btn else "✗ 𝖥ᴀʟsᴇ"}</code>\n" \
-          f"›› <b>ʀᴇᴘʟʏ ᴛᴇxᴛ:</b> <code>{client.reply_text if client.reply_text else 'ɴᴏɴᴇ'}</code>\n" \
+          f"›› <b>ᴀuᴛᴏ ᴅᴇʟᴇᴛᴇ ᴛɪᴍᴇʀ:</b> <code>{client.auto_del}</code>\n" \
+          f"›› <b>ᴘʀᴏᴛᴇᴄᴛ ᴄcontent:</b> <code>{"✓ ᴛʀᴜᴇ" if client.protect else "✗ 𝖥ᴀʟsᴇ"}</code>\n" \
+          f"›› <b>ᴅɪsᴀʙʟᴇ ʙuᴛᴛᴏɴ:</b> <code>{"✓ ᴛʀᴜᴇ" if client.disable_btn else "✗ 𝖥ᴀʟsᴇ"}</code>\n" \
+          f"›› <b>名ᴇᴘʟʏ ᴛᴇxᴛ:</b> <code>{client.reply_text if client.reply_text else 'ɴᴏɴᴇ'}</code>\n" \
           f"›› <b>ᴀᴅᴍɪɴs:</b> <code>{len(client.admins)}</code>\n\n" \
-          f"<blockquote><u><b>≡ ᴍᴜʟᴛɪ-sʜᴏʀᴛᴇɴᴇɴᴇʀ sᴛᴀᴛᴜs:</b></u></blockquote>\n" \
+          f"<blockquote><u><b>≡ ᴍuʟᴛɪ-sʜᴏʀᴛᴇɴᴇɴᴇʀ sᴛᴀᴛus:</b></u></blockquote>\n" \
           f"›› <b>sʜᴏʀᴛɴᴇer 1:</b> <code>{getattr(config, 'SHORT_URL_1', 'None')}</code> [<code>{"✔️ ᴏɴ" if getattr(config, 'SHORT_STATUS_1', True) else "❌ ᴏғғ"}</code>]\n" \
           f"›› <b>sʜᴏʀᴛɴᴇer 2:</b> <code>{getattr(config, 'SHORT_URL_2', 'None')}</code> [<code>{"✔️ ᴏɴ" if getattr(config, 'SHORT_STATUS_2', True) else "❌ ᴏғғ"}</code>]\n" \
           f"›› <b>sʜᴏʀᴛɴᴇer 3:</b> <code>{getattr(config, 'SHORT_URL_3', 'None')}</code> [<code>{"✔️ ᴏɴ" if getattr(config, 'SHORT_STATUS_3', True) else "❌ ᴏғғ"}</code>]"
@@ -54,7 +54,7 @@ async def back_to_home_callback(client: Client, query: CallbackQuery):
     
     buttons = [[InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data="ABOUT"), InlineKeyboardButton("ᴄʟᴏsᴇ •", callback_data='close')]]
     if user_id in client.admins:
-        buttons.insert(0, [InlineKeyboardButton("• ꜱᴇᴛᴛɪɴɢs •", callback_data="settings")])
+        buttons.insert(0, [InlineKeyboardButton("• ꜱETTINGs •", callback_data="settings")])
         
     start_caption = config.MESSAGES.get('START', '').format(
         first=query.from_user.first_name,
@@ -118,15 +118,15 @@ async def settings(client, query):
     primary_db = getattr(client, 'primary_db_channel', client.db)
     
     msg = f"""<blockquote>✦ sᴇᴛᴛɪɴgs ᴏғ @{client.username} (ᴘᴀɢᴇ 1)</blockquote>
-›› <b>欲sᴜʙ ᴄʜᴀɴɴᴇʟs:</b> <code>{total_fsub}</code> (ʀᴇǫᴜᴇsᴛ: {request_enabled}, ᴛɪᴍᴇʀ: {timer_enabled})
+›› <b>欲sᴜʙ ᴄʜᴀɴɴᴇʟs:</b> <code>{total_fsub}</code> (名ᴇǫᴜᴇsᴛ: {request_enabled}, ᴛɪᴍᴇʀ: {timer_enabled})
 ›› <b>ᴅʙ ᴄʜᴀɴɴᴇʟs:</b> <code>{total_db_channels}</code> (ᴘʀɪᴍᴀʀʏ: <code>{primary_db}</code>)
-›› <b>ᴀᴜᴛᴏ ᴅᴇʟᴇᴛᴇ ᴛɪᴍᴇʀ:</b> <code>{client.auto_del}</code>
-›› <b>ᴘʀᴏᴛᴇᴄᴛ ᴄᴏɴᴛᴇɴᴛ:</b> <code>{"✓ ᴛʀᴜᴇ" if client.protect else "✗ 𝖥ᴀʟsᴇ"}</code>
-›› <b>ᴅɪsᴀʙʟᴇ ʙᴜᴛᴛᴏɴ:</b> <code>{"✓ ᴛʀᴜᴇ" if client.disable_btn else "✗ 𝖥ᴀʟsᴇ"}</code>
-›› <b>ʀᴇᴘʟʏ ᴛᴇxᴛ:</b> <code>{client.reply_text if client.reply_text else 'ɴᴏɴᴇ'}</code>
+›› <b>ᴀuᴛᴏ store_ᴅᴇʟᴇᴛᴇ ᴛɪᴍᴇʀ:</b> <code>{client.auto_del}</code>
+›› <b>ᴘʀᴏᴛᴇᴄᴛ ᴄcontent:</b> <code>{"✓ ᴛʀᴜᴇ" if client.protect else "✗ 𝖥ᴀʟsᴇ"}</code>
+›› <b>ᴅɪsᴀʙʟᴇ ʙuᴛᴛᴏɴ:</b> <code>{"✓ ᴛʀᴜᴇ" if client.disable_btn else "✗ 𝖥ᴀʟsᴇ"}</code>
+›› <b>名ᴇᴘʟʏ ᴛᴇxᴛ:</b> <code>{client.reply_text if client.reply_text else '名ᴏɴᴇ'}</code>
 ›› <b>ᴀᴅᴍɪɴs:</b> <code>{len(client.admins)}</code>
 
-<blockquote><u><b>≡ ᴍᴜʟᴛɪ-sʜᴏʀᴛᴇɴᴇɴᴇʀ sᴛᴀᴛᴜs:</b></u></blockquote>
+<blockquote><u><b>≡ ᴍuʟᴛɪ-sʜᴏʀᴛᴇɴᴇɴᴇ r sᴛᴀᴛus:</b></u></blockquote>
 ›› <b>sʜᴏʀᴛɴᴇer 1:</b> <code>{getattr(config, 'SHORT_URL_1', 'None')}</code> [<code>{"✔️ ᴏɴ" if getattr(config, 'SHORT_STATUS_1', True) else "❌ ᴏғғ"}</code>]
 ›› <b>sʜᴏʀᴛɴᴇer 2:</b> <code>{getattr(config, 'SHORT_URL_2', 'None')}</code> [<code>{"✔️ ᴏɴ" if getattr(config, 'SHORT_STATUS_2', True) else "❌ ᴏғғ"}</code>]
 ›› <b>sʜᴏʀᴛɴᴇer 3:</b> <code>{getattr(config, 'SHORT_URL_3', 'None')}</code> [<code>{"✔️ ᴏɴ" if getattr(config, 'SHORT_STATUS_3', True) else "❌ ᴏғғ"}</code>]
@@ -224,9 +224,9 @@ async def edit_specific_shortner(client, query):
     msg = f"""<blockquote>🛠️ ᴄᴏɴ𝖥ɪɢᴜʀᴇ sʜᴏʀᴛᴇɴᴇer {num}</blockquote>
 ›› <b>sᴛᴀᴛᴜs:</b> <code>{"✔️ ᴀᴄᴛɪᴠᴇ / ᴏɴ" if status_val else "❌ ɪɴᴀᴄᴛɪᴠᴇ / ᴏғғ"}</code>
 ›› <b><b>ᴄᴜʀʀᴇɴᴛ uʀʟ:</b></b> <code>{url_val}</code>
-›› <b><b><b>ᴄᴜʀʀᴇɴᴛ ᴛuᴛᴏʀɪᴀʟ:</b></b></b> <code>{tut_val}</code>
+›› <b><b><b><b>ᴄᴜʀʀᴇɴᴛ ᴛuᴛᴏʀɪᴀʟ:</b></b></b></b> <code>{tut_val}</code>
 
-__<b>ᴍᴀɴᴀɢᴇ sᴡɪᴛᴄʜ, uᴘᴅᴀᴛᴇ ᴘᴀʀᴀᴍᴇᴛᴇʀs ᴏʀ ᴛᴇsᴛ 𝖠𝖯𝖨 connectivity:</b>__"""
+__<b>ᴍᴀɴᴀɢᴇ sᴡɪᴛᴄʜ, uᴘᴅᴀᴛᴇ ᴘᴀʀᴀᴍᴇᴛᴇʀs ᴏʀ ᴛᴇsᴛ ᴀᴘɪ ᴄᴏɴɴᴇᴄᴛɪᴠɪᴛʏ:</b>__"""
     
     status_text = "❌ ᴅɪsᴀʙʟᴇ / ᴛᴜʀɴ ᴏғғ" if status_val else "✔️ ᴇɴᴀʙʟᴇ / ᴛᴜʀɴ ᴏɴ"
     
@@ -306,7 +306,7 @@ async def process_shortner_inputs(client, query):
             upsert=True
         )
                 
-        await query.message.edit_text(f"<blockquote><b>✓ sʜᴏʀᴛᴇɴᴇer {num} {field.upper()} uᴘᴅᴀᴛᴇᴅ suᴄᴄᴇss𝖥uʟʟʏ!</b></blockquote>\n\n›› <b>ɴᴇᴡ ᴠᴀʟᴜᴇ:</b> <code>{new_value}</code>", 
+        await query.message.edit_text(f"<blockquote><b>✓ sʜᴏʀᴛᴇɴᴇer {num} {field.upper()} uᴘᴅᴀᴛᴇᴅ suᴄᴄᴇss𝖥uʟʟY!</b></blockquote>\n\n›› <b>ɴᴇᴡ ᴠᴀʟᴜᴇ:</b> <code>{new_value}</code>", 
                                     reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('‹ ʙᴀᴄᴋ', f'edit_short_{num}')]]))
         await res.delete()
     except ListenerTimeout:
@@ -353,16 +353,16 @@ async def fsub(client, query):
         channel_list = []
         for channel_id, channel_data in client.fsub_dict.items():
             channel_name = channel_data[0] if channel_data and len(channel_data) > 0 else "Unknown"
-            request_status = "✓ ʀᴇǫᴜᴇsᴛ" if channel_data[2] else "✗ ʀᴇǫᴜᴇsᴛ"
-            timer_status = f"ᴛɪᴍᴇʀ: {channel_data[3]}ᴍ" if channel_data[3] > 0 else "ᴛɪ|}{ᴍᴇʀ: ∞"
+            request_status = "✓ 名ᴇǫᴜᴇsᴛ" if channel_data[2] else "✗ 名ᴇǫᴜᴇsᴛ"
+            timer_status = f"ᴛɪᴍᴇʀ: {channel_data[3]}ᴍ" if channel_data[3] > 0 else "ᴛɪᴍᴇʀ: ∞"
             channel_list.append(f"• <code>{channel_name}</code> (<code>{channel_id}</code>) - {request_status}, {timer_status}")
         channels_display = "\n".join(channel_list)
     else:
-        channels_display = "_ɴᴏ 𝖥ᴏʀᴄᴇ suʙsᴄʀɪᴘᴛɪᴏɴ ᴄʜᴀɴɴᴇʟs ᴄᴏɴ𝖥uʀᴇᴅ_"
+        channels_display = "_名ᴏ 𝖥ᴏʀᴄᴇ suʙsᴄʀɪᴘᴛɪᴏɴ ᴄʜᴀɴɴᴇʟs ᴄᴏɴ𝖥uʀᴇᴅ_"
     
     msg = f"<b>◍ ꜰᴏʀᴄᴇ sᴜʙsᴄʀɪᴘᴛɪᴏɴ sᴇᴛᴛɪɴɢs</b>\n\n" \
           f"›› <b>ᴄᴏɴꜰɪɢᴜʀᴇᴅ ᴄʜᴀɴɴᴇʟs:</b>\n{channels_display}\n\n" \
-          f"__<b>ᴜsᴇ ᴛʜᴇ ᴀᴘᴘʀᴏᴘʀɪᴀᴛᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟۆᴡ ᴛᴏ ᴍᴀɴᴀɢᴇ ʏᴏᴜʀ ꜰᴏʀᴄᴇ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴄʜᴀɴɴᴇʟ ʙᴀsᴇᴅ ᴏɴ ʏᴏᴜʀ ɴᴇᴇᴅs!</b>__"
+          f"__<b>ᴜsᴇ ᴛʜᴇ ᴀᴘᴘʀᴏᴘʀɪᴀᴛᴇ <b>ʙᴜᴛᴛᴏɴ ʙᴇʟۆᴡ ᴛᴏ ᴍᴀɴᴀɢᴇ ʏᴏᴜʀ ꜰᴏʀᴄᴇ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴄʜᴀɴɴᴇʟ ʙᴀsᴇᴅ ᴏɴ ʏᴏᴜʀ ɴᴇᴇᴅs!</b></b>__"
     reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton('›› ᴀᴅᴅ ᴄʜᴀɴɴᴇʟ', 'add_fsub'), InlineKeyboardButton('›› ʀᴇᴍᴏᴠᴇ ᴄʜᴀɴɴᴇʟ', 'rm_fsub')], [InlineKeyboardButton('‹ ʙᴀᴄᴋ', 'settings')]])
     await query.message.edit_text(msg, reply_markup=reply_markup)
 
@@ -371,5 +371,4 @@ async def db_channels(client, query):
     if not query.from_user.id in client.admins: 
         return await query.answer('✗ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs!', show_alert=True)
     db_channels_data = getattr(client, 'db_channels', {})
-    if db_channels_data:
-     
+    if db_cha
