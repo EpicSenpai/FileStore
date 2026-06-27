@@ -425,10 +425,10 @@ async def set_photo_callback(client: Client, query: CallbackQuery):
         res = await client.listen(user_id=query.from_user.id, filters=filters.text, timeout=60)
         new_url = res.text.strip()
         config.MESSAGES[photo_key] = new_url
-        # Save to DB
         await client.mongodb.user_data.update_one(
             {"_id": "bot_messages"},
             {"$set": {photo_key: new_url}},
             upsert=True
         )
         await res.delete()
+        await quer
