@@ -36,8 +36,7 @@ async def settings_text_command(client: Client, message: Message):
     if message.from_user.id not in client.admins:
         return await message.reply(client.reply_text if client.reply_text else "Access Denied!")
     msg, reply_markup = _build_settings_page1_msg(client)
-    image_url = config.MESSAGES.get("START_PHOTO", "https://litter.catbox.moe/q9aqxh.jpg")
-    await message.reply_photo(photo=image_url, caption=msg, reply_markup=reply_markup)
+    await message.reply(msg, reply_markup=reply_markup)
 
 @Client.on_callback_query(filters.regex("^home$"))
 async def back_to_home_callback(client: Client, query: CallbackQuery):
@@ -337,127 +336,6 @@ async def set_text_callback(client: Client, query: CallbackQuery):
         await query.message.edit_text(f"<blockquote><b>✓ {text_key} ᴜᴘᴅᴀᴛᴇᴅ!</b></blockquote>", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('◂ ʙᴀᴄᴋ', 'texts')]]))
     except ListenerTimeout:
         await query.message.edit_text("<b>✗ ᴛɪᴍᴇᴏᴜᴛ!</b>", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('◂ ʙᴀᴄᴋ', 'texts')]]))
-
-@Client.on_callback_query(filters.regex("^settings_page_2$"))
-async def settings_page_2(client, query):
-    if query.from_user.id not in client.admins:
-        return await query.answer('✗ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs!', show_alert=True)
-    total_fsub = len(client.fsub_dict)
-    total_db_channels = len(getattr(client, 'db_channels', {}))
-    msg = (
-        f"<blockquote>✦ sᴇᴛᴛɪɴɢs ᴏꜰ @{client.username} (ᴘᴀɢᴇ 2)</blockquote>\n"
-        f"›› <b>ꜰsᴜʙ ᴄʜᴀɴɴᴇʟs:</b> <code>{total_fsub}</code>\n"
-        f"›› <b>ᴅʙ ᴄʜᴀɴɴᴇʟs:</b> <code>{total_db_channels}</code>\n"
-        f"›› <b>ᴘʀᴏᴛᴇᴄᴛ ᴄᴏɴᴛᴇɴᴛ:</b> <code>{'✓ ᴛʀᴜᴇ' if client.protect else '✗ ꜰᴀʟsᴇ'}</code>\n"
-        f"›› <b>ᴅɪsᴀʙʟᴇ ʙᴜᴛᴛᴏɴ:</b> <code>{'✓ ᴛʀᴜᴇ' if client.disable_btn else '✗ ꜰᴀʟsᴇ'}</code>\n\n"
-        f"<blockquote><u><b>≡ 1sᴛ sʜᴏʀᴛᴇɴᴇʀ:</b></u></blockquote>\n"
-        f"›› <b>sᴛᴀᴛᴜs:</b> <code>{'✔️ ᴇɴᴀʙʟᴇᴅ' if getattr(config, 'SHORT_STATUS_1', True) else '❌ ᴅɪsᴀʙʟᴇᴅ'}</code>\n"
-        f"›› <b>ᴜʀʟ:</b> <code>{getattr(config, 'SHORT_URL_1', 'None')}</code>\n\n"
-        f"<blockquote><u><b>≡ 2ɴᴅ sʜᴏʀᴛᴇɴᴇʀ:</b></u></blockquote>\n"
-        f"›› <b>sᴛᴀᴛᴜs:</b> <code>{'✔️ ᴇɴᴀʙʟᴇᴅ' if getattr(config, 'SHORT_STATUS_2', True) else '❌ ᴅɪsᴀʙʟᴇᴅ'}</code>\n"
-        f"›› <b>ᴜʀʟ:</b> <code>{getattr(config, 'SHORT_URL_2', 'None')}</code>\n\n"
-        f"<blockquote><u><b>≡ 3ʀᴅ sʜᴏʀᴛᴇɴᴇʀ:</b></u></blockquote>\n"
-        f"›› <b>sᴛᴀᴛᴜs:</b> <code>{'✔️ ᴇɴᴀʙʟᴇᴅ' if getattr(config, 'SHORT_STATUS_3', True) else '❌ ᴅɪsᴀʙʟᴇᴅ'}</code>\n"
-        f"›› <b>ᴜʀʟ:</b> <code>{getattr(config, 'SHORT_URL_3', 'None')}</code>"
-    )
-    reply_markup = InlineKeyboardMarkup([
-        [InlineKeyboardButton('ᴘʀᴏᴛᴇᴄᴛ ᴄᴏɴᴛᴇɴᴛ', 'protect'), InlineKeyboardButton('ᴘʜᴏᴛᴏs', 'photos')],
-        [InlineKeyboardButton('ᴛᴇxᴛs', 'texts'), InlineKeyboardButton('🛠️ sʜᴏʀᴛɴᴇer sᴇᴛᴛɪɴɢs', 'manage_shortners')],
-        [InlineKeyboardButton('‹ ᴘʀᴇᴠ', 'settings'), InlineKeyboardButton('ʜᴏᴍᴇ', 'home')]
-    ])
-    try:
-        await query.message.edit_text(msg, reply_markup=reply_markup)
-    except Exception:
-        await query.message.edit_caption(caption=msg, reply_markup=reply_markup)
-
-@Client.on_callback_query(filters.regex("^manage_shortners$"))
-async def manage_shortners(client, query):
-    if query.from_user.id not in client.admins:
-        return await query.answer('✗ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs!', show_alert=True)
-    msg = (
-        f"<blockquote>✦ ᴍᴜʟᴛɪ-sʜᴏʀᴛᴇɴᴇer ᴍᴀɴᴀɢᴇᴍᴇɴᴛ</blockquote>\n\n"
-        f"›› 1sᴛ: <code>{getattr(config, 'SHORT_URL_1', 'None')}</code> [<code>{'✔️' if getattr(config, 'SHORT_STATUS_1', True) else '❌'}</code>]\n"
-        f"›› 2ɴᴅ: <code>{getattr(config, 'SHORT_URL_2', 'None')}</code> [<code>{'✔️' if getattr(config, 'SHORT_STATUS_2', True) else '❌'}</code>]\n"
-        f"›› 3ʀᴅ: <code>{getattr(config, 'SHORT_URL_3', 'None')}</code> [<code>{'✔️' if getattr(config, 'SHORT_STATUS_3', True) else '❌'}</code>]"
-    )
-    reply_markup = InlineKeyboardMarkup([
-        [InlineKeyboardButton('sʜᴏʀᴛɴᴇer 1', 'edit_short_1'), InlineKeyboardButton('sʜᴏʀᴛɴᴇer 2', 'edit_short_2')],
-        [InlineKeyboardButton('sʜᴏʀᴛɴᴇer 3', 'edit_short_3')],
-        [InlineKeyboardButton('‹ ʙᴀᴄᴋ', 'settings_page_2')]
-    ])
-    try:
-        await query.message.edit_text(msg, reply_markup=reply_markup)
-    except Exception:
-        await query.message.edit_caption(caption=msg, reply_markup=reply_markup)
-
-@Client.on_callback_query(filters.regex("^edit_short_(1|2|3)$"))
-async def edit_specific_shortner(client, query):
-    if query.from_user.id not in client.admins:
-        return await query.answer('✗ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs!', show_alert=True)
-    num = query.data.split("_")[2]
-    url_val = getattr(config, f"SHORT_URL_{num}", "None")
-    tut_val = getattr(config, f"SHORT_TUT_{num}", "None")
-    status_val = getattr(config, f"SHORT_STATUS_{num}", True)
-    analytics = await client.mongodb.db.shortner_analytics.find_one({"shortner_id": int(num)}) or {}
-    total_clicks = analytics.get("clicks", 0)
-    msg = (
-        f"<blockquote>🛠️ sʜᴏʀᴛᴇɴᴇer {num}</blockquote>\n"
-        f"›› <b>sᴛᴀᴛᴜs:</b> <code>{'✔️ ᴀᴄᴛɪᴠᴇ' if status_val else '❌ ɪɴᴀᴄᴛɪᴠᴇ'}</code>\n"
-        f"›› <b>ᴜʀʟ:</b> <code>{url_val}</code>\n"
-        f"›› <b>ᴛᴜᴛ:</b> <code>{tut_val}</code>"
-    )
-    status_text = "❌ ᴅɪsᴀʙʟᴇ" if status_val else "✔️ ᴇɴᴀʙʟᴇ"
-    reply_markup = InlineKeyboardMarkup([
-        [InlineKeyboardButton(status_text, f'toggle_status_{num}')],
-        [InlineKeyboardButton('ᴠᴇʀɪꜰɪᴇᴅ: ' + str(total_clicks), f'clicks_stats_{num}')],
-        [InlineKeyboardButton('sᴇᴛ ᴜʀʟ', f'set_url_{num}'), InlineKeyboardButton('sᴇᴛ ᴀᴘɪ', f'set_api_{num}')],
-        [InlineKeyboardButton('sᴇᴛ ᴛᴜᴛ', f'set_tut_{num}'), InlineKeyboardButton('ᴛᴇsᴛ', f'test_api_{num}')],
-        [InlineKeyboardButton('‹ ʙᴀᴄᴋ', 'manage_shortners')]
-    ])
-    try:
-        await query.message.edit_text(msg, reply_markup=reply_markup)
-    except Exception:
-        await query.message.edit_caption(caption=msg, reply_markup=reply_markup)
-
-@Client.on_callback_query(filters.regex("^clicks_stats_(1|2|3)$"))
-async def stats_alert_callback(client, query):
-    num = query.data.split("_")[2]
-    analytics = await client.mongodb.db.shortner_analytics.find_one({"shortner_id": int(num)}) or {}
-    clicks = analytics.get("clicks", 0)
-    await query.answer(f"Shortener {num}: {clicks} verifications today!", show_alert=True)
-
-@Client.on_callback_query(filters.regex("^toggle_status_(1|2|3)$"))
-async def toggle_shortner_status(client, query):
-    if query.from_user.id not in client.admins:
-        return await query.answer('✗ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs!', show_alert=True)
-    num = query.data.split("_")[2]
-    current_status = getattr(config, f"SHORT_STATUS_{num}", True)
-    new_status = not current_status
-    setattr(config, f"SHORT_STATUS_{num}", new_status)
-    await client.mongodb.db.shortner_config.update_one({"shortner_id": int(num)}, {"$set": {"enabled": new_status}}, upsert=True)
-    await query.answer(f"Shortener {num} {'ON' if new_status else 'OFF'}!", show_alert=True)
-    await edit_specific_shortner(client, query)
-
-@Client.on_callback_query(filters.regex("^set_(url|api|tut)_(1|2|3)$"))
-async def process_shortner_inputs(client, query):
-    if query.from_user.id not in client.admins:
-        return await query.answer('✗ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs!', show_alert=True)
-    await query.answer()
-    _, field, num = query.data.split("_")
-    examples = {"url": "gplinks.com", "api": "540e6d65...", "tut": "https://t.me/channel"}
-    await query.message.edit_text(f"<b>📥 sᴇɴᴅ ɴᴇᴡ {field.upper()} ꜰᴏʀ sʜᴏʀᴛᴇɴᴇer {num} (60s):</b>\n\n<b>ᴇx:</b> <code>{examples[field]}</code>")
-    try:
-        res = await client.listen(user_id=query.from_user.id, filters=filters.text, timeout=60)
-        new_value = res.text.strip()
-        if field == "url":
-            new_value = new_value.replace('https://', '').replace('http://', '').replace('/', '')
-        setattr(config, f"SHORT_{field.upper()}_{num}", new_value)
-        db_field_map = {"url": "short_url", "api": "short_api", "tut": "tutorial_link"}
-        await client.mongodb.db.shortner_config.update_one({"shortner_id": int(num)}, {"$set": {db_field_map[field]: new_value}}, upsert=True)
-        await res.delete()
-        await query.message.edit_text(f"<blockquote><b>✓ sʜᴏʀᴛᴇɴᴇer {num} {field.upper()} ᴜᴘᴅᴀᴛᴇᴅ!</b></blockquote>\n\n›› <code>{new_value}</code>", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('‹ ʙᴀᴄᴋ', f'edit_short_{num}')]]))
-    except ListenerTimeout:
-        await query.message.edit_text("<b>✗ ᴛɪᴍᴇᴏᴜᴛ!</b>", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('‹ ʙᴀᴄᴋ', f'edit_short_{num}')]]))
 
 @Client.on_callback_query(filters.regex("^test_api_(1|2|3)$"))
 async def test_shortner_connectivity(client, query):
