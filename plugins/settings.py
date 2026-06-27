@@ -421,7 +421,7 @@ async def set_photo_callback(client: Client, query: CallbackQuery):
         f"<b>🖼️ sᴇɴᴅ ɴᴇᴡ ᴘʜᴏᴛᴏ ᴜʀʟ ꜰᴏʀ <code>{photo_key}</code> ᴡɪᴛʜɪɴ 60s:</b>\n\n"
         f"<b>ᴇxᴀᴍᴘʟᴇ:</b> <code>https://example.com/image.jpg</code>"
     )
-    try:
+try:
         res = await client.listen(user_id=query.from_user.id, filters=filters.text, timeout=60)
         new_url = res.text.strip()
         config.MESSAGES[photo_key] = new_url
@@ -431,4 +431,17 @@ async def set_photo_callback(client: Client, query: CallbackQuery):
             upsert=True
         )
         await res.delete()
-        await quer
+        await query.message.edit_text(
+            f"<blockquote><b>✓ {photo_key} ᴜᴘᴅᴀᴛᴇᴅ!</b></blockquote>\n\n›› <code>{new_url}</code>",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('◂ ʙᴀᴄᴋ', 'photos')]])
+        )
+    except ListenerTimeout:
+        await query.message.edit_text(
+            "<b>✗ ᴛɪᴍᴇᴏᴜᴛ!</b>",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('◂ ʙᴀᴄᴋ', 'photos')]])
+        )
+    except Exception as e:
+        await query.message.edit_text(
+            f"<b>✗ ᴇʀʀᴏʀ: {e}</b>",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('◂ ʙᴀᴄᴋ', 'photos')]])
+        )
