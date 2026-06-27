@@ -431,18 +431,4 @@ async def set_photo_callback(client: Client, query: CallbackQuery):
             {"$set": {photo_key: new_url}},
             upsert=True
         )
-await client.mongodb.user_data.update_one(
-            {"_id": "bot_messages"},
-            {"$set": {photo_key: new_url}},
-            upsert=True
-        )
-        await res.delete()   # ← try block ke andar
-        await query.message.edit_text(
-            f"<blockquote><b>✓ {photo_key} ᴜᴘᴅᴀᴛᴇᴅ!</b></blockquote>\n\n›› <code>{new_url}</code>",
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('◂ ʙᴀᴄᴋ', 'photos')]])
-        )
-    except ListenerTimeout:
-        await query.message.edit_text(
-            "<b>✗ ᴛɪᴍᴇᴏᴜᴛ!</b>",
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('◂ ʙᴀᴄᴋ', 'photos')]])
-        )
+        await res.delete
