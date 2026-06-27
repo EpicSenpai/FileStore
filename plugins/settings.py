@@ -415,33 +415,18 @@ async def set_photo_callback(client: Client, query: CallbackQuery):
     if query.from_user.id not in client.admins:
         return await query.answer('✗ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs!', show_alert=True)
     await query.answer()
-
     photo_key = query.data.replace("set_photo_", "")
     await query.message.edit_text(
-        f"<b>🖼️ sᴇɴᴅ ɴᴇᴡ ᴘʜᴏᴛᴏ ᴜʀʟ ꜰᴏʀ <code>{photo_key}</code> ᴡɪᴛʜɪɴ 60s:</b>\n\n"
-        f"<b>ᴇxᴀᴍᴘʟᴇ:</b> <code>https://example.com/image.jpg</code>"
+        f"<b>🖼️ sᴇɴᴅ ɴᴇᴡ ᴜʀʟ ꜰᴏʀ <code>{photo_key}</code> ᴡɪᴛʜɪɴ 60s:</b>"
     )
-try:
+    try:
         res = await client.listen(user_id=query.from_user.id, filters=filters.text, timeout=60)
         new_url = res.text.strip()
         config.MESSAGES[photo_key] = new_url
-        await client.mongodb.user_data.update_one(
-            {"_id": "bot_messages"},
-            {"$set": {photo_key: new_url}},
-            upsert=True
-        )
+        await client.mongodb.user_data.update_one({"_id": "bot_messages"}, {"$set": {photo_key: new_url}}, upsert=True)
         await res.delete()
-        await query.message.edit_text(
-            f"<blockquote><b>✓ {photo_key} ᴜᴘᴅᴀᴛᴇᴅ!</b></blockquote>\n\n›› <code>{new_url}</code>",
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('◂ ʙᴀᴄᴋ', 'photos')]])
-        )
+        await query.message.edit_text(f"<b>✓ {photo_key} ᴜᴘᴅᴀᴛᴇᴅ!</b>\n\n›› <code>{new_url}</code>", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('◂ ʙᴀᴄᴋ', 'photos')]]))
     except ListenerTimeout:
-        await query.message.edit_text(
-            "<b>✗ ᴛɪᴍᴇᴏᴜᴛ!</b>",
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('◂ ʙᴀᴄᴋ', 'photos')]])
-        )
+        await query.message.edit_text("<b>✗ ᴛɪᴍᴇᴏᴜᴛ!</b>", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('◂ ʙᴀᴄᴋ', 'photos')]]))
     except Exception as e:
-        await query.message.edit_text(
-            f"<b>✗ ᴇʀʀᴏʀ: {e}</b>",
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('◂ ʙᴀᴄᴋ', 'photos')]])
-        )
+        await query.message.edit_text(f"<b>✗ ᴇʀʀᴏʀ: {e}</b>", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('◂ ʙᴀᴄᴋ', 'photos')]]))
