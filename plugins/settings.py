@@ -431,4 +431,9 @@ async def set_photo_callback(client: Client, query: CallbackQuery):
             {"$set": {photo_key: new_url}},
             upsert=True
         )
-        await res.delete
+    await res.delete()        # line 434 ✓
+        await query.message.edit_text(   # line 435
+            f"...",
+            reply_markup=...
+        )
+           # ← YE DUPLICATE HAI, HATAO
