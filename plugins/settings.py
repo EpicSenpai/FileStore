@@ -431,4 +431,4 @@ async def set_photo_callback(client: Client, query: CallbackQuery):
             {"$set": {photo_key: new_url}},
             upsert=True
         )
-        await res.delete
+        await res.delete()
