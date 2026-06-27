@@ -1,339 +1,237 @@
 from helper.helper_func import *
 from pyrogram import Client, filters
 from pyrogram.types import CallbackQuery, Message, InlineKeyboardButton, InlineKeyboardMarkup
-from config import MSG_EFFECT
 from pyrogram.errors.pyromod import ListenerTimeout
+from datetime import datetime, timedelta
+import re
 import config
 
 #===============================================================#
+# HELPER: PARSE PREMIUM DURATION
+#===============================================================#
 
-@Client.on_message(filters.command('db') & filters.private)
-async def db_channels_command(client: Client, message: Message):
-    """Direct command to manage DB channels"""
+def parse_premium_duration(time_str: str):
+    if time_str.lower() == "lifetime":
+        return None, True
+    match = re.match(r"^(\d+)(d)$", time_str.lower())
+    if not match:
+        return None, False
+    amount = int(match.group(1))
+    return datetime.now() + timedelta(days=amount), False
+
+#===============================================================#
+# /addpremium COMMAND
+#===============================================================#
+
+@Client.on_message(filters.command("addpremium") & filters.private)
+async def add_premium_user_command(client: Client, message: Message):
     if message.from_user.id not in client.admins:
-        return await message.reply(client.reply_text)
-    
-    # Show current DB channels status
-    db_channels = getattr(client, 'db_channels', {})
-    primary_db = getattr(client, 'primary_db_channel', client.db)
-    
-    if db_channels:
-        channel_list = []
-        for channel_id_str, channel_data in db_channels.items():
-            channel_name = channel_data.get('name', 'ᴜɴᴋɴᴏᴡɴ')
-            is_primary = "✓ ᴘʀɪᴍᴀʀʏ" if channel_data.get('is_primary', False) else "• sᴇᴄᴏɴᴅᴀʀʏ"
-            is_active = "✓ ᴀᴄᴛɪᴠᴇ" if channel_data.get('is_active', True) else "✗ ɪɴᴀᴄᴛɪᴠᴇ"
-            channel_list.append(f"• `{channel_name}` (`{channel_id_str}`)\n  {is_primary} | {is_active}")
-        
-        channels_display = "\n\n".join(channel_list)
-    else:
-        channels_display = "_ɴᴏ ᴀᴅᴅɪᴛɪᴏɴᴀʟ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟs ᴄᴏɴғɪɢᴜʀᴇᴅ_"
-    
-    msg = f"""<blockquote>✦ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟs ᴍᴀɴᴀɢᴇᴍᴇɴᴛ</blockquote>
-
-›› **<b>ᴄᴜʀʀᴇɴᴛ ᴘʀɪᴍᴀʀʏ ᴅʙ:</b>** `{primary_db}`
-›› **<b>ᴛᴏᴛᴀʟ ᴅʙ ᴄʜᴀɴɴᴇʟs:</b>** `{len(db_channels)}`
-
-<b>ᴄᴏɴғɪɢᴜʀᴇᴅ ᴄʜᴀɴɴᴇʟs:</b>
-{channels_display}
-
-__ᴜsᴇ ᴛʜᴇ ʙᴜᴛᴛᴏɴs ʙᴇʟᴏᴡ ᴛᴏ ᴍᴀɴᴀɢᴇ ʏᴏᴜʀ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟs!__
-"""
-    
-    reply_markup = InlineKeyboardMarkup([
-        [InlineKeyboardButton('›› ᴀᴅᴅ ᴅʙ ᴄʜᴀɴɴᴇʟ', 'add_db_channel')],
-        [InlineKeyboardButton('›› ʀᴇᴍᴏᴠᴇ ᴅʙ ᴄʜᴀɴɴᴇʟ', 'rm_db_channel')],
-        [InlineKeyboardButton('›› sᴇᴛ ᴘʀɪᴍᴀʀʏ', 'set_primary_db')],
-        [InlineKeyboardButton('›› ᴛᴏɢɢʟᴇ sᴛᴀᴛᴜs', 'toggle_db_status')],
-        [InlineKeyboardButton('›› ᴠɪᴇᴡ ᴅᴇᴛᴀɪʟs', 'db_details')]
-    ])
-    
-    await message.reply(msg, reply_markup=reply_markup)
-
-#===============================================================#
-
-@Client.on_callback_query(filters.regex("^db_details$"))
-async def db_details(client, query):
-    """Show detailed information about DB channels"""
-    if not query.from_user.id in client.admins:
-        return await query.answer('✗ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs!', show_alert=True)
-    
-    await query.answer()
-    
-    db_channels = getattr(client, 'db_channels', {})
-    primary_db = getattr(client, 'primary_db_channel', client.db)
-    
-    msg = f"""<blockquote>✦ ᴅᴇᴛᴀɪʟᴇᴅ ᴅʙ ᴄʜᴀɴɴᴇʟs ɪɴғᴏʀᴍᴀᴛɪᴏɴ</blockquote>
-
-›› **<b>ᴘʀɪᴍᴀʀʏ ᴅʙ ᴄʜᴀɴɴᴇʟ:</b>** `{primary_db}`
-›› **<b>ᴛᴏᴛᴀʟ ᴄᴏɴғɪɢᴜʀᴇᴅ:</b>** `{len(db_channels)}`
-
-"""
-    
-    if db_channels:
-        for i, (channel_id_str, channel_data) in enumerate(db_channels.items(), 1):
-            channel_name = channel_data.get('name', 'ᴜɴᴋɴᴏᴡɴ')
-            is_primary = channel_data.get('is_primary', False)
-            is_active = channel_data.get('is_active', True)
-            added_by = channel_data.get('added_by', 'ᴜɴᴋɴᴏᴡɴ')
-            
-            status_emoji = "✓" if is_primary else "•"
-            active_emoji = "✓" if is_active else "✗"
-            
-            msg += f"""**{i}. {channel_name}**
-• **<b>ɪᴅ:</b>** `{channel_id_str}`
-• **<b>sᴛᴀᴛᴜs:</b>** {status_emoji} {'ᴘʀɪᴍᴀʀʏ' if is_primary else 'sᴇᴄᴏɴᴅᴀʀʏ'}
-• **<b>ᴀᴄᴛɪᴠᴇ:</b>** {active_emoji} {'ʏᴇs' if is_active else 'ɴᴏ'}
-• **<b>ᴀᴅᴅᴇᴅ ʙʏ:</b>** `{added_by}`
-
-"""
-    else:
-        msg += "_ɴᴏ ᴀᴅᴅɪᴛɪᴏɴᴀʟ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟs ᴄᴏɴғɪɢᴜʀᴇᴅ_\n\n"
-    
-    msg += """**✦ ɴᴏᴛᴇs:**
-• ᴘʀɪᴍᴀʀʏ ᴄʜᴀɴɴᴇʟ ɪs ᴜsᴇᴅ ғɪʀsᴛ ғᴏʀ ʀᴇᴛʀɪᴇᴠɪɴɢ ғɪʟᴇs
-• sᴇᴄᴏɴᴅᴀʀʏ ᴄʜᴀɴɴᴇʟs ᴀʀᴇ ᴜsᴇᴅ ᴀs ғᴀʟʟʙᴀᴄᴋ
-• ɪɴᴀᴄᴛɪᴠᴇ ᴄʜᴀɴɴᴇʟs ᴀʀᴇ sᴋɪᴘᴘᴇᴅ ᴅᴜʀɪɴɢ ғɪʟᴇ ʀᴇᴛʀɪᴇᴠᴀʟ
-• ʏᴏᴜ ᴄᴀɴ ʜᴀᴠᴇ ᴍᴜʟᴛɪᴘʟᴇ ᴅʙ ᴄʜᴀɴɴᴇʟs ғᴏʀ ʙᴇᴛᴛᴇʀ ʀᴇʟɪᴀʙɪʟɪᴛʏ"""
-    
-    reply_markup = InlineKeyboardMarkup([
-        [InlineKeyboardButton('‹ ʙᴀᴄᴋ ᴛᴏ ᴍᴀɴᴀɢᴇᴍᴇɴᴛ', 'back_to_db_management')]
-    ])
-    
-    await query.message.edit_text(msg, reply_markup=reply_markup)
-
-#===============================================================#
-
-@Client.on_callback_query(filters.regex("^back_to_db_management$"))
-async def back_to_db_management(client, query):
-    """Go back to main DB channels management"""
-    if not query.from_user.id in client.admins:
-        return await query.answer('✗ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs!', show_alert=True)
-    
-    await query.answer()
-    
-    db_channels = getattr(client, 'db_channels', {})
-    primary_db = getattr(client, 'primary_db_channel', client.db)
-    
-    if db_channels:
-        channel_list = []
-        for channel_id_str, channel_data in db_channels.items():
-            channel_name = channel_data.get('name', 'ᴜɴᴋɴᴏᴡɴ')
-            is_primary = "✓ ᴘʀɪᴍᴀʀʏ" if channel_data.get('is_primary', False) else "• sᴇᴄᴏɴᴅᴀʀʏ"
-            is_active = "✓ ᴀᴄᴛɪᴠᴇ" if channel_data.get('is_active', True) else "✗ ɪɴᴀᴄᴛɪᴠᴇ"
-            channel_list.append(f"• `{channel_name}` (`{channel_id_str}`)\n  {is_primary} | {is_active}")
-        
-        channels_display = "\n\n".join(channel_list)
-    else:
-        channels_display = "_ɴᴏ ᴀᴅᴅɪᴛɪᴏɴᴀʟ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟs ᴄᴏɴғɪɢᴜʀᴇᴅ_"
-    
-    msg = f"""<blockquote>✦ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟs ᴍᴀɴᴀɢᴇᴍᴇɴᴛ</blockquote>
-
-›› **<b>ᴄᴜʀʀᴇɴᴛ ᴘʀɪᴍᴀʀʏ ᴅʙ:</b>** `{primary_db}`
-›› **<b>ᴛᴏᴛᴀʟ ᴅʙ ᴄʜᴀɴɴᴇʟs:</b>** `{len(db_channels)}`
-
-<b>ᴄᴏɴғɪɢᴜʀᴇᴅ ᴄʜᴀɴɴᴇʟs:</b>
-{channels_display}
-
-__ᴜsᴇ ᴛʜᴇ ʙᴜᴛᴛᴏɴs ʙᴇʟᴏᴡ ᴛᴏ ᴍᴀɴᴀɢᴇ ʏᴏᴜʀ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟs!__
-"""
-    
-    reply_markup = InlineKeyboardMarkup([
-        [InlineKeyboardButton('›› ᴀᴅᴅ ᴅʙ ᴄʜᴀɴɴᴇʟ', 'add_db_channel')],
-        [InlineKeyboardButton('›› ʀᴇᴍᴏᴠᴇ ᴅʙ ᴄʜᴀɴɴᴇʟ', 'rm_db_channel')],
-        [InlineKeyboardButton('›› sᴇᴛ ᴘʀɪᴍᴀʀʏ', 'set_primary_db')],
-        [InlineKeyboardButton('›› ᴛᴏɢɢʟᴇ sᴛᴀᴛᴜs', 'toggle_db_status')],
-        [InlineKeyboardButton('›› ᴠɪᴇᴡ ᴅᴇᴛᴀɪʟs', 'db_details')]
-    ])
-    
-    await query.message.edit_text(msg, reply_markup=reply_markup)
-
-#===============================================================#
-
-@Client.on_message(filters.command(['adddb', 'add_db']) & filters.private)
-async def quick_add_db(client: Client, message: Message):
-    """Quick command to add a DB channel"""
-    if message.from_user.id not in client.admins:
-        return await message.reply(client.reply_text)
-    
+        return await message.reply(client.reply_text if client.reply_text else "Access Denied!")
     args = message.text.split()
-    if len(args) < 2:
-        return await message.reply("""<blockquote>✦ ᴀᴅᴅ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟ</blockquote>
-
-›› **<b>ᴜsᴀɢᴇ:</b>** `/adddb <channel_id>`
-›› **<b>ᴇxᴀᴍᴘʟᴇ:</b>** `/adddb -1001234567890`
-
-**<b>ɴᴏᴛᴇ:</b>** ᴍᴀᴋᴇ sᴜʀᴇ ᴛʜᴇ ʙᴏᴛ ɪs ᴀᴅᴍɪɴ ɪɴ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ!""")
-    
+    if len(args) < 3:
+        return await message.reply("<blockquote><b>✦ ᴀᴅᴅ ᴘʀᴇᴍɪᴜᴍ</b></blockquote>\n\n›› <b>ᴜsᴀɢᴇ:</b> <code>/addpremium &lt;user_id&gt; &lt;duration&gt;</code>\n›› <b>ᴇxᴀᴍᴘʟᴇs:</b>\n• <code>/addpremium 12345678 7d</code> (7 Days)\n• <code>/addpremium 12345678 30d</code> (30 Days)\n• <code>/addpremium 12345678 lifetime</code> (Permanent)")
     try:
-        channel_id = int(args[1])
+        target_user = int(args[1])
+        duration_str = args[2]
     except ValueError:
-        return await message.reply("**✗ ɪɴᴠᴀʟɪᴅ ᴄʜᴀɴɴᴇʟ ɪᴅ! ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴠᴀʟɪᴅ ɴᴇɢᴀᴛɪᴠᴇ ɪɴᴛᴇɢᴇʀ.**")
-    
-    db_channels = getattr(client, 'db_channels', {})
-    if str(channel_id) in db_channels:
-        return await message.reply(f"**✗ ᴄʜᴀɴɴᴇʟ `{channel_id}` ɪs ᴀʟʀᴇᴀᴅʏ ᴀᴅᴅᴇᴅ ᴀs ᴀ ᴅʙ ᴄʜᴀɴɴᴇʟ!**")
-    
+        return await message.reply("<b>✗ ɪɴᴠᴀʟɪᴅ ᴜsᴇʀ ɪᴅ! ᴍᴜsᴛ ʙᴇ ᴀ ɴᴜᴍʙᴇʀ.</b>")
+    expiry_time, is_lifetime = parse_premium_duration(duration_str)
+    if expiry_time is None and not is_lifetime:
+        return await message.reply("<b>✗ ɪɴᴠᴀʟɪᴅ ᴅᴜʀᴀᴛɪᴏɴ! ᴜsᴇ <code>1d</code> ᴛᴏ <code>30d</code> ᴏʀ <code>lifetime</code>.</b>")
+    total_days = int(duration_str.replace('d', '')) if 'd' in duration_str.lower() else None
+    await client.mongodb.add_pro(user_id=target_user, expiry_date=expiry_time, total_days=total_days, is_lifetime=is_lifetime)
+    expiry_display = "ʟɪꜰᴇᴛɪᴍᴇ" if is_lifetime else expiry_time.strftime('%Y-%m-%d %H:%M:%S')
+    await message.reply(f"<blockquote><b>✓ ᴘʀᴇᴍɪᴜᴍ ɢʀᴀɴᴛᴇᴅ!</b></blockquote>\n\n›› <b>ᴜsᴇʀ:</b> <code>{target_user}</code>\n›› <b>ᴠᴀʟɪᴅɪᴛʏ:</b> <code>{expiry_display}</code>")
     try:
-        chat = await client.get_chat(channel_id)
-        test_msg = await client.send_message(chat_id=channel_id, text="ᴛᴇsᴛɪɴɢ ᴅʙ ᴄʜᴀɴɴᴇʟ ᴀᴄᴄᴇss - @Okabe_xRintarou")
-        await test_msg.delete()
-        
-        channel_data = {
-            'name': chat.title,
-            'is_primary': len(db_channels) == 0,
-            'is_active': True,
-            'added_by': message.from_user.id
-        }
-        
-        await client.mongodb.add_db_channel(channel_id, channel_data)
-        
-        if not hasattr(client, 'db_channels'):
-            client.db_channels = {}
-        client.db_channels[str(channel_id)] = channel_data
-        
-        if channel_data['is_primary']:
-            client.primary_db_channel = channel_id
-            await client.mongodb.set_primary_db_channel(channel_id)
-        
-        await message.reply(f"""**✓ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟ ᴀᴅᴅᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ!**
-
-›› **<b><b>ᴄʜᴀɴɴᴇʟ:</b></b>** `{chat.title}`
-›› **<b><b>ɪᴅ:</b></b>** `{channel_id}`
-›› **<b><b>sᴛᴀᴛᴜs:</b></b>** {'ᴘʀɪᴍᴀʀʏ' if channel_data['is_primary'] else 'sᴇᴄᴏɴᴅᴀʀʏ'}
-
-ᴜsᴇ `/dbchannels` ᴛᴏ ᴍᴀɴᴀɢᴇ ᴀʟʟ ʏᴏᴜʀ ᴅʙ ᴄʜᴀɴɴᴇʟs.""")
-    
-    except Exception as e:
-        await message.reply(f"""**✗ ᴇʀʀᴏʀ ᴀᴄᴄᴇssɪɴɢ ᴄʜᴀɴɴᴇʟ!**
-
-›› **<b>ᴇʀʀᴏʀ:</b>** `{str(e)}`
-
-**<b>ᴘʟᴇᴀsᴇ ᴍᴀᴋᴇ sᴜʀᴇ:</b>**
-• ʙᴏᴛ ɪs ᴀᴅᴍɪɴ ɪɴ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ
-• ᴄʜᴀɴɴᴇʟ ɪᴅ ɪs ᴄᴏʀʀᴇᴄᴛ
-• ᴄʜᴀɴɴᴇʟ ᴇxɪsᴛs""")
-
-#===============================================================#
-
-@Client.on_message(filters.command(['removedb', 'rm_db']) & filters.private)
-async def quick_remove_db(client: Client, message: Message):
-    """Quick command to remove a DB channel"""
-    if message.from_user.id not in client.admins:
-        return await message.reply(client.reply_text)
-    
-    args = message.text.split()
-    if len(args) < 2:
-        db_channels = getattr(client, 'db_channels', {})
-        if not db_channels:
-            return await message.reply("**✗ ɴᴏ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟs ᴛᴏ ʀᴇᴍᴏᴠᴇ!**")
-        
-        msg = """<blockquote>✦ ʀᴇᴍᴏᴠᴇ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟ</blockquote>
-
-›› **<b>ᴜsᴀɢᴇ:</b>** `/removedb <channel_id>`
-
-**<b>ᴀcodeᴠᴀɪʟᴀʙʟᴇ ᴄʜᴀɴɴᴇʟs:</b>**
-"""
-        for channel_id_str, channel_data in db_channels.items():
-            channel_name = channel_data.get('name', 'ᴜɴᴋɴᴏᴡɴ')
-            is_primary = " (ᴘʀɪᴍᴀʀʏ)" if channel_data.get('is_primary', False) else ""
-            msg += f"• `{channel_name}` - `{channel_id_str}`{is_primary}\n"
-        
-        return await message.reply(msg)
-    
-    try:
-        channel_id = int(args[1])
-    except ValueError:
-        return await message.reply("**✗ ɪɴᴠᴀʟɪᴅ ᴄʜᴀɴɴᴇʟ ɪᴅ! ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴠᴀʟɪᴅ ɴᴇɢᴀᴛɪᴠᴇ ɪɴᴛᴇɢᴇʀ.**")
-    
-    db_channels = getattr(client, 'db_channels', {})
-    if str(channel_id) not in db_channels:
-        return await message.reply(f"**✗ ᴄʜᴀɴɴᴇʟ `{channel_id}` ɪs ɴᴏᴛ ɪɴ ᴛʜᴇ ᴅʙ ᴄʜᴀɴɴᴇʟs ʟɪsᴛ!**")
-    
-    if db_channels[str(channel_id)].get('is_primary', False) and len(db_channels) > 1:
-        return await message.reply("**✗ ᴄᴀɴɴᴏᴛ ʀᴇᴍᴏᴠᴇ ᴘʀɪᴍᴀʀʏ ᴄʜᴀɴɴᴇʟ!**\n\n__ᴘʟᴇᴀsᴇ sᴇᴛ ᴀɴᴏᴛʜᴇ r ᴄʜᴀɴɴᴇʟ ᴀs ᴘʀɪᴍᴀʀʏ ғɪʀsᴛ.__")
-    
-    channel_name = db_channels[str(channel_id)].get('name', 'ᴜɴᴋɴᴏᴡɴ')
-    await client.mongodb.remove_db_channel(channel_id)
-    del client.db_channels[str(channel_id)]
-    
-    await message.reply(f"""**✓ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟ ʀᴇᴍᴏᴠᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ!**
-
-›› **<b>ʀᴇᴍᴏᴠᴇᴅ:</b>** `{channel_name}` (`{channel_id}`)
-
-ᴜsᴇ `/db` ᴛᴏ ᴍᴀɴᴀɢᴇ ʏᴏᴜʀ ʀᴇᴍᴀɪɴɪɴɢ ᴅʙ ᴄʜᴀɴɴᴇʟs.""")
-
-#==========================================================================#        
-# HIGH-PRIORITY INTEGRACTIVE NAVIGATION COMPLIANCE WITH REAL PHOTO INTERFACE
-#==========================================================================#        
-
-@Client.on_callback_query(filters.regex('^home$'))
-async def home(client: Client, query: CallbackQuery):
-    await query.answer("↩️ Returning back to home dashboard...")
-    user_id = query.from_user.id
-    
-    buttons = [[InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data="ABOUT"), InlineKeyboardButton("ᴄʟᴏsᴇ •", callback_data="close")]]
-    if user_id in client.admins:
-        buttons.insert(0, [InlineKeyboardButton("• ꜱᴇᴛᴛɪɴɢs •", callback_data="settings")])
-        
-    start_caption = config.MESSAGES.get('START', '').format(
-        first=query.from_user.first_name,
-        last=query.from_user.last_name or "",
-        username=None if not query.from_user.username else '@' + query.from_user.username,
-        mention=query.from_user.mention,
-        id=user_id
-    )
-    
-    try:
-        # Fixed: Safely edit photo caption layout to maintain exact font style constraints
-        await query.message.edit_caption(
-            caption=start_caption,
-            reply_markup=InlineKeyboardMarkup(buttons)
-        )
+        await client.send_message(chat_id=target_user, text=f"<blockquote><b>✨ ᴀᴀᴘᴋᴀ ᴀᴄᴄᴏᴜɴᴛ ᴘʀᴇᴍɪᴜᴍ ʜᴏ ɢᴀʏᴀ!</b></blockquote>\n\n›› <b>sᴛᴀᴛᴜs:</b> ᴅɪʀᴇᴄᴛ ꜰɪʟᴇ ᴀᴄᴄᴇss (ɴᴏ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ)\n›› <b>ᴇxᴘɪʀʏ:</b> <code>{expiry_display}</code>")
     except Exception:
-        try:
-            await query.message.edit_text(
-                text=start_caption,
-                reply_markup=InlineKeyboardMarkup(buttons)
-            )
-        except Exception:
-            pass
-    return
-
-#==========================================================================#        
-
-@Client.on_callback_query(filters.regex('^ABOUT$'))
-async def about(client: Client, query: CallbackQuery):
-    await query.answer("ℹ️ Loading about documentation details...")
-    
-    about_text = config.MESSAGES.get('ABOUT', '').format(
-        bot_name=client.username,
-        mention=query.from_user.mention
-    )
-    
-    back_markup = InlineKeyboardMarkup([[InlineKeyboardButton("‹ ʙᴀᴄᴋ", callback_data="home")]])
-    
-    try:
-        await query.message.edit_caption(caption=about_text, reply_markup=back_markup)
-    except Exception:
-        try:
-            await query.message.edit_text(text=about_text, reply_markup=back_markup)
-        except Exception:
-            pass
-    return
-
-#==========================================================================#        
-
-@Client.on_callback_query(filters.regex('^close$'))
-async def close(client: Client, query: CallbackQuery):
-    await query.answer("🗑️ Interface interface closed.")
-    await query.message.delete()
-    try:
-        await query.message.reply_to_message.delete()
-    except:
         pass
 
-#==========================================================================#        
+#===============================================================#
+# /remove_premium COMMAND
+#===============================================================#
+
+@Client.on_message(filters.command("remove_premium") & filters.private)
+async def remove_premium_user_command(client: Client, message: Message):
+    if message.from_user.id not in client.admins:
+        return await message.reply(client.reply_text if client.reply_text else "Access Denied!")
+    args = message.text.split()
+    if len(args) < 2:
+        return await message.reply("<b>✗ ᴜsᴀɢᴇ:</b> <code>/remove_premium &lt;user_id&gt;</code>")
+    try:
+        target_user = int(args[1])
+    except ValueError:
+        return await message.reply("<b>✗ ɪɴᴠᴀʟɪᴅ ᴜsᴇʀ ɪᴅ!</b>")
+    is_pro = await client.mongodb.is_pro(target_user)
+    if not is_pro:
+        return await message.reply("<b>✗ ᴛʜɪs ᴜsᴇʀ ɪs ɴᴏᴛ ᴘʀᴇᴍɪᴜᴍ!</b>")
+    await client.mongodb.remove_pro(target_user)
+    await message.reply(f"<blockquote><b>✓ ᴘʀᴇᴍɪᴜᴍ ʀᴇᴍᴏᴠᴇᴅ!</b></blockquote>\n\n›› ᴜsᴇʀ <code>{target_user}</code> ᴀʙ ɴᴏʀᴍᴀʟ ᴜsᴇʀ ʜᴀɪ.")
+    try:
+        await client.send_message(chat_id=target_user, text="<b>⚠️ ᴀᴀᴘᴋᴀ ᴘʀᴇᴍɪᴜᴍ ʜᴀᴛᴀ ᴅɪʏᴀ ɢᴀʏᴀ ʜᴀɪ. ᴀʙ ᴀᴀᴘᴋᴏ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ᴋᴀʀɴɪ ʜᴏɢɪ.</b>")
+    except Exception:
+        pass
+
+#===============================================================#
+# /premium_users COMMAND
+#===============================================================#
+
+@Client.on_message(filters.command("premium_users") & filters.private)
+async def list_premium_users_command(client: Client, message: Message):
+    if message.from_user.id not in client.admins:
+        return await message.reply(client.reply_text if client.reply_text else "Access Denied!")
+    await render_premium_list_page(client, message, page=1, is_callback=False)
+
+async def render_premium_list_page(client, message_or_query, page: int, is_callback: bool):
+    current_time = datetime.now()
+    cursor = client.mongodb.premium_users.find()
+    all_pros = [doc async for doc in cursor]
+    total_users = len(all_pros)
+    items_per_page = 10
+    total_pages = max((total_users + items_per_page - 1) // items_per_page, 1)
+    start_idx = (page - 1) * items_per_page
+    page_items = all_pros[start_idx:start_idx + items_per_page]
+    msg = f"<blockquote>✦ ᴘʀᴇᴍɪᴜᴍ ᴍᴇᴍʙᴇʀs (ᴘᴀɢᴇ {page}/{total_pages})</blockquote>\n\n"
+    if not page_items:
+        msg += "<i>ᴋᴏɪ ʙʜɪ ᴘʀᴇᴍɪᴜᴍ ᴜsᴇʀ ɴᴀʜɪ ʜᴀɪ!</i>\n"
+    else:
+        for idx, doc in enumerate(page_items, start=start_idx + 1):
+            u_id = doc['_id']
+            is_lifetime = doc.get('is_lifetime', False)
+            expiry_date = doc.get('expiry_date')
+            added_at = doc.get('added_at', current_time)
+            total_days = doc.get('total_days', 0)
+            elapsed = current_time - added_at
+            elapsed_str = f"{elapsed.days}d ʙɪᴛ ɢᴀʏᴇ" if elapsed.days > 0 else "ᴀᴀᴊ ᴀᴅᴅ ʜᴜᴀ"
+            if is_lifetime:
+                time_status = "♾️ ʟɪꜰᴇᴛɪᴍᴇ"
+            elif expiry_date:
+                remaining = expiry_date - current_time
+                if remaining.total_seconds() <= 0:
+                    time_status = "❌ ᴇxᴘɪʀᴇᴅ"
+                else:
+                    time_status = f"⏳ {remaining.days}d {remaining.seconds // 3600}h ʙᴀᴋɪ"
+            else:
+                time_status = "❓ ᴜɴᴋɴᴏᴡɴ"
+            total_days_str = f" | ᴋᴜʟ: {total_days}d" if total_days else ""
+            msg += f"<b>{idx}.</b> <a href='tg://user?id={u_id}'>ᴜsᴇʀ</a> (<code>{u_id}</code>)\n   {time_status}{total_days_str} | <i>{elapsed_str}</i>\n\n"
+    buttons = []
+    nav_row = []
+    if page > 1:
+        nav_row.append(InlineKeyboardButton("‹ ᴘʀᴇᴠ", callback_data=f"propage_{page-1}"))
+    if page < total_pages:
+        nav_row.append(InlineKeyboardButton("ɴᴇxᴛ ›", callback_data=f"propage_{page+1}"))
+    if nav_row:
+        buttons.append(nav_row)
+    if page > 1:
+        buttons.append([InlineKeyboardButton("‹ ʙᴀᴄᴋ ᴛᴏ ʜᴏᴍᴇ", callback_data="close")])
+    else:
+        buttons.append([InlineKeyboardButton("ᴄʟᴏsᴇ •", callback_data="close")])
+    markup = InlineKeyboardMarkup(buttons)
+    if is_callback:
+        await message_or_query.message.edit_text(text=msg, reply_markup=markup)
+    else:
+        await message_or_query.reply(text=msg, reply_markup=markup)
+
+@Client.on_callback_query(filters.regex(r"^propage_(\d+)$"))
+async def process_pro_pagination_callback(client: Client, query: CallbackQuery):
+    await query.answer()
+    target_page = int(query.data.split("_")[1])
+    await render_premium_list_page(client, query, page=target_page, is_callback=True)
+
+#===============================================================#
+# /addcredit COMMAND
+#===============================================================#
+
+@Client.on_message(filters.command("addcredit") & filters.private)
+async def add_credits_to_user_command(client: Client, message: Message):
+    if message.from_user.id not in client.admins:
+        return await message.reply(client.reply_text if client.reply_text else "Access Denied!")
+    args = message.text.split()
+    if len(args) < 3:
+        return await message.reply("<b>✗ ᴜsᴀɢᴇ:</b> <code>/addcredit &lt;user_id&gt; &lt;amount&gt;</code>")
+    try:
+        target_user = int(args[1])
+        amount = int(args[2])
+    except ValueError:
+        return await message.reply("<b>✗ ɪɴᴠᴀʟɪᴅ ɪɴᴘᴜᴛ! ᴅᴏɴᴏ ɴᴜᴍʙᴇʀ ʜᴏɴᴇ ᴄʜᴀʜɪʏᴇ.</b>")
+    user_data = await client.mongodb.user_data.find_one({"_id": target_user})
+    if not user_data:
+        return await message.reply("<b>✗ ʏᴇ ᴜsᴇʀ ʙᴏᴛ ᴍᴇɪɴ ʀᴇɢɪsᴛᴇʀᴇᴅ ɴᴀʜɪ ʜᴀɪ!</b>")
+    current_credits = user_data.get("credits", 0)
+    new_credits = current_credits + amount
+    await client.mongodb.user_data.update_one({"_id": target_user}, {"$set": {"credits": new_credits}}, upsert=True)
+    await message.reply(f"<blockquote><b>✓ ᴄʀᴇᴅɪᴛs ᴀᴅᴅ ʜᴏ ɢᴀʏᴇ!</b></blockquote>\n\n›› ᴜsᴇʀ <code>{target_user}</code>\n›› ᴘᴜʀᴀɴᴇ: <code>{current_credits}</code> → ɴᴀʏᴇ: <code>{new_credits}</code>")
+    try:
+        reward_amount = await client.mongodb.get_set_credits_amount()
+        await client.send_message(chat_id=target_user, text=f"<blockquote><b>✨ ᴀᴀᴘᴋᴇ ᴀᴄᴄᴏᴜɴᴛ ᴍᴇɪɴ ᴄʀᴇᴅɪᴛs ᴀᴀ ɢᴀʏᴇ!</b></blockquote>\n\n›› <b>ᴊᴏᴅᴇ ɢᴀʏᴇ:</b> <code>{amount} ᴄʀᴇᴅɪᴛs</code>\n›› <b>ᴀʙ ʙᴀᴋɪ:</b> <code>{new_credits} ᴄʀᴇᴅɪᴛs</code>")
+    except Exception:
+        pass
+
+#===============================================================#
+# /setcredit COMMAND
+#===============================================================#
+
+@Client.on_message(filters.command("setcredit") & filters.private)
+async def set_global_credits_config_command(client: Client, message: Message):
+    if message.from_user.id not in client.admins:
+        return await message.reply(client.reply_text if client.reply_text else "Access Denied!")
+    args = message.text.split()
+    if len(args) < 2:
+        current_val = await client.mongodb.get_set_credits_amount()
+        return await message.reply(f"<blockquote><b>✦ ɢʟᴏʙᴀʟ ᴄʀᴇᴅɪᴛs ᴄᴏɴꜰɪɢ</b></blockquote>\n\n›› <b>ᴀʙʜɪ ᴋᴇ ᴄʀᴇᴅɪᴛs ᴘʀᴇ ʙʏᴘᴀss:</b> <code>{current_val}</code>\n›› <b>ᴄʜᴀɴɢᴇ ᴋᴀʀɴᴇ ᴋᴇ ʟɪʏᴇ:</b> <code>/setcredit &lt;amount&gt;</code>")
+    try:
+        new_amount = int(args[1])
+    except ValueError:
+        return await message.reply("<b>✗ ɪɴᴠᴀʟɪᴅ! ɴᴜᴍʙᴇʀ ᴅᴀʟᴏ.</b>")
+    await client.mongodb.set_global_credits_amount(new_amount)
+    await message.reply(f"<blockquote><b>✓ ᴄʀᴇᴅɪᴛs ᴀᴘᴅᴀᴛᴇ ʜᴏ ɢᴀʏᴇ!</b></blockquote>\n\n›› <b>ɴᴀʏᴀ ᴀᴍᴏᴜɴᴛ:</b> <code>{new_amount} ᴄʀᴇᴅɪᴛs</code> ᴘʀᴇ ʙʏᴘᴀss")
+
+#===============================================================#
+# /commands COMMAND
+#===============================================================#
+
+@Client.on_message(filters.command("commands") & filters.private)
+async def admin_manual_commands_directory_command(client: Client, message: Message):
+    if message.from_user.id not in client.admins:
+        return await message.reply(client.reply_text if client.reply_text else "Access Denied!")
+    manual = """<blockquote><b>⛩️ ʙᴏᴛ ᴄᴏᴍᴍᴀɴᴅs ᴅɪʀᴇᴄᴛᴏʀʏ</b></blockquote>
+
+<b>⚙️ sᴇᴛᴛɪɴɢs:</b>
+• <code>/settings</code> › ʙᴏᴛ ᴋɪ sᴇᴛᴛɪɴɢs ᴘᴀɴᴇʟ ᴋʜᴏʟᴏ
+
+<b>👑 ᴘʀᴇᴍɪᴜᴍ ᴏᴘᴇʀᴀᴛɪᴏɴs:</b>
+• <code>/addpremium &lt;id&gt; &lt;1d-30d|lifetime&gt;</code> › ᴜsᴇʀ ᴋᴏ ᴘʀᴇᴍɪᴜᴍ ᴅᴏ (ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ɴᴀʜɪ ʜᴏɢɪ)
+• <code>/remove_premium &lt;id&gt;</code> › ᴘʀᴇᴍɪᴜᴍ ʜᴀᴛᴀᴏ, ᴠᴀᴘᴀs ɴᴏʀᴍᴀʟ ʙɴᴇɢᴀ
+• <code>/premium_users</code> › ᴘʀᴇᴍɪᴜᴍ ᴜsᴇʀs ᴋɪ ʟɪsᴛ ᴅᴇᴋʜᴏ
+
+<b>💰 ᴄʀᴇᴅɪᴛs:</b>
+• <code>/addcredit &lt;id&gt; &lt;amount&gt;</code> › ᴋɪsɪ ʙʜɪ ᴜsᴇʀ ᴋᴏ ᴄʀᴇᴅɪᴛs ᴅᴏ
+• <code>/setcredit &lt;amount&gt;</code> › ʜᴀʀ ʙʏᴘᴀss ᴘᴀʀ ᴍɪʟɴᴇ ᴡᴀʟᴇ ᴄʀᴇᴅɪᴛs sᴇᴛ ᴋᴀʀᴏ
+
+<b>📡 ʙʀᴏᴀᴅᴄᴀsᴛ:</b>
+• <code>/broadcast</code> › ɪɴsᴛᴀɴᴛ ʙʀᴏᴀᴅᴄᴀsᴛ (ʀᴇᴘʟʏ ᴋᴀʀᴋᴇ)
+• <code>/broadcast del 10m</code> › ʙʀᴏᴀᴅᴄᴀsᴛ + 10 ᴍɪɴᴛ ᴍᴇɪɴ ᴀᴜᴛᴏ ᴅᴇʟᴇᴛᴇ
+• <code>/broadcast schedule 2h</code> › 2 ɢʜᴀɴᴛᴇ ʙᴀᴀᴅ ʙʜᴇᴊᴏ
+• <code>/broadcast schedule 1h del 30m</code> › sᴄʜᴇᴅᴜʟᴇ + ᴀᴜᴛᴏ ᴅᴇʟᴇᴛᴇ
+• <code>/pbroadcast</code> › ʙʀᴏᴀᴅᴄᴀsᴛ + ᴘɪɴ ᴋᴀʀᴏ
+
+<b>📊 sᴛᴀᴛs:</b>
+• <code>/stats</code> › CPU, RAM, ɴᴇᴛᴡᴏʀᴋ sᴛᴀᴛs
+• <code>/users</code> › ᴋᴜʟ ᴜsᴇʀs ᴋɪᴛɴᴇ ʜᴀɪɴ
+
+<b>🛡️ ʙᴀɴ/ᴜɴʙᴀɴ:</b>
+• <code>/ban &lt;id&gt;</code> › ᴜsᴇʀ ʙᴀɴ ᴋᴀʀᴏ
+• <code>/unban &lt;id&gt;</code> › ᴜsᴇʀ ᴜɴʙᴀɴ ᴋᴀʀᴏ
+
+<b>🗄️ ᴅᴀᴛᴀʙᴀsᴇ:</b>
+• <code>/dbroadcast &lt;seconds&gt;</code> › ʙʀᴏᴀᴅᴄᴀsᴛ ᴀᴜᴛᴏ ᴅᴇʟᴇᴛᴇ ᴛɪᴍᴇ sᴇᴛ ᴋᴀʀᴏ
+• <code>/commands</code> › ʏᴇ ʟɪsᴛ ᴅᴇᴋʜᴏ"""
+    await message.reply(manual)
+
+#===============================================================#
+# BAN / UNBAN COMMANDS
+#===============================================================#
 
 @Client.on_message(filters.command('ban'))
 async def ban(client: Client, message: Message):
@@ -344,19 +242,16 @@ async def ban(client: Client, message: Message):
         c = 0
         for user_id in user_ids.split():
             user_id = int(user_id)
-            c = c + 1
+            c += 1
             if user_id in client.admins:
                 continue
             if not await client.mongodb.present_user(user_id):
                 await client.mongodb.add_user(user_id, True)
-                continue
             else:
                 await client.mongodb.ban_user(user_id)
-        return await message.reply(f"__{c} users have been banned!__")
+        return await message.reply(f"<b>{c} ᴜsᴇʀs ʙᴀɴ ᴋᴀʀ ᴅɪʏᴇ!</b>")
     except Exception as e:
-        return await message.reply(f"**Error:** `{e}`")
-
-#==========================================================================#        
+        return await message.reply(f"<b>ᴇʀʀᴏʀ:</b> <code>{e}</code>")
 
 @Client.on_message(filters.command('unban'))
 async def unban(client: Client, message: Message):
@@ -367,15 +262,40 @@ async def unban(client: Client, message: Message):
         c = 0
         for user_id in user_ids.split():
             user_id = int(user_id)
-            c = c + 1
+            c += 1
             if user_id in client.admins:
                 continue
             if not await client.mongodb.present_user(user_id):
                 await client.mongodb.add_user(user_id)
-                continue
             else:
                 await client.mongodb.unban_user(user_id)
-        return await message.reply(f"__{c} users have been unbanned!__")
+        return await message.reply(f"<b>{c} ᴜsᴇʀs ᴜɴʙᴀɴ ᴋᴀʀ ᴅɪʏᴇ!</b>")
     except Exception as e:
-        return await message.reply(f"**Error:** `{e}`")
+        return await message.reply(f"<b>ᴇʀʀᴏʀ:</b> <code>{e}</code>")
+
+#===============================================================#
+# DB CHANNELS COMMANDS
+#===============================================================#
+
+@Client.on_message(filters.command('db') & filters.private)
+async def db_channels_command(client: Client, message: Message):
+    if message.from_user.id not in client.admins:
+        return await message.reply(client.reply_text)
+    db_channels = getattr(client, 'db_channels', {})
+    primary_db = getattr(client, 'primary_db_channel', client.db)
+    if db_channels:
+        ch_list = []
+        for ch_id_str, ch_data in db_channels.items():
+            name = ch_data.get('name', 'ᴜɴᴋɴᴏᴡɴ')
+            primary_tag = " ✓ ᴘʀɪᴍᴀʀʏ" if ch_data.get('is_primary', False) else ""
+            ch_list.append(f"• <code>{name}</code> (<code>{ch_id_str}</code>){primary_tag}")
+        channels_display = "\n".join(ch_list)
+    else:
+        channels_display = f"<i>ᴅᴇꜰᴀᴜʟᴛ ᴅʙ: <code>{primary_db}</code></i>"
+    msg = f"<blockquote><b>🗄️ ᴅᴀᴛᴀʙᴀsᴇ ᴄʜᴀɴɴᴇʟs</b></blockquote>\n\n›› <b>ᴘʀɪᴍᴀʀʏ:</b> <code>{primary_db}</code>\n›› <b>ᴛᴏᴛᴀʟ:</b> <code>{len(db_channels)}</code>\n\n{channels_display}"
+    reply_markup = InlineKeyboardMarkup([
+        [InlineKeyboardButton('➕ ᴀᴅᴅ', 'add_db_ch'), InlineKeyboardButton('➖ ʀᴇᴍᴏᴠᴇ', 'remove_db_ch')],
+        [InlineKeyboardButton('⭐ sᴇᴛ ᴘʀɪᴍᴀʀʏ', 'set_primary_db')]
+    ])
+    await message.reply(msg, reply_markup=reply_markup)
         
