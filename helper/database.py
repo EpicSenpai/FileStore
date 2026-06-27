@@ -349,3 +349,46 @@ class MongoDB:
             print(f"Error getting comprehensive fsub statistics: {e}")
             return {}
         
+# ============================================================
+# ADD THESE FUNCTIONS TO YOUR helper/database.py FILE
+# Add them after the existing fsub channel functions
+# ============================================================
+
+    # ✅ DB CHANNELS FUNCTIONS (ADD THESE TO database.py)
+
+    async def get_db_channels(self) -> dict:
+        data = await self.user_data.find_one({"_id": "db_channels"})
+        return data.get("channels", {}) if data else {}
+
+    async def add_db_channel(self, channel_id: int, channel_data: dict):
+        current_data = await self.get_db_channels()
+        current_data[str(channel_id)] = channel_data
+        await self.user_data.update_one(
+            {"_id": "db_channels"},
+            {"$set": {"channels": current_data}},
+            upsert=True
+        )
+
+    async def remove_db_channel(self, channel_id: int):
+        current_data = await self.get_db_channels()
+        current_data.pop(str(channel_id), None)
+        await self.user_data.update_one(
+            {"_id": "db_channels"},
+            {"$set": {"channels": current_data}},
+            upsert=True
+        )
+
+    async def set_primary_db_channel(self, channel_id: int):
+        current_data = await self.get_db_channels()
+        # Reset all primaries
+        for ch_id_str in current_data:
+            current_data[ch_id_str]['is_primary'] = False
+        # Set new primary
+        if str(channel_id) in current_data:
+            current_data[str(channel_id)]['is_primary'] = True
+        await self.user_data.update_one(
+            {"_id": "db_channels"},
+            {"$set": {"channels": current_data}},
+            upsert=True
+        )
+        
