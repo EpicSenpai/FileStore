@@ -348,11 +348,6 @@ class MongoDB:
         except Exception as e:
             print(f"Error getting comprehensive fsub statistics: {e}")
             return {}
-        
-# ============================================================
-# ADD THESE FUNCTIONS TO YOUR helper/database.py FILE
-# Add them after the existing fsub channel functions
-# ============================================================
 
     # ✅ DB CHANNELS FUNCTIONS (ADD THESE TO database.py)
 
