@@ -4,7 +4,6 @@ import config
 import re
 import base64
 from plugins.shortner import get_short
-from database import db  # Aapka jo bhi main database import module ho
 
 #===============================================================#
 # 🛠️ HELPER FUNCTIONS: ENCODING / DECODING LAYER FOR FILE ID
@@ -21,7 +20,7 @@ def decode_data(data: str) -> str:
         return ""
 
 #===============================================================#
-# 🚀 CORE ROUTER FOR /START COMMAND (WITH FILE RETRIEVAl & SHORTLINK)
+# 🚀 CORE ROUTER FOR /START COMMAND (WITH FILE RETRIEVAL & SHORTLINK)
 #===============================================================#
 
 @Client.on_message(filters.command("start") & filters.private)
@@ -61,22 +60,21 @@ async def start_command_handler(client: Client, message: Message):
     # Checking for multi-channel database parsing structure
     parts = decoded_string.split("_")
     if len(parts) < 2:
-        return await message.reply_text("<b>✗ ʟɪɴᴋ sᴛʀᴜᴄᴛᴜʀᴇ ɴot sᴜᴘᴘᴏʀᴛᴇᴅ!</b>")
+        return await message.reply_text("<b>✗ ʟɪɴᴋ sᴛʀᴜᴄᴛᴜʀᴇ ɴᴏᴛ s<b>ᴜᴘᴘᴏʀᴛᴇᴅ!</b></b>")
         
     target_channel_id = int(parts[0])
     target_message_id = int(parts[1])
     
-    # Check if the user has verified the shortlink token bypass rule
-    user_verified = await client.mongodb.is_user_verified(user_id) # dynamic database validation
+    # Check if the user has verified the shortlink token bypass rule using client.mongodb context
+    user_verified = await client.mongodb.is_user_verified(user_id)
     
     if not user_verified and user_id not in client.admins:
         # Generate the verified shortlink layer token dynamically using multi-shortener settings
-        # It picks config configuration settings automatically
         original_link = f"https://t.me/{client.username}?start={query_data}"
         bypass_short_url = get_short(original_link, client)
         
         tutorial_link = config.MESSAGES.get('SHORT_TUT', 'https://t.me/How_To_Open_Shortners')
-        short_msg = config.MESSAGES.get('SHORT_MSG', '<blockquote><b>⚠️ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ʀᴇǫᴜɪʀᴇᴅ!</b></blockquote>\n\n›› ʏᴏᴜ ɴᴇᴇᴅ ᴛᴏ ᴠᴇʀɪꜰʏ ᴛᴏ ᴀᴄᴄᴇss ʏᴏᴜʀ ꜰɪʟᴇ.\n›› ᴄʟɪᴄᴋ ᴏɴ ʙʏᴘᴀss ʟɪɴᴋ ʙᴇʟᴏᴡ.').format(
+        short_msg = config.MESSAGES.get('SHORT_MSG', '<blockquote><b>⚠️ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ʀᴇǫᴜɪʀᴇᴅ!</b></blockquote>\n\n›› ʏᴏᴜ ɴᴇᴇᴅ ᴛᴏ ᴠᴇʀɪꜰʏ ᴛᴏ ᴀᴄᴄᴇss ʏᴏᴜʀ ꜰɪʟᴇ.\n›› <b>ᴄʟɪᴄᴋ ᴏɴ ʙʏᴘᴀss ʟɪɴᴋ ʙᴇʟᴏᴡ.</b>').format(
             mention=message.from_user.mention,
             id=user_id
         )
