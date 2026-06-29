@@ -19,10 +19,10 @@ def _build_settings_page1_msg(client):
         f"›› <b>ᴅɪsᴀʙʟᴇ ʙᴜᴛᴛᴏɴ:</b> <code>{'✓ ᴛʀᴜᴇ' if client.disable_btn else '✗ ꜰᴀʟsᴇ'}</code>\n"
         f"›› <b>ʀᴇᴘʟʏ ᴛᴇxᴛ:</b> <code>{client.reply_text if client.reply_text else 'ɴᴏɴᴇ'}</code>\n"
         f"›› <b>ᴀᴅᴍɪɴs:</b> <code>{len(client.admins)}</code>\n\n"
-        f"<blockquote><u><b>≡ ᴍᴜʟᴛɪ-sʜᴏʀᴛᴇɴᴇer sᴛᴀᴛᴜs:</b></u></blockquote>\n"
-        f"›› <b>sʜᴏʀᴛɴᴇer 1:</b> <code>{getattr(config, 'SHORT_URL_1', 'None')}</code> [<code>{'✔️ ᴏɴ' if getattr(config, 'SHORT_STATUS_1', True) else '❌ ᴏꜰꜰ'}</code>]\n"
-        f"›› <b>sʜᴏʀᴛɴᴇer 2:</b> <code>{getattr(config, 'SHORT_URL_2', 'None')}</code> [<code>{'✔️ ᴏɴ' if getattr(config, 'SHORT_STATUS_2', True) else '❌ ᴏꜰꜰ'}</code>]\n"
-        f"›› <b>sʜᴏʀᴛɴᴇer 3:</b> <code>{getattr(config, 'SHORT_URL_3', 'None')}</code> [<code>{'✔️ ᴏɴ' if getattr(config, 'SHORT_STATUS_3', True) else '❌ ᴏꜰꜰ'}</code>]"
+        f"<blockquote><u><b>≡ ᴍᴜʟᴛɪ-ꜱʜᴏʀᴛɴᴇʀ sᴛᴀᴛᴜs:</b></u></blockquote>\n"
+        f"›› <b>ꜱʜᴏʀᴛɴᴇʀ 1:</b> <code>{getattr(config, 'SHORT_URL_1', 'None')}</code> [<code>{'✔️ ᴏɴ' if getattr(config, 'SHORT_STATUS_1', True) else '❌ ᴏꜰꜰ'}</code>]\n"
+        f"›› <b>ꜱʜᴏʀᴛɴᴇʀ 2:</b> <code>{getattr(config, 'SHORT_URL_2', 'None')}</code> [<code>{'✔️ ᴏɴ' if getattr(config, 'SHORT_STATUS_2', True) else '❌ ᴏꜰꜰ'}</code>]\n"
+        f"›› <b>ꜱʜᴏʀᴛɴᴇʀ 3:</b> <code>{getattr(config, 'SHORT_URL_3', 'None')}</code> [<code>{'✔️ ᴏɴ' if getattr(config, 'SHORT_STATUS_3', True) else '❌ ᴏꜰꜰ'}</code>]"
     )
     reply_markup = InlineKeyboardMarkup([
         [InlineKeyboardButton('ꜰsᴜʙ ᴄʜᴀɴɴᴇʟs', 'fsub'), InlineKeyboardButton('ᴅʙ ᴄʜᴀɴɴᴇʟs', 'db_channels')],
@@ -298,7 +298,7 @@ async def settings_page_2(client, query):
     total_fsub = len(client.fsub_dict)
     total_db_channels = len(getattr(client, 'db_channels', {}))
     msg = (f"<blockquote>✦ sᴇᴛᴛɪɴɢs ᴏꜰ @{client.username} (ᴘᴀɢᴇ 2)</blockquote>\n" f"›› <b>ꜰsᴜʙ ᴄʜᴀɴɴᴇʟs:</b> <code>{total_fsub}</code>\n" f"›› <b>ᴅʙ ᴄʜᴀɴɴᴇʟs:</b> <code>{total_db_channels}</code>\n" f"›› <b>ᴘʀᴏᴛᴇᴄᴛ ᴄᴏɴᴛᴇɴᴛ:</b> <code>{'✓ ᴛʀᴜᴇ' if client.protect else '✗ ꜰᴀʟsᴇ'}</code>\n" f"›› <b>ᴅɪsᴀʙʟᴇ ʙᴜᴛᴛᴏɴ:</b> <code>{'✓ ᴛʀᴜᴇ' if client.disable_btn else '✗ ꜰᴀʟsᴇ'}</code>\n\n" f"<blockquote><u><b>≡ 1sᴛ sʜᴏʀᴛᴇɴᴇʀ:</b></u></blockquote>\n" f"›› <b>sᴛᴀᴛᴜs:</b> <code>{'✔️ ᴇɴᴀʙʟᴇᴅ' if getattr(config, 'SHORT_STATUS_1', True) else '❌ ᴅɪsᴀʙʟᴇᴅ'}</code>\n" f"›› <b>ᴜʀʟ:</b> <code>{getattr(config, 'SHORT_URL_1', 'None')}</code>\n\n" f"<blockquote><u><b>≡ 2ɴᴅ sʜᴏʀᴛᴇɴᴇʀ:</b></u></blockquote>\n" f"›› <b>sᴛᴀᴛᴜs:</b> <code>{'✔️ ᴇɴᴀʙʟᴇᴅ' if getattr(config, 'SHORT_STATUS_2', True) else '❌ ᴅɪsᴀʙʟᴇᴅ'}</code>\n" f"›› <b>ᴜʀʟ:</b> <code>{getattr(config, 'SHORT_URL_2', 'None')}</code>\n\n" f"<blockquote><u><b>≡ 3ʀᴅ sʜᴏʀᴛᴇɴᴇʀ:</b></u></blockquote>\n" f"›› <b>sᴛᴀᴛᴜs:</b> <code>{'✔️ ᴇɴᴀʙʟᴇᴅ' if getattr(config, 'SHORT_STATUS_3', True) else '❌ ᴅɪsᴀʙʟᴇᴅ'}</code>\n" f"›› <b>ᴜʀʟ:</b> <code>{getattr(config, 'SHORT_URL_3', 'None')}</code>")
-    reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton('ᴘʀᴏᴛᴇᴄᴛ ᴄᴏɴᴛᴇɴᴛ', 'protect'), InlineKeyboardButton('ᴘʜᴏᴛᴏs', 'photos')], [InlineKeyboardButton('ᴛᴇxᴛs', 'texts'), InlineKeyboardButton('🛠️ sʜᴏʀᴛɴᴇer sᴇᴛᴛɪɴɢs', 'manage_shortners')], [InlineKeyboardButton('‹ ᴘʀᴇᴠ', 'settings'), InlineKeyboardButton('ʜᴏᴍᴇ', 'home')]])
+    reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton('ᴘʀᴏᴛᴇᴄᴛ ᴄᴏɴᴛᴇɴᴛ', 'protect'), InlineKeyboardButton('ᴘʜᴏᴛᴏs', 'photos')], [InlineKeyboardButton('ᴛᴇxᴛs', 'texts'), InlineKeyboardButton('ꜱʜᴏʀᴛɴᴇʀꜱ', 'manage_shortners')], [InlineKeyboardButton('‹ ᴘʀᴇᴠ', 'settings'), InlineKeyboardButton('ʜᴏᴍᴇ', 'home')]])
     try:
         await query.message.edit_text(msg, reply_markup=reply_markup)
     except Exception:
@@ -369,7 +369,7 @@ async def process_shortner_inputs(client, query):
         db_field_map = {"url": "short_url", "api": "short_api", "tut": "tutorial_link"}
         await client.mongodb.db.shortner_config.update_one({"shortner_id": int(num)}, {"$set": {db_field_map[field]: new_value}}, upsert=True)
         await res.delete()
-        await query.message.edit_text(f"<blockquote><b>✓ sʜᴏʀᴛᴇɴᴇer {num} {field.upper()} ᴜᴘᴅᴀᴛᴇᴅ!</b></blockquote>\n\n›› <code>{new_value}</code>", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('‹ ʙᴀᴄᴋ', f'edit_short_{num}')]]))
+        await query.message.edit_text(f"<blockquote><b>✓ ꜱʜᴏʀᴛɴᴇʀ {num} {field.upper()} ᴜᴘᴅᴀᴛᴇᴅ!</b></blockquote>\n\n›› <code>{new_value}</code>", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('‹ ʙᴀᴄᴋ', f'edit_short_{num}')]]))
     except ListenerTimeout:
         await query.message.edit_text("<b>✗ ᴛɪᴍᴇᴏᴜᴛ!</b>", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('‹ ʙᴀᴄᴋ', f'edit_short_{num}')]]))
 
@@ -392,7 +392,7 @@ async def test_shortner_connectivity(client, query):
         client.shortner_url = original_url
         client.shortner_api = original_api
         if test_link and test_link.startswith("http"):
-            msg = f"<blockquote><b>✓ sʜᴏʀᴛᴇɴᴇer {num} ᴡᴏʀᴋɪɴɢ!</b></blockquote>\n\n›› {test_link}"
+            msg = f"<blockquote><b>✓ ꜱʜᴏʀᴛɴᴇʀ {num} ᴡᴏʀᴋɪɴɢ!</b></blockquote>\n\n›› {test_link}"
         else:
             msg = f"<blockquote><b>✗ ᴛᴇsᴛ ꜰᴀɪʟᴇᴅ!</b></blockquote>\n\n›› ᴄʜᴇᴄᴋ ᴀᴘɪ ᴛᴏᴋᴇɴ."
     except Exception as e:
