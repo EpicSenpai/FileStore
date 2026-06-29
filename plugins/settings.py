@@ -274,7 +274,24 @@ async def texts_callback(client: Client, query: CallbackQuery):
 @Client.on_callback_query(filters.regex("^set_text_(.+)$"))
 async def set_text_callback(client: Client, query: CallbackQuery):
     if query.from_user.id not in client.admins:
-        return await query.answer('✗ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs!', show_alert=True)@Client.on_callback_query(filters.regex("^settings_page_2$"))
+        return await query.answer('✗ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs!', show_alert=True)
+    await query.answer()
+    text_key = query.data.replace("set_text_", "")
+    current = config.MESSAGES.get(text_key, 'None')
+    await query.message.edit_text(f"<b>📝 ᴇᴅɪᴛ <code>{text_key}</code> (120s timeout):</b>\n\n<b>ᴄᴜʀʀᴇɴᴛ:</b>\n<code>{current[:200]}</code>\n\n<i>sᴇɴᴅ 'none' ᴛᴏ ᴄʟᴇᴀʀ.</i>")
+    try:
+        res = await client.listen(user_id=query.from_user.id, filters=filters.text, timeout=120)
+        new_text = "" if res.text.strip().lower() == "none" else res.text.strip()
+        config.MESSAGES[text_key] = new_text
+        if text_key == "REPLY":
+            client.reply_text = new_text
+        await client.mongodb.user_data.update_one({"_id": "bot_messages"}, {"$set": {text_key: new_text}}, upsert=True)
+        await res.delete()
+        await query.message.edit_text(f"<blockquote><b>✓ {text_key} ᴜᴘᴅᴀᴛᴇᴅ!</b></blockquote>", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('◂ ʙᴀᴄᴋ', 'texts')]]))
+    except ListenerTimeout:
+        await query.message.edit_text("<b>✗ ᴛɪᴍᴇᴏᴜᴛ!</b>", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('◂ ʙᴀᴄᴋ', 'texts')]]))
+
+@Client.on_callback_query(filters.regex("^settings_page_2$"))
 async def settings_page_2(client, query):
     if query.from_user.id not in client.admins:
         return await query.answer('✗ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs!', show_alert=True)
