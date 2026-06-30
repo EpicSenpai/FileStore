@@ -88,7 +88,7 @@ async def start_command(client: Client, message: Message):
                     quote=True,
                     reply_markup=InlineKeyboardMarkup([
                         [InlineKeyboardButton("✨ ᴄʟɪᴄᴋ ʜᴇʀᴇ ✨", callback_data=f"getfiles_{base64_string}")],
-                        [InlineKeyboardButton("• ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ •", url="https://t.me/Premiium_Tube/6")]
+                        [InlineKeyboardButton("• ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ •", url="https://t.me/SenFlux/14")]
                     ])
                 )
                 return
@@ -117,7 +117,7 @@ async def start_command(client: Client, message: Message):
                             caption=custom_credit_msg,
                             reply_markup=InlineKeyboardMarkup([
                                 [InlineKeyboardButton("• ᴏᴘᴇɴ ʟɪɴᴋ", url=short_link), InlineKeyboardButton("ᴛᴜᴛᴏʀɪᴀʟ •", url=tutorial_link)],
-                                [InlineKeyboardButton(" • ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ •", url="https://t.me/Premiium_Tube/6")]
+                                [InlineKeyboardButton(" • ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ •", url="https://t.me/SenFlux/14")]
                             ])
                         )
                         return
