@@ -73,7 +73,7 @@ async def shortner_panel(client, query_or_message):
           f"›› **ꜱʜᴏʀᴛɴᴇʀ 1:** `{url1}` [ {status1} ]\n" \
           f"›› **ꜱʜᴏʀᴛɴᴇʀ 2:** `{url2}` [ {status2} ]\n" \
           f"›› **ꜱʜᴏʀᴛɴᴇʀ 3:** `{url3}` [ {status3} ]</blockquote>\n\n" \
-          f"<b><blockquote>≡ ᴜsᴇ ᴛʜᴇ ʙᴜᴛᴛᴏɴs ʙᴇʟᴏᴡ ᴛᴏ ᴍᴀɴᴀɢᴇ ᴀɴᴅ ᴄᴏɴꜰɪɢᴜʀᴇ ʏᴏᴜʀ sʜᴏʀᴛɴᴇer sᴇᴛᴛɪɴɢs!</blockquote></b>"
+          f"<b><blockquote>≡ ᴜsᴇ ᴛʜᴇ ʙᴜᴛᴛᴏɴs ʙᴇʟᴏᴡ ᴛᴏ ᴍᴀɴᴀɢᴇ ᴀɴᴅ ᴄᴏɴꜰɪɢᴜʀᴇ ʏᴏᴜʀ ꜱʜᴏʀᴛɴᴇʀ sᴇᴛᴛɪɴɢs!</blockquote></b>"
     
     # Kept your exact structural buttons layout intact but expanded for 3 nodes control safely
     buttons = [
