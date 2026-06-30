@@ -55,14 +55,14 @@ SHORT_TUT = SHORT_TUT_1
 
 #===============================================================#
 
-SESSION = os.environ.get("SESSION", "rezebot")
+SESSION = os.environ.get("SESSION", "")
 TOKEN = os.environ.get("TOKEN", "")
 API_ID = int(os.environ.get("API_ID", "34310221"))
 API_HASH = os.environ.get("API_HASH", "9e18f477424fa6252663d5d6c895470d")
 WORKERS = int(os.environ.get("WORKERS", "5"))
 
 DB_URI = os.environ.get("DB_URI", "")
-DB_NAME = os.environ.get("DB_NAME", "rezebot")
+DB_NAME = os.environ.get("DB_NAME", "")
 
 DB_CHANNEL = int(os.environ.get("DB_CHANNEL", ""))
 FSUBS = [] 
