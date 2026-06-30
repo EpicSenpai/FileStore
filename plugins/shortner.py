@@ -70,14 +70,14 @@ async def shortner_panel(client, query_or_message):
     msg = f"<b>◍ ᴍᴜʟᴛɪ sʜᴏʀᴛɴᴇʀ sᴇᴛᴛɪɴɢs</b>\n\n" \
           f"<b><u>ᴄᴜʀʀᴇɴᴛ sᴇᴛᴛɪɴɢs:</u></b>\n" \
           f"<blockquote>›› **ɢʟᴏʙᴀʟ sᴛᴀᴛᴜs:** {enabled_text}\n" \
-          f"›› **sʜᴏʀᴛɴᴇer 1:** `{url1}` [ {status1} ]\n" \
-          f"›› **sʜᴏʀᴛɴᴇer 2:** `{url2}` [ {status2} ]\n" \
-          f"›› **sʜᴏʀᴛɴᴇer 3:** `{url3}` [ {status3} ]</blockquote>\n\n" \
+          f"›› **ꜱʜᴏʀᴛɴᴇʀ 1:** `{url1}` [ {status1} ]\n" \
+          f"›› **ꜱʜᴏʀᴛɴᴇʀ 2:** `{url2}` [ {status2} ]\n" \
+          f"›› **ꜱʜᴏʀᴛɴᴇʀ 3:** `{url3}` [ {status3} ]</blockquote>\n\n" \
           f"<b><blockquote>≡ ᴜsᴇ ᴛʜᴇ ʙᴜᴛᴛᴏɴs ʙᴇʟᴏᴡ ᴛᴏ ᴍᴀɴᴀɢᴇ ᴀɴᴅ ᴄᴏɴꜰɪɢᴜʀᴇ ʏᴏᴜʀ sʜᴏʀᴛɴᴇer sᴇᴛᴛɪɴɢs!</blockquote></b>"
     
     # Kept your exact structural buttons layout intact but expanded for 3 nodes control safely
     buttons = [
-        [InlineKeyboardButton(f'• {toggle_text} sʜᴏʀᴛɴᴇer •', 'toggle_shortner')],
+        [InlineKeyboardButton(f'• {toggle_text} ꜱʜᴏʀᴛɴᴇʀ •', 'toggle_shortner')],
         [InlineKeyboardButton('• ᴍᴀɴᴀɢᴇ sʜᴏʀᴛ 1 •', 'edit_short_1'), InlineKeyboardButton('• ᴍᴀɴᴀɢᴇ sʜᴏʀᴛ 2 •', 'edit_short_2')],
         [InlineKeyboardButton('• ᴍᴀɴᴀɢᴇ sʜᴏʀᴛ 3 •', 'edit_short_3')]
     ]
@@ -118,6 +118,6 @@ async def toggle_shortner(client: Client, query: CallbackQuery):
     
     await client.mongodb.set_shortner_status(new_status)
     status_text = "ᴇɴᴀʙʟᴇᴅ" if new_status else "ᴅɪsᴀʙʟᴇᴅ"
-    await query.answer(f"✓ sʜᴏʀᴛɴᴇer {status_text}!")
+    await query.answer(f"✓ ꜱʜᴏʀᴛɴᴇʀ {status_text}!")
     await shortner_panel(client, query)
     
