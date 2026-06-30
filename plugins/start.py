@@ -208,7 +208,7 @@ async def deliver_files_routing(client, message, base64_string, original_payload
                 ids = [int(encoded_msg / abs(client.db))]
     except Exception as e:
         return await client.send_message(chat_target, "<b>✗ ɪɴᴠᴀʟɪᴅ ᴏʀ ᴇxᴘɪʀᴇᴅ ꜰɪʟᴇ ʟɪɴᴋ.</b>")
-    temp_msg = await client.send_message(chat_target, "<b><i>Wait A Sec...</i></b>")
+    temp_msg = await client.send_message(chat_target, "<i>Wait A Sec...</i>")
     messages = []
     try:
         if source_channel_id:
