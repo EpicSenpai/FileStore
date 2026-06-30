@@ -36,17 +36,17 @@ MSG_EFFECT = int(os.environ.get("MSG_EFFECT", "5046509860389126442"))
 # MULTI-SHORTENER GLOBAL VARIABLES WITH LIVE MUTATION SUPPORT
 #===============================================================#
 
-SHORT_URL_1 = os.environ.get("SHORT_URL_1", "gplinks.com")
-SHORT_API_1 = os.environ.get("SHORT_API_1", "540e6d65d2851a9c645d0eafb573535af3d33943")
-SHORT_TUT_1 = os.environ.get("SHORT_TUT_1", "https://t.me/How_To_Open_Shortners")
+SHORT_URL_1 = os.environ.get("SHORT_URL_1", "")
+SHORT_API_1 = os.environ.get("SHORT_API_1", "")
+SHORT_TUT_1 = os.environ.get("SHORT_TUT_1", "")
 
-SHORT_URL_2 = os.environ.get("SHORT_URL_2", "linkshortify.com")
-SHORT_API_2 = os.environ.get("SHORT_API_2", "fec7b30d9561894979e5aa8999b16de8470315fb")
-SHORT_TUT_2 = os.environ.get("SHORT_TUT_2", "https://t.me/How_To_Open_Shortners")
+SHORT_URL_2 = os.environ.get("SHORT_URL_2", "")
+SHORT_API_2 = os.environ.get("SHORT_API_2", "")
+SHORT_TUT_2 = os.environ.get("SHORT_TUT_2", "")
 
-SHORT_URL_3 = os.environ.get("SHORT_URL_3", "vplink.in")
-SHORT_API_3 = os.environ.get("SHORT_API_3", "8b62a316f1b492d73f27d74aed48788c4b7a2bda")
-SHORT_TUT_3 = os.environ.get("SHORT_TUT_3", "https://t.me/How_To_Open_Shortners")
+SHORT_URL_3 = os.environ.get("SHORT_URL_3", "")
+SHORT_API_3 = os.environ.get("SHORT_API_3", "")
+SHORT_TUT_3 = os.environ.get("SHORT_TUT_3", "")
 
 # Legacy compatibility layers
 SHORT_URL = SHORT_URL_1
@@ -56,18 +56,18 @@ SHORT_TUT = SHORT_TUT_1
 #===============================================================#
 
 SESSION = os.environ.get("SESSION", "rezebot")
-TOKEN = os.environ.get("TOKEN", "8743100938:AAGhqbQ4M9uKPKIwjNht9AZ")
+TOKEN = os.environ.get("TOKEN", "")
 API_ID = int(os.environ.get("API_ID", "34310221"))
 API_HASH = os.environ.get("API_HASH", "9e18f477424fa6252663d5d6c895470d")
 WORKERS = int(os.environ.get("WORKERS", "5"))
 
-DB_URI = os.environ.get("DB_URI", "mongodb+srv://rezebot:bXtk6z31xL")
+DB_URI = os.environ.get("DB_URI", "")
 DB_NAME = os.environ.get("DB_NAME", "rezebot")
 
-DB_CHANNEL = int(os.environ.get("DB_CHANNEL", "-1003819023656"))
+DB_CHANNEL = int(os.environ.get("DB_CHANNEL", ""))
 FSUBS = [] 
 
-ADMINS = [int(x) for x in os.environ.get("ADMINS", "824793853,6341").split(",") if x.strip().isdigit()]
+ADMINS = [int(x) for x in os.environ.get("ADMINS", "824793853").split(",") if x.strip().isdigit()]
 
 DISABLE_BTN = True
 PROTECT = False 
