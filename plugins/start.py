@@ -258,6 +258,6 @@ async def deliver_files_routing(client, message, base64_string, original_payload
         except Exception:
             pass
     return
-                pass
+pass
     return
                 
