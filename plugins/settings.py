@@ -295,6 +295,19 @@ async def set_text_callback(client: Client, query: CallbackQuery):
     except ListenerTimeout:
         await query.message.edit_text("<b>✗ ᴛɪᴍᴇᴏᴜᴛ!</b>", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('◂ ʙᴀᴄᴋ', 'texts')]]))
 
+@Client.on_callback_query(filters.regex("^settings_page_2$"))
+async def settings_page_2(client, query):
+    if query.from_user.id not in client.admins:
+        return await query.answer('✗ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs!', show_alert=True)
+    total_fsub = len(client.fsub_dict)
+    total_db_channels = len(getattr(client, 'db_channels', {}))
+    msg = (f"<blockquote>✦ sᴇᴛᴛɪɴɢs ᴏꜰ @{client.username} (ᴘᴀɢᴇ 2)</blockquote>\n" f"›› <b>ꜰsᴜʙ ᴄʜᴀɴɴᴇʟs:</b> <code>{total_fsub}</code>\n" f"›› <b>ᴅʙ ᴄʜᴀɴɴᴇʟs:</b> <code>{total_db_channels}</code>\n" f"›› <b>ᴘʀᴏᴛᴇᴄᴛ ᴄᴏɴᴛᴇɴᴛ:</b> <code>{'✓ ᴛʀᴜᴇ' if client.protect else '✗ ꜰᴀʟsᴇ'}</code>\n" f"›› <b>ᴅɪsᴀʙʟᴇ ʙᴜᴛᴛᴏɴ:</b> <code>{'✓ ᴛʀᴜᴇ' if client.disable_btn else '✗ ꜰᴀʟsᴇ'}</code>\n\n" f"<blockquote><u><b>≡ 1sᴛ sʜᴏʀᴛᴇɴᴇʀ:</b></u></blockquote>\n" f"›› <b>sᴛᴀᴛᴜs:</b> <code>{'✔️ ᴇɴᴀʙʟᴇᴅ' if getattr(config, 'SHORT_STATUS_1', True) else '❌ ᴅɪsᴀʙʟᴇᴅ'}</code>\n" f"›› <b>ᴜʀʟ:</b> <code>{getattr(config, 'SHORT_URL_1', 'None')}</code>\n\n" f"<blockquote><u><b>≡ 2ɴᴅ sʜᴏʀᴛᴇɴᴇʀ:</b></u></blockquote>\n" f"›› <b>sᴛᴀᴛᴜs:</b> <code>{'✔️ ᴇɴᴀʙʟᴇᴅ' if getattr(config, 'SHORT_STATUS_2', True) else '❌ ᴅɪsᴀʙʟᴇᴅ'}</code>\n" f"›› <b>ᴜʀʟ:</b> <code>{getattr(config, 'SHORT_URL_2', 'None')}</code>\n\n" f"<blockquote><u><b>≡ 3ʀᴅ sʜᴏʀᴛᴇɴᴇʀ:</b></u></blockquote>\n" f"›› <b>sᴛᴀᴛᴜs:</b> <code>{'✔️ ᴇɴᴀʙʟᴇᴅ' if getattr(config, 'SHORT_STATUS_3', True) else '❌ ᴅɪsᴀʙʟᴇᴅ'}</code>\n" f"›› <b>ᴜʀʟ:</b> <code>{getattr(config, 'SHORT_URL_3', 'None')}</code>")
+    reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton('ᴘʀᴏᴛᴇᴄᴛ ᴄᴏɴᴛᴇɴᴛ', 'protect'), InlineKeyboardButton('ᴘʜᴏᴛᴏs', 'photos')], [InlineKeyboardButton('ᴛᴇxᴛs', 'texts'), InlineKeyboardButton('ꜱʜᴏʀᴛɴᴇʀꜱ', 'manage_shortners')], [InlineKeyboardButton('‹ ᴘʀᴇᴠ', 'settings'), InlineKeyboardButton('ʜᴏᴍᴇ', 'home')]])
+    try:
+        await query.message.edit_caption(caption=msg, reply_markup=reply_markup)
+    except Exception:
+        await query.message.edit_text(msg, reply_markup=reply_markup)
+
 @Client.on_callback_query(filters.regex("^manage_shortners$"))
 async def manage_shortners(client, query):
     if query.from_user.id not in client.admins:
