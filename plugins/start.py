@@ -67,9 +67,11 @@ async def start_command(client: Client, message: Message):
             user_credits = user_data.get("credits", 0)
             rotation_index = user_data.get("rotation_index", 0)
             if is_short_link:
-                user_credits = reward_amount - 1
+                user_credits = reward_amount
                 next_rotation = (rotation_index + 1) % 3
-                await client.mongodb.user_data.update_one({"_id": user_id}, {"$set": {"credits": user_credits, "rotation_index": next_rotation}}, upsert=True)
+                # Deduct 1 credit for current file access (net = reward_amount - 1)
+                await client.mongodb.user_data.update_one({"_id": user_id}, {"$set": {"credits": user_credits - 1, "rotation_index": next_rotation}}, upsert=True)
+                user_credits = user_credits - 1
                 try:
                     await client.mongodb.db.shortner_analytics.update_one({"shortner_id": int(rotation_index)}, {"$inc": {"clicks": 1}}, upsert=True)
                 except Exception:
@@ -255,5 +257,7 @@ async def deliver_files_routing(client, message, base64_string, original_payload
             asyncio.create_task(schedule_dynamic_deletion(client=client, chat_id=chat_target, media_messages=media_messages, banner_msg=banner_msg, transfer_link=transfer_link))
         except Exception:
             pass
+    return
+                pass
     return
                 
