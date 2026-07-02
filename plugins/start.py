@@ -4,12 +4,8 @@ from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, 
 from pyrogram.errors import FloodWait
 import humanize
 import asyncio
-from config import (
-    MESSAGES, MSG_EFFECT, OWNER_ID,
-    SHORT_URL_1, SHORT_API_1, SHORT_TUT_1,
-    SHORT_URL_2, SHORT_API_2, SHORT_TUT_2,
-    SHORT_URL_3, SHORT_API_3, SHORT_TUT_3
-)
+from config import MESSAGES, MSG_EFFECT, OWNER_ID
+import config
 from plugins.shortner import get_short
 from helper.helper_func import get_messages, force_sub, decode
 
@@ -93,11 +89,17 @@ async def start_command(client: Client, message: Message):
                 )
                 return
             elif user_credits <= 0:
-                current_url, current_api, current_tut = SHORT_URL_1, SHORT_API_1, SHORT_TUT_1
-                if rotation_index == 1 and SHORT_URL_2 and SHORT_API_2:
-                    current_url, current_api, current_tut = SHORT_URL_2, SHORT_API_2, SHORT_TUT_2
-                elif rotation_index == 2 and SHORT_URL_3 and SHORT_API_3:
-                    current_url, current_api, current_tut = SHORT_URL_3, SHORT_API_3, SHORT_TUT_3
+                current_url = config.SHORT_URL_1
+                current_api = config.SHORT_API_1
+                current_tut = config.SHORT_TUT_1
+                if rotation_index == 1 and config.SHORT_URL_2 and config.SHORT_API_2:
+                    current_url = config.SHORT_URL_2
+                    current_api = config.SHORT_API_2
+                    current_tut = config.SHORT_TUT_2
+                elif rotation_index == 2 and config.SHORT_URL_3 and config.SHORT_API_3:
+                    current_url = config.SHORT_URL_3
+                    current_api = config.SHORT_API_3
+                    current_tut = config.SHORT_TUT_3
                 if current_url and current_api:
                     try:
                         client.short_url = current_url
@@ -254,4 +256,4 @@ async def deliver_files_routing(client, message, base64_string, original_payload
         except Exception:
             pass
     return
-                    
+    
