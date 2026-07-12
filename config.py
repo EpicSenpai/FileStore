@@ -77,7 +77,7 @@ AUTO_DEL = 1800
 MESSAGES = {
     "START": "<b><blockquote>›› ʜᴇʏ {mention} ~ </blockquote> <blockquote>ᴛʜᴇ ᴏᴄᴇᴀɴ ᴛᴀᴜɢʜᴛ ᴍᴇ ᴏɴᴇ ᴛʜɪɴɢ — ᴇᴠᴇɴ ᴛʜᴇ ᴅᴇᴇᴘᴇꜱᴛ ꜱɪʟᴇɴᴄᴇ ᴄᴀɴ ʜᴏʟᴅ ᴛʜᴇ ʟᴏᴜᴅᴇꜱᴛ ꜰᴇᴇʟɪɴɢꜱ.</blockquote></b>",
     "FSUB": "<b><blockquote>›› ʜᴇʏ 🫧 ~</blockquote> ‼️ ʏᴏᴜʀ ꜰɪʟᴇ ɪs ʀᴇᴀᴅʏ! ᴋɪɴᴅʟʏ ᴊᴏɪɴ ᴏᴜʀ ᴄʜᴀɴɴᴇʟ ᴛᴏ ɢᴇᴛ ᴀᴄᴄᴇss.</b>",
-    "ABOUT": "<b>✦ ᴍʏ ɴᴀᴍᴇ: Rᴇᴢᴇ 🫧 \n <blockquote>›› ᴜᴘᴅᴀᴛᴇs ᴄʜᴀɴɴᴇʟ: <a href='https://t.me/AuraTube'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>\n›› ᴏᴡɴᴇʀ: @EpicSenpai\n›› ʟᴀɴɢᴜᴀɢᴇ: <a href='https://docs.python.org/'>ᴘʏᴛʜᴏɴ 3</a>\n›› ᴅᴀᴛᴀʙᴀsᴇ: <a href='https://www.mongodb.com/docs/'>ᴍᴏɴɢᴏ ᴅʙ</a>\n›› ᴅᴇᴠᴇʟᴏᴘᴇʀ: <a href='https://t.me/SenFlux'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a></blockquote></b>",
+    "ABOUT": "<b>✦ ᴍʏ ɴᴀᴍᴇ: Rᴇᴢᴇ 🫧 \n <blockquote expandable>›› ᴜᴘᴅᴀᴛᴇs ᴄʜᴀɴɴᴇʟ: <a href='https://t.me/AuraTube'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a>\n›› ᴏᴡɴᴇʀ: @EpicSenpai\n›› ʟᴀɴɢᴜᴀɢᴇ: <a href='https://docs.python.org/'>ᴘʏᴛʜᴏɴ 3</a>\n›› ᴅᴀᴛᴀʙᴀsᴇ: <a href='https://www.mongodb.com/docs/'>ᴍᴏɴɢᴏ ᴅʙ</a>\n›› ᴅᴇᴠᴇʟᴏᴘᴇʀ: <a href='https://t.me/SenFlux'>ᴄʟɪᴄᴋ ʜᴇʀᴇ</a></blockquote></b>",
     "REPLY": "", 
     "SHORT_MSG": "<b><blockquote>✦ ʜᴇʏ {user_mention} ~</blockquote> ‼️ ɢᴇᴛ ᴀʟʟ ꜰɪʟᴇs ɪɴ ᴀ sɪɴɢʟᴇ ʟɪɴᴋ ‼️\n\n⌂ ʏᴏᴜʀ ʟɪɴᴋ ɪs ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴏᴘᴇɴ ʟɪɴᴋ ʙᴜᴛᴛᴏɴ..</b>",
     "START_PHOTO": "https://litter.catbox.moe/cq72pc.jpg",
