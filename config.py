@@ -27,7 +27,7 @@ LOGGER = SmartLogger()
 
 # Bot Configuration
 LOG_FILE_NAME = "bot.log"
-PORT = os.environ.get("PORT", "5010")
+PORT = os.environ.get("PORT", "7860")
 
 OWNER_ID = int(os.environ.get("OWNER_ID", "824793853"))
 MSG_EFFECT = int(os.environ.get("MSG_EFFECT", "5046509860389126442"))
