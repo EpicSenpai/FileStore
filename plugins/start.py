@@ -9,6 +9,24 @@ import config
 from plugins.shortner import get_short
 from helper.helper_func import get_messages, force_sub, decode
 
+# ── Global preview killer ────────────────────────────────────────────────
+# Patches send_message / edit_text / reply so EVERY message sent anywhere
+# in the bot (any plugin) has link previews disabled by default, without
+# needing to add disable_web_page_preview=True everywhere manually.
+def _auto_disable_preview(func):
+    async def wrapper(*args, **kwargs):
+        kwargs.setdefault("disable_web_page_preview", True)
+        return await func(*args, **kwargs)
+    return wrapper
+
+Client.send_message = _auto_disable_preview(Client.send_message)
+Client.edit_message_text = _auto_disable_preview(Client.edit_message_text)
+Message.edit_text = _auto_disable_preview(Message.edit_text)
+Message.reply_text = _auto_disable_preview(Message.reply_text)
+Message.reply = _auto_disable_preview(Message.reply)
+# ──────────────────────────────────────────────────────────────────────────
+
+
 async def schedule_dynamic_deletion(client: Client, chat_id: int, media_messages: list, banner_msg: Message, transfer_link: str):
     deletion_seconds = getattr(client, 'auto_del', 1800)
     await asyncio.sleep(deletion_seconds)
@@ -252,21 +270,29 @@ async def deliver_files_routing(client, message, base64_string, original_payload
         readable_time = humanize.naturaldelta(auto_del_seconds)
         warning_banner_text = (
             "<b><blockquote>⧗ Dᴜᴇ ᴛᴏ Cᴏᴘʏʀɪɢʜᴛ ɪssᴜᴇs....</blockquote>\n"
-            f'<blockquote>›› Yᴏᴜʀ ғɪʟᴇs ᴡɪʟʟ ʙᴇ ᴅᴇʟᴇᴛᴇᴅ ᴡɪᴛʜɪɴ <code>{readable_time}</code>... '
+            f'<blockquote>›› Yᴏᴜʀ ғɪʟᴇs ᴡɪʟʟ ʙᴇ ᴅᴇʟᴇᴛᴇᴅ ᴡɪᴛʜɪɴ <a href="https://t.me/{client.username}">{readable_time}</a>... '
             'Sᴏ ᴘʟᴇᴀsᴇ ғᴏʀᴡᴀʀᴅ ᴛʜᴇᴍ ᴛᴏ ᴀɴʏ ᴏᴛʜᴇʀ ᴘʟᴀᴄᴇ ғᴏʀ ғᴜᴛᴜʀᴇ ᴀᴠᴀɪʟᴀʙɪʟɪᴛʏ..</blockquote>\n'
             '<blockquote>≡ Nᴏᴛᴇ : ᴜsᴇ <a href="https://play.google.com/store/apps/details?id=org.videolan.vlc">ᴠʟᴄ ᴘʟᴀʏᴇʀ</a> ᴏʀ '
             '<a href="https://play.google.com/store/apps/details?id=com.mxtech.videoplayer.ad">ᴍx ᴘʟᴀʏᴇʀ</a> '
-            "ᴛᴏ ᴡᴀᴛᴄʜ ᴛʜᴇ ᴍᴏᴠɪᴇꜱ/ꜱᴇʀɪᴇꜱ ᴡɪᴛʜ ɢᴏᴏᴅ ᴇxᴘᴇʀɪᴇɴᴄᴇ !.</blockquote></b>"
+            "ᴛᴏ ᴡᴀᴛᴄʜ ᴛʜᴇ ᴍᴏᴠɪᴇꜱ/ꜱᴇʀɪᴇꜱ ᴡɪᴛʜ ɢᴏᴏᴅ ᴇxᴘᴇʀɪᴇɴᴄᴇ!</blockquote></b>"
         )
         try:
-            banner_msg = await client.send_message(
-                chat_id=chat_target,
-                text=warning_banner_text,
-                disable_web_page_preview=True
-            )
+            try:
+                banner_msg = await client.send_message(
+                    chat_id=chat_target,
+                    text=warning_banner_text,
+                    disable_web_page_preview=True,
+                    reply_to_message_id=media_messages[-1].id
+                )
+            except TypeError:
+                banner_msg = await client.send_message(
+                    chat_id=chat_target,
+                    text=warning_banner_text,
+                    disable_web_page_preview=True
+                )
             transfer_link = original_payload
             asyncio.create_task(schedule_dynamic_deletion(client=client, chat_id=chat_target, media_messages=media_messages, banner_msg=banner_msg, transfer_link=transfer_link))
         except Exception:
             pass
     return
-        
+            
