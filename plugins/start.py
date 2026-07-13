@@ -250,7 +250,12 @@ async def deliver_files_routing(client, message, base64_string, original_payload
     if media_messages:
         auto_del_seconds = getattr(client, 'auto_del', 1800)
         readable_time = humanize.naturaldelta(auto_del_seconds)
-        warning_banner_text = f'<b>⚠️ This File is deleting automatically in <a href="https://t.me/{client.username}">{readable_time}...</a> Forward in your Saved Messages..!</b>'
+        warning_banner_text = f'<b><blockquote>⧗ Dᴜᴇ ᴛᴏ Cᴏᴘʏʀɪɢʜᴛ ɪssᴜᴇs....</blockquote>\n"
+            f'<blockquote>›› Yᴏᴜʀ ғɪʟᴇs ᴡɪʟʟ ʙᴇ ᴅᴇʟᴇᴛᴇᴅ ᴡɪᴛʜɪɴ <a href="https://t.me/{client.username}">{readable_time}...</a> '
+            'Sᴏ ᴘʟᴇᴀsᴇ ғᴏʀᴡᴀʀᴅ ᴛʜᴇᴍ ᴛᴏ ᴀɴʏ ᴏᴛʜᴇʀ ᴘʟᴀᴄᴇ ғᴏʀ ғᴜᴛᴜʀᴇ ᴀᴠᴀɪʟᴀʙɪʟɪᴛʏ..</blockquote>\n'
+            '<blockquote>≡ Nᴏᴛᴇ : ᴜsᴇ <a href="https://play.google.com/store/apps/details?id=org.videolan.vlc">ᴠʟᴄ ᴘʟᴀʏᴇʀ</a> ᴏʀ '
+            '<a href="https://play.google.com/store/apps/details?id=com.mxtech.videoplayer.ad">ᴍx ᴘʟᴀʏᴇʀ</a> '
+            "ᴛᴏ ᴡᴀᴛᴄʜ ᴛʜᴇ ᴍᴏᴠɪᴇꜱ/ꜱᴇʀɪᴇꜱ ᴡɪᴛʜ ɢᴏᴏᴅ ᴇxᴘᴇʀɪᴇɴᴄᴇ!</blockquote></b>'
         try:
             banner_msg = await client.send_message(chat_id=chat_target, text=warning_banner_text)
             transfer_link = original_payload
