@@ -250,20 +250,9 @@ async def deliver_files_routing(client, message, base64_string, original_payload
     if media_messages:
         auto_del_seconds = getattr(client, 'auto_del', 1800)
         readable_time = humanize.naturaldelta(auto_del_seconds)
-        warning_banner_text = (
-            "<b><blockquote>⧗ Dᴜᴇ ᴛᴏ Cᴏᴘʏʀɪɢʜᴛ ɪssᴜᴇs....</blockquote>\n"
-            f'<blockquote>›› Yᴏᴜʀ ғɪʟᴇs ᴡɪʟʟ ʙᴇ ᴅᴇʟᴇᴛᴇᴅ ᴡɪᴛʜɪɴ "{readable_time}." '
-            f'Sᴏ ᴘʟᴇᴀsᴇ ғᴏʀᴡᴀʀᴅ ᴛʜᴇᴍ ᴛᴏ <a href="https://t.me/{client.username}">ᴀɴʏ ᴏᴛʜᴇʀ ᴘʟᴀᴄᴇ</a> ғᴏʀ ғᴜᴛᴜʀᴇ ᴀᴠᴀɪʟᴀʙɪʟɪᴛʏ..</blockquote>\n'
-            '<blockquote>≡ ɴᴏᴛᴇ : ᴜsᴇ "<a href="https://play.google.com/store/apps/details?id=org.videolan.vlc">ᴠʟᴄ ᴘʟᴀʏᴇʀ</a>" ᴏʀ "'
-            '<a href="https://play.google.com/store/apps/details?id=com.mxtech.videoplayer.ad">ᴍx ᴘʟᴀʏᴇʀ</a>" '
-            "ᴛᴏ ᴡᴀᴛᴄʜ ᴛʜᴇ ᴍᴏᴠɪᴇꜱ/ꜱᴇʀɪᴇꜱ ᴡɪᴛʜ ɢᴏᴏᴅ ᴇxᴘᴇʀɪᴇɴᴄᴇ !.</blockquote></b>"
-        )
+        warning_banner_text = f'<b>⚠️ This File is deleting automatically in <a href="https://t.me/{client.username}">{readable_time}...</a> Forward in your Saved Messages..!</b>'
         try:
-            banner_msg = await client.send_message(
-                chat_id=chat_target,
-                text=warning_banner_text,
-                disable_web_page_preview=True
-            )
+            banner_msg = await client.send_message(chat_id=chat_target, text=warning_banner_text)
             transfer_link = original_payload
             asyncio.create_task(schedule_dynamic_deletion(client=client, chat_id=chat_target, media_messages=media_messages, banner_msg=banner_msg, transfer_link=transfer_link))
         except Exception:
