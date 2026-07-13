@@ -1,6 +1,6 @@
 from helper.helper_func import *
 from pyrogram import Client, filters
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, LinkPreviewOptions
 from pyrogram.errors import FloodWait
 import humanize
 import asyncio
@@ -254,14 +254,27 @@ async def deliver_files_routing(client, message, base64_string, original_payload
             "<b><blockquote>⧗ Dᴜᴇ ᴛᴏ Cᴏᴘʏʀɪɢʜᴛ ɪssᴜᴇs....</blockquote>\n"
             f'<blockquote>›› Yᴏᴜʀ ғɪʟᴇs ᴡɪʟʟ ʙᴇ ᴅᴇʟᴇᴛᴇᴅ ᴡɪᴛʜɪɴ <a href="https://t.me/{client.username}">{readable_time}...</a> '
             'Sᴏ ᴘʟᴇᴀsᴇ ғᴏʀᴡᴀʀᴅ ᴛʜᴇᴍ ᴛᴏ ᴀɴʏ ᴏᴛʜᴇʀ ᴘʟᴀᴄᴇ ғᴏʀ ғᴜᴛᴜʀᴇ ᴀᴠᴀɪʟᴀʙɪʟɪᴛʏ..</blockquote>\n'
-            '<blockquote>≡ Nᴏᴛᴇ : ᴜsᴇ <a href="https://play.google.com/store/apps/details?id=org.videolan.vlc">ᴠʟᴄ ᴘʟᴀʏᴇʀ</a> ᴏʀ '
+            '<blockquote>≡ ɴᴏᴛᴇ : ᴜsᴇ <a href="https://play.google.com/store/apps/details?id=org.videolan.vlc">ᴠʟᴄ ᴘʟᴀʏᴇʀ</a> ᴏʀ '
             '<a href="https://play.google.com/store/apps/details?id=com.mxtech.videoplayer.ad">ᴍx ᴘʟᴀʏᴇʀ</a> '
-            "ᴛᴏ ᴡᴀᴛᴄʜ ᴛʜᴇ ᴍᴏᴠɪᴇꜱ/ꜱᴇʀɪᴇꜱ ᴡɪᴛʜ ɢᴏᴏᴅ ᴇxᴘᴇʀɪᴇɴᴄᴇ!</blockquote></b>"
+            "ᴛᴏ ᴡᴀᴛᴄʜ ᴛʜᴇ ᴍᴏᴠɪᴇꜱ/ꜱᴇʀɪᴇꜱ ᴡɪᴛʜ ɢᴏᴏᴅ ᴇxᴘᴇʀɪᴇɴᴄᴇ !.</blockquote></b>"
         )
         try:
-            banner_msg = await client.send_message(chat_id=chat_target, text=warning_banner_text)
+            banner_msg = await client.send_message(
+                chat_id=chat_target,
+                text=warning_banner_text,
+                link_preview_options=LinkPreviewOptions(is_disabled=True)
+            )
+            transfer_link = original_payload
+            asyncio.create_task(schedule_dynamic_deletion(client=client, chat_id=chat_target, media_messages=media_messages, banner_msg=banner_msg, transfer_link=transfer_link))
+        except TypeError:
+            banner_msg = await client.send_message(
+                chat_id=chat_target,
+                text=warning_banner_text,
+                disable_web_page_preview=True
+            )
             transfer_link = original_payload
             asyncio.create_task(schedule_dynamic_deletion(client=client, chat_id=chat_target, media_messages=media_messages, banner_msg=banner_msg, transfer_link=transfer_link))
         except Exception:
             pass
     return
+                
