@@ -82,5 +82,5 @@ MESSAGES = {
     "SHORT_MSG": "<b><blockquote>✦ ʜᴇʏ {user_mention} ~</blockquote> ‼️ ɢᴇᴛ ᴀʟʟ ꜰɪʟᴇs ɪɴ ᴀ sɪɴɢʟᴇ ʟɪɴᴋ ‼️\n\n⌂ ʏᴏᴜʀ ʟɪɴᴋ ɪs ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴏᴘᴇɴ ʟɪɴᴋ ʙᴜᴛᴛᴏɴ..</b>",
     "START_PHOTO": "https://litter.catbox.moe/cq72pc.jpg",
     "FSUB_PHOTO": "https://litter.catbox.moe/w9bw9z.jpg",
-    "SHORT_PIC": "https://litter.catbox.moe/q9aqxh.jpg"
+    "SHORT_PIC": "https://litter.catbox.moe/h509lv.jpg"
 }
