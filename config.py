@@ -80,7 +80,7 @@ MESSAGES = {
     "ABOUT": "<b>✦ ᴍʏ ɴᴀᴍᴇ: Rᴇᴢᴇ🫧 <blockquote expandable>›› ᴄᴏᴍᴍᴜɴɪᴛʏ: <a href='https://t.me/SenVerse'>Sᴇɴᴘᴀɪ'ꜱ Vᴇʀꜱᴇ</a>\n›› ᴜᴘᴅᴀᴛᴇs ᴄʜᴀɴɴᴇʟ: <a href='https://t.me/AuraTube'>Cʟɪᴄᴋ Hᴇʀᴇ</a>\n›› ᴏᴡɴᴇʀ: @EpicSenpai\n›› ʟᴀɴɢᴜᴀɢᴇ: <a href='https://docs.python.org/'>Pʏᴛʜᴏɴ 3</a>\n›› ʟɪʙʀᴀʀʏ: <a href='https://docs.pyrogram.org/'>Pʏʀᴏɢʀᴀᴍ ᴠ2</a>\n›› ᴅᴀᴛᴀʙᴀsᴇ: <a href='https://www.mongodb.com/docs/'>Mᴏɴɢᴏ ᴅʙ</a>\n›› ᴅᴇᴠᴇʟᴏᴘᴇʀ: <a href='https://t.me/SenFlux'>Cʟɪᴄᴋ Hᴇʀᴇ</a></blockquote></b>",
     "REPLY": "", 
     "SHORT_MSG": "<b><blockquote>✦ ʜᴇʏ {user_mention} ~</blockquote> ‼️ ɢᴇᴛ ᴀʟʟ ꜰɪʟᴇs ɪɴ ᴀ sɪɴɢʟᴇ ʟɪɴᴋ ‼️\n\n⌂ ʏᴏᴜʀ ʟɪɴᴋ ɪs ʀᴇᴀᴅʏ, ᴋɪɴᴅʟʏ ᴄʟɪᴄᴋ ᴏɴ ᴏᴘᴇɴ ʟɪɴᴋ ʙᴜᴛᴛᴏɴ..</b>",
-    "START_PHOTO": "https://litter.catbox.moe/cq72pc.jpg",
+    "START_PHOTO": "https://litter.catbox.moe/h509lv.jpg",
     "FSUB_PHOTO": "https://litter.catbox.moe/w9bw9z.jpg",
     "SHORT_PIC": "https://litter.catbox.moe/h509lv.jpg"
 }
