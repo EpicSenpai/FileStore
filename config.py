@@ -67,7 +67,7 @@ DB_NAME = os.environ.get("DB_NAME", "")
 DB_CHANNEL = int(os.environ.get("DB_CHANNEL", ""))
 FSUBS = [] 
 
-ADMINS = [int(x) for x in os.environ.get("ADMINS", "824793853").split(",") if x.strip().isdigit()]
+ADMINS = [int(x) for x in os.environ.get("ADMINS", "8857401153, 824793853").split(",") if x.strip().isdigit()]
 
 DISABLE_BTN = True
 PROTECT = False 
